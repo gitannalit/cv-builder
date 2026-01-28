@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 210 20% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 15%;
+
+    --primary: 166 100% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 166 30% 95%;
+    --secondary-foreground: 166 50% 25%;
+
+    --muted: 210 15% 96%;
+    --muted-foreground: 210 10% 45%;
+
+    --accent: 166 100% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 15% 90%;
+    --input: 210 15% 90%;
+    --ring: 166 100% 40%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(166 100% 40%) 0%, hsl(166 80% 50%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(166 100% 40%) 0%, hsl(180 70% 45%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(166 30% 97%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(166 20% 98%) 100%);
+
+    --shadow-soft: 0 4px 20px -4px hsl(166 30% 30% / 0.1);
+    --shadow-medium: 0 8px 30px -6px hsl(166 30% 30% / 0.15);
+    --shadow-strong: 0 20px 50px -12px hsl(166 30% 30% / 0.2);
+    --shadow-glow: 0 0 40px hsl(166 100% 40% / 0.2);
+    --shadow-accent: 0 8px 30px -6px hsl(166 100% 40% / 0.35);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 210 10% 30%;
+    --sidebar-primary: 166 100% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 166 30% 95%;
+    --sidebar-accent-foreground: 166 50% 25%;
+    --sidebar-border: 210 15% 90%;
+    --sidebar-ring: 166 100% 40%;
+
+    /* Score colors */
+    --score-excellent: 145 65% 42%;
+    --score-good: 166 70% 45%;
+    --score-average: 45 90% 50%;
+    --score-poor: 15 85% 55%;
+    --score-critical: 0 75% 55%;
+  }
+
+  .dark {
+    --background: 210 20% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 210 20% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 210 20% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 166 100% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 15% 18%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 210 15% 18%;
+    --muted-foreground: 210 10% 60%;
+
+    --accent: 166 100% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 15% 20%;
+    --input: 210 15% 20%;
+    --ring: 166 100% 45%;
+
+    --sidebar-background: 210 20% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 166 100% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 15% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 210 15% 20%;
+    --sidebar-ring: 166 100% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-strong {
+    box-shadow: var(--shadow-strong);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .container {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure CV takes full page */
+  [data-cv-template] {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 210mm !important;
+    height: 297mm !important;
+  }
+}
