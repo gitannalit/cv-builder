@@ -18,7 +18,9 @@ async function callAnalyzeFunction(cvText: string, action?: string, extraData?: 
     throw new Error(error.error || "Error al procesar el CV");
   }
 
-  return response.json();
+  const result = await response.json();
+  console.log(`Supabase Function Result (${action || "analyze"}):`, result);
+  return result;
 }
 
 export async function analyzeCVText(cvText: string, options?: any): Promise<AnalysisResult> {

@@ -5,7 +5,8 @@ import { TemplateType } from "@/components/analyzer/templates";
 export function generateTemplateHTML(
   version: CVVersion,
   template: TemplateType,
-  hasWatermark: boolean
+  hasWatermark: boolean,
+  userData?: { name: string; email: string; phone?: string; targetJob?: string }
 ): string {
   const watermarkHTML = hasWatermark
     ? `<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0, 204, 169, 0.08); font-weight: bold; pointer-events: none; z-index: 1000; white-space: nowrap; font-family: 'Inter', sans-serif;">T2W CV Builder</div>`
@@ -47,19 +48,31 @@ export function generateTemplateHTML(
 
   switch (template) {
     case 'modern':
-      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles);
+      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     case 'classic':
       return generateClassicHTML(version, hasWatermark, watermarkHTML, baseStyles);
     case 'minimal':
       return generateMinimalHTML(version, hasWatermark, watermarkHTML, baseStyles);
     case 'creative':
-      return generateCreativeHTML(version, hasWatermark, watermarkHTML, baseStyles);
+      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+    case 'executive':
+      return generateExecutiveHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     default:
-      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles);
+      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
   }
 }
 
-function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string): string {
+function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
+  const primaryColor = "#00BFA6"; // T2W Turquoise
+  const darkColor = "#0d1117";
+
+  const name = userData?.name || "Tu Nombre";
+  const email = userData?.email || "tu@email.com";
+  const phone = userData?.phone || "";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
+
+  const languages = version.content.languages || [];
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -67,132 +80,288 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
-    .container { padding: 0; display: flex; flex-direction: column; }
-    .top-bar { h-2; height: 8px; background: linear-gradient(90deg, #00cca9, #00cca988) !important; width: 100%; }
-    .content { padding: 48px; flex-grow: 1; }
-    .header { margin-bottom: 40px; }
-    .header h1 { font-family: 'Playfair Display', serif; font-size: 36px; color: #1a1a1a; margin-bottom: 8px; font-weight: 600; }
-    .header-subtitle { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
-    .line { height: 1px; flex-grow: 1; background: linear-gradient(90deg, rgba(0, 204, 169, 0.6), transparent) !important; }
-    .line-rev { height: 1px; flex-grow: 1; background: linear-gradient(270deg, rgba(0, 204, 169, 0.6), transparent) !important; }
-    .version-title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; color: #00cca9 !important; }
+    .container { display: flex; min-height: 297mm; background: white !important; }
     
-    .section { margin-bottom: 32px; }
-    .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-    .icon-box { width: 40px; height: 40px; border-radius: 50%; background: rgba(0, 204, 169, 0.1) !important; display: flex; align-items: center; justify-content: center; }
-    .icon-box svg { width: 20px; height: 20px; color: #00cca9 !important; }
-    .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #6b7280; }
+    .sidebar { 
+      width: 35%; 
+      background-color: ${darkColor} !important; 
+      color: white !important; 
+      padding: 40px 30px; 
+      display: flex; 
+      flex-direction: column;
+      -webkit-print-color-adjust: exact !important;
+    }
     
-    .summary { color: #4b5563; line-height: 1.8; font-size: 15px; padding-left: 56px; }
+    .profile-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: ${primaryColor} !important;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: white !important;
+    }
     
-    .experience-list { padding-left: 56px; position: relative; }
-    .experience-item { position: relative; margin-bottom: 24px; }
-    .timeline-dot { position: absolute; left: -28px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: #00cca9 !important; box-shadow: 0 0 0 4px rgba(0, 204, 169, 0.1) !important; }
-    .timeline-line { position: absolute; left: -25px; top: 24px; bottom: -16px; width: 1px; background: linear-gradient(180deg, rgba(0, 204, 169, 0.3), transparent) !important; }
+    .sidebar h1 { 
+      font-size: 24px; 
+      font-weight: bold; 
+      text-align: center; 
+      margin-bottom: 4px; 
+      color: white !important;
+    }
     
-    .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-    .exp-role { font-size: 18px; font-weight: 600; color: #111827; }
-    .exp-dates { font-size: 12px; font-weight: 500; color: #9ca3af; }
-    .exp-company { font-size: 14px; font-weight: 500; color: #00cca9 !important; margin-bottom: 8px; }
-    .exp-desc { color: #4b5563; font-size: 14px; line-height: 1.7; }
+    .sidebar-job { 
+      text-align: center; 
+      color: ${primaryColor} !important; 
+      font-size: 14px; 
+      margin-bottom: 40px; 
+    }
     
-    .grid-cols { display: grid; grid-template-columns: 3fr 2fr; gap: 40px; padding-left: 56px; }
+    .sidebar-section { margin-bottom: 32px; }
+    .sidebar-title { 
+      font-size: 11px; 
+      font-weight: bold; 
+      text-transform: uppercase; 
+      letter-spacing: 2px; 
+      color: ${primaryColor} !important; 
+      border-bottom: 1px solid ${primaryColor}44 !important; 
+      padding-bottom: 8px; 
+      margin-bottom: 16px; 
+    }
     
-    .edu-item { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; }
-    .edu-item:last-child { border-bottom: none; }
-    .edu-degree { font-weight: 600; color: #111827; font-size: 15px; }
-    .edu-field { color: #00cca9 !important; font-size: 14px; font-weight: 500; }
-    .edu-meta { display: flex; justify-content: space-between; margin-top: 4px; font-size: 13px; color: #6b7280; }
+    .contact-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #d1d5db !important; }
+    .contact-icon { 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      background: rgba(0, 191, 166, 0.1) !important; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: ${primaryColor} !important; 
+      flex-shrink: 0;
+    }
+    .contact-icon svg { width: 16px; height: 16px; }
     
-    .skills-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .skill-tag { padding: 6px 14px; background: linear-gradient(90deg, rgba(0, 204, 169, 0.05), rgba(0, 204, 169, 0.1)) !important; border: 1px solid rgba(0, 204, 169, 0.2) !important; border-radius: 8px; font-size: 13px; font-weight: 500; color: #374151; }
+    .skill-tag { 
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(0, 204, 169, 0.15) !important;
+      color: ${primaryColor} !important;
+      border-radius: 20px;
+      font-size: 12px;
+      margin: 0 4px 8px 0;
+    }
     
-    .footer-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(0, 204, 169, 0.6), #00cca9, rgba(0, 204, 169, 0.6)) !important; }
+    .lang-item { margin-bottom: 12px; }
+    .lang-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+    .lang-bar { height: 6px; background: #374151 !important; border-radius: 3px; overflow: hidden; }
+    .lang-progress { height: 100%; background: ${primaryColor} !important; border-radius: 3px; }
+    
+    .edu-item { margin-bottom: 16px; }
+    .edu-degree { font-size: 14px; font-weight: 600; color: white !important; }
+    .edu-field { font-size: 13px; color: #9ca3af !important; }
+    .edu-inst { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
+    .edu-dates { font-size: 11px; color: ${primaryColor} !important; margin-top: 4px; }
+    
+    .main-content { flex: 1; padding: 48px; background: white !important; }
+    .main-section { margin-bottom: 40px; }
+    .main-title { 
+      font-size: 20px; 
+      font-weight: bold; 
+      color: ${darkColor} !important; 
+      margin-bottom: 20px; 
+      display: flex; 
+      align-items: center; 
+      gap: 12px;
+      border-bottom: 2px solid ${primaryColor} !important;
+      padding-bottom: 8px;
+    }
+    .main-title-icon { 
+      width: 32px; 
+      height: 32px; 
+      background: ${primaryColor} !important; 
+      border-radius: 8px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: white !important; 
+    }
+    
+    .summary { color: #4b5563 !important; line-height: 1.8; font-size: 15px; }
+    
+    .exp-item { position: relative; padding-left: 24px; margin-bottom: 32px; }
+    .exp-item::before { 
+      content: ''; 
+      position: absolute; 
+      left: -4px; 
+      top: 6px; 
+      width: 10px; 
+      height: 10px; 
+      border-radius: 50%; 
+      border: 2px solid ${primaryColor} !important; 
+      background: white !important; 
+      z-index: 2; 
+    }
+    .exp-item::after { 
+      content: ''; 
+      position: absolute; 
+      left: 0px; 
+      top: 16px; 
+      bottom: -32px; 
+      width: 2px; 
+      background: rgba(0, 204, 169, 0.2) !important; 
+    }
+    .exp-item:last-child::after { display: none; }
+    
+    .exp-role { font-size: 17px; font-weight: 700; color: #111827 !important; margin-bottom: 4px; }
+    .exp-company { color: ${primaryColor} !important; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+    .exp-dates { 
+      font-size: 11px; 
+      color: ${primaryColor} !important; 
+      background: rgba(0, 204, 169, 0.1) !important; 
+      padding: 2px 10px; 
+      border-radius: 12px; 
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
+    .achievement-list { padding-left: 16px; margin-top: 8px; }
+    .achievement-item { font-size: 13px; color: #374151 !important; margin-bottom: 4px; list-style-type: disc; }
+    
+    .footer { 
+      margin-top: auto; 
+      text-align: center; 
+      font-size: 11px; 
+      color: #6b7280 !important; 
+      background-color: ${darkColor} !important;
+      padding: 16px;
+      margin: 0 -30px -40px;
+    }
   </style>
 </head>
 <body>
   ${watermarkHTML}
   <div class="container">
-    <div class="top-bar"></div>
-    <div class="content">
-      <header class="header">
-        <h1>${version.content.experience[0]?.position || "Profesional"}</h1>
-        <div class="header-subtitle">
-          <div class="line"></div>
-          <span class="version-title">${version.title}</span>
-          <div class="line-rev"></div>
-        </div>
-      </header>
+    <aside class="sidebar">
+      <div class="profile-circle">${name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}</div>
+      <h1>${name}</h1>
+      <div class="sidebar-job">${targetJob}</div>
       
-      <section class="section">
-        <div class="section-header">
-          <div class="icon-box">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Contacto</h2>
+        <div class="contact-item">
+          <div class="contact-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
           </div>
-          <h2 class="section-title">Perfil Profesional</h2>
+          <span style="word-break: break-all;">${email}</span>
         </div>
+        ${phone ? `
+        <div class="contact-item">
+          <div class="contact-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+          </div>
+          <span>${phone}</span>
+        </div>` : ""}
+      </div>
+      
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Habilidades</h2>
+        <div style="display: flex; flex-wrap: wrap;">
+          ${version.content.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+        </div>
+      </div>
+      
+      ${languages.length > 0 ? `
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Idiomas</h2>
+        ${languages.map((lang: any) => {
+    const level = lang.level.toLowerCase();
+    const percentage = level.includes("nativo") || level.includes("c2") ? "100%" :
+      level.includes("avanzado") || level.includes("c1") ? "85%" :
+        level.includes("intermedio") || level.includes("b") ? "60%" : "40%";
+    return `
+          <div class="lang-item">
+            <div class="lang-header">
+              <span>${lang.language}</span>
+              <span style="color: #9ca3af;">${lang.level}</span>
+            </div>
+            <div class="lang-bar">
+              <div class="lang-progress" style="width: ${percentage};"></div>
+            </div>
+          </div>`;
+  }).join('')}
+      </div>` : ""}
+      
+      <div class="sidebar-section">
+        <h2 class="sidebar-title">Formación</h2>
+        ${(version.content.education || []).map(edu => {
+    const institution = (edu as any).institution || (edu as any).institucion || (edu as any).school || (edu as any).university || "";
+    const degree = (edu as any).degree || (edu as any).titulo || (edu as any).degree_name || "";
+    const field = (edu as any).field || (edu as any).campo || (edu as any).area || "";
+    const endDate = (edu as any).endDate || (edu as any).end_date || (edu as any).fecha_fin || "";
+
+    return `
+          <div class="edu-item">
+            <div class="edu-degree">${degree}</div>
+            <div class="edu-field">${field}</div>
+            <div class="edu-inst">${institution}</div>
+            <div class="edu-dates">${endDate}</div>
+          </div>`;
+  }).join('')}
+      </div>
+      
+      <div class="footer">
+        CV generado con <span style="color: ${primaryColor}">T2W CV Builder</span>
+      </div>
+    </aside>
+    
+    <main class="main-content">
+      <section class="main-section">
+        <h2 class="main-title">
+          <span class="main-title-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+          </span>
+          Sobre Mí
+        </h2>
         <p class="summary">${version.content.summary}</p>
       </section>
       
-      <section class="section">
-        <div class="section-header">
-          <div class="icon-box">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-          </div>
-          <h2 class="section-title">Experiencia Profesional</h2>
-        </div>
+      <section class="main-section">
+        <h2 class="main-title">
+          <span class="main-title-icon">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          </span>
+          Experiencia Laboral
+        </h2>
         <div class="experience-list">
-          ${version.content.experience.map((exp, idx) => `
-            <div class="experience-item">
-              ${idx < version.content.experience.length - 1 ? '<div class="timeline-line"></div>' : ''}
-              <div class="timeline-dot"></div>
-              <div class="exp-header">
-                <h3 class="exp-role">${exp.position}</h3>
-                <span class="exp-dates">${exp.startDate} — ${exp.endDate}</span>
-              </div>
-              <div class="exp-company">${exp.company}</div>
-              <p class="exp-desc">${exp.description}</p>
-            </div>
-          `).join('')}
+          ${(version.content.experience || []).map(exp => {
+    const company = (exp as any).company || (exp as any).empresa || (exp as any).organization || "";
+    const position = (exp as any).position || (exp as any).puesto || (exp as any).cargo || (exp as any).role || "";
+    const startDate = (exp as any).startDate || (exp as any).start_date || (exp as any).fecha_inicio || "";
+    const endDate = (exp as any).endDate || (exp as any).end_date || (exp as any).fecha_fin || "";
+    const description = (exp as any).description || (exp as any).descripcion || (exp as any).desc || "";
+    const achievements = (exp as any).achievements || (exp as any).logros || [];
+
+    return `
+            <div class="exp-item">
+              <h3 class="exp-role">${position}</h3>
+              <div class="exp-company">${company}</div>
+              <div class="exp-dates">${startDate} - ${endDate}</div>
+              <p class="exp-desc">${description}</p>
+              ${achievements.length > 0 ? `
+              <ul class="achievement-list">
+                ${achievements.map((ach: string) => `<li class="achievement-item">${ach}</li>`).join('')}
+              </ul>` : ""}
+            </div>`;
+  }).join('')}
         </div>
       </section>
-      
-      <div class="grid-cols">
-        <section class="section">
-          <div class="section-header" style="margin-left: -56px;">
-            <div class="icon-box">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg>
-            </div>
-            <h2 class="section-title">Educación</h2>
-          </div>
-          <div class="edu-list">
-            ${version.content.education.map(edu => `
-              <div class="edu-item">
-                <h3 class="edu-degree">${edu.degree}</h3>
-                <div class="edu-field">${edu.field}</div>
-                <div class="edu-meta">
-                  <span>${edu.institution}</span>
-                  <span>${edu.startDate} - ${edu.endDate}</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </section>
-        
-        <section class="section">
-          <div class="section-header" style="margin-left: -56px;">
-            <div class="icon-box">
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-            </div>
-            <h2 class="section-title">Habilidades</h2>
-          </div>
-          <div class="skills-container">
-            ${version.content.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
-          </div>
-        </section>
-      </div>
-    </div>
-    <div class="footer-accent"></div>
+    </main>
   </div>
 </body>
 </html>`;
@@ -361,9 +530,16 @@ function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermar
 </html>`;
 }
 
-function generateCreativeHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string): string {
-  const primaryColor = "#00cca9";
-  const darkColor = "#0d1117";
+
+function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
+  const primaryColor = "#1a1a2e"; // Dark Navy
+
+  const name = userData?.name || "Tu Nombre";
+  const email = userData?.email || "tu@email.com";
+  const phone = userData?.phone || "";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
+
+  const languages = version.content.languages || [];
 
   return `<!DOCTYPE html>
 <html>
@@ -372,201 +548,177 @@ function generateCreativeHTML(version: CVVersion, hasWatermark: boolean, waterma
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
-    .container { display: flex; min-height: 297mm; background: white !important; }
+    .container { padding: 0; display: flex; flex-direction: column; background: white !important; }
     
-    /* Sidebar */
-    .sidebar { 
-      width: 35%; 
-      background-color: ${darkColor} !important; 
+    .header { 
+      background-color: ${primaryColor} !important; 
       color: white !important; 
-      padding: 40px 30px; 
-      display: flex; 
-      flex-direction: column;
+      padding: 32px 40px;
       -webkit-print-color-adjust: exact !important;
     }
+    .header h1 { font-size: 36px; font-weight: 700; margin-bottom: 4px; color: white !important; }
+    .header p { font-size: 20px; color: #d1d5db !important; margin-bottom: 16px; }
+    .header-info { display: flex; flex-wrap: wrap; gap: 24px; font-size: 14px; color: #9ca3af !important; }
+    .info-item { display: flex; align-items: center; gap: 8px; }
+    .info-item svg { width: 16px; height: 16px; color: #9ca3af !important; }
     
-    .profile-circle {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background-color: ${primaryColor} !important;
-      margin: 0 auto 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      font-weight: bold;
-      color: white !important;
-    }
+    .content { padding: 32px 40px; flex-grow: 1; }
     
-    .sidebar h1 { 
-      font-size: 24px; 
-      font-weight: bold; 
-      text-align: center; 
-      margin-bottom: 4px; 
-      color: white !important;
-    }
-    
-    .sidebar-job { 
-      text-align: center; 
-      color: ${primaryColor} !important; 
+    .section { margin-bottom: 32px; }
+    .section-title { 
       font-size: 14px; 
-      margin-bottom: 40px; 
-    }
-    
-    .sidebar-section { margin-bottom: 32px; }
-    .sidebar-title { 
-      font-size: 11px; 
-      font-weight: bold; 
+      font-weight: 700; 
       text-transform: uppercase; 
       letter-spacing: 2px; 
       color: ${primaryColor} !important; 
-      border-bottom: 1px solid ${primaryColor}44 !important; 
+      border-bottom: 2px solid ${primaryColor} !important; 
       padding-bottom: 8px; 
       margin-bottom: 16px; 
     }
     
-    .contact-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #d1d5db !important; }
-    .contact-icon { width: 24px; height: 24px; border-radius: 50%; background: rgba(0, 204, 169, 0.1) !important; display: flex; align-items: center; justify-content: center; color: ${primaryColor} !important; }
+    .summary { color: #374151 !important; line-height: 1.6; font-size: 15px; }
     
+    .exp-item { position: relative; padding-left: 16px; border-left: 2px solid #e5e7eb !important; margin-bottom: 24px; }
+    .exp-dot { position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #9ca3af !important; }
+    .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+    .exp-role { font-size: 16px; font-weight: 700; color: #111827 !important; }
+    .exp-company { font-size: 14px; font-weight: 600; color: #4b5563 !important; margin-bottom: 8px; }
+    .exp-dates { font-size: 13px; color: #6b7280 !important; white-space: nowrap; }
+    .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.6; margin-bottom: 8px; }
+    .achievement-list { padding-left: 16px; margin-top: 8px; }
+    .achievement-item { font-size: 13px; color: #374151 !important; margin-bottom: 4px; list-style-type: disc; }
+    
+    .grid-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    
+    .edu-item { margin-bottom: 12px; }
+    .edu-degree { font-size: 14px; font-weight: 700; color: #111827 !important; }
+    .edu-field { font-size: 13px; color: #4b5563 !important; }
+    .edu-meta { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
+    
+    .skills-container { display: flex; flex-wrap: wrap; gap: 8px; }
     .skill-tag { 
-      display: inline-block;
-      padding: 4px 12px;
-      background: rgba(0, 204, 169, 0.15) !important;
-      color: ${primaryColor} !important;
-      border-radius: 20px;
-      font-size: 12px;
-      margin: 0 4px 8px 0;
+      padding: 4px 12px; 
+      background-color: #f3f4f6 !important; 
+      color: #374151 !important; 
+      border-radius: 4px; 
+      font-size: 12px; 
+      font-weight: 500; 
+      -webkit-print-color-adjust: exact !important;
     }
     
-    .edu-item { margin-bottom: 16px; }
-    .edu-degree { font-size: 14px; font-weight: 600; color: white !important; }
-    .edu-field { font-size: 13px; color: #9ca3af !important; }
-    .edu-inst { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
-    .edu-dates { font-size: 11px; color: ${primaryColor} !important; margin-top: 4px; }
-    
-    /* Main Content */
-    .main-content { flex: 1; padding: 48px; background: white !important; }
-    .main-section { margin-bottom: 40px; }
-    .main-title { 
-      font-size: 20px; 
-      font-weight: bold; 
-      color: ${darkColor} !important; 
-      margin-bottom: 20px; 
-      display: flex; 
-      align-items: center; 
-      gap: 12px;
-      border-bottom: 2px solid ${primaryColor} !important;
-      padding-bottom: 8px;
-    }
-    
-    .summary { color: #4b5563 !important; line-height: 1.8; font-size: 15px; }
-    
-    .exp-item { position: relative; padding-left: 24px; margin-bottom: 32px; }
-    .exp-item::before { 
-      content: ''; 
-      position: absolute; 
-      left: -4px; 
-      top: 6px; 
-      width: 10px; 
-      height: 10px; 
-      border-radius: 50%; 
-      border: 2px solid ${primaryColor} !important; 
-      background: white !important; 
-      z-index: 2; 
-    }
-    .exp-item::after { 
-      content: ''; 
-      position: absolute; 
-      left: 0px; 
-      top: 16px; 
-      bottom: -32px; 
-      width: 2px; 
-      background: rgba(0, 204, 169, 0.2) !important; 
-    }
-    .exp-item:last-child::after { display: none; }
-    
-    .exp-role { font-size: 17px; font-weight: 700; color: #111827 !important; margin-bottom: 4px; }
-    .exp-company { color: ${primaryColor} !important; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
-    .exp-dates { 
-      font-size: 11px; 
-      color: ${primaryColor} !important; 
-      background: rgba(0, 204, 169, 0.1) !important; 
-      padding: 2px 10px; 
-      border-radius: 12px; 
-      display: inline-block;
-      margin-bottom: 8px;
-    }
-    .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.7; }
+    .lang-item { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
     
     .footer { 
-      margin-top: auto; 
+      background-color: #f9fafb !important; 
+      color: #9ca3af !important; 
+      padding: 16px 40px; 
       text-align: center; 
       font-size: 11px; 
-      color: #6b7280 !important; 
-      background-color: ${darkColor} !important;
-      padding: 16px;
-      margin: 0 -30px -40px;
+      margin-top: auto;
+      -webkit-print-color-adjust: exact !important;
     }
   </style>
 </head>
 <body>
   ${watermarkHTML}
   <div class="container">
-    <aside class="sidebar">
-      <div class="profile-circle">${version.content.experience[0]?.position?.charAt(0) || "CV"}</div>
-      <h1>${version.content.experience[0]?.position || "Profesional"}</h1>
-      <div class="sidebar-job">${version.title}</div>
-      
-      <div class="sidebar-section">
-        <h2 class="sidebar-title">Contacto</h2>
-        <div class="contact-item">
-          <span>${version.content.summary.substring(0, 20)}...</span>
+    <header class="header">
+      <h1>${name}</h1>
+      <p>${targetJob}</p>
+      <div class="header-info">
+        <div class="info-item">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          <span>${email}</span>
         </div>
-      </div>
-      
-      <div class="sidebar-section">
-        <h2 class="sidebar-title">Habilidades</h2>
-        <div style="display: flex; flex-wrap: wrap;">
-          ${version.content.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
-        </div>
-      </div>
-      
-      <div class="sidebar-section">
-        <h2 class="sidebar-title">Educación</h2>
-        ${version.content.education.map(edu => `
-          <div class="edu-item">
-            <div class="edu-degree">${edu.degree}</div>
-            <div class="edu-field">${edu.field}</div>
-            <div class="edu-inst">${edu.institution}</div>
-            <div class="edu-dates">${edu.startDate} - ${edu.endDate}</div>
+        ${phone ? `
+          <div class="info-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+            <span>${phone}</span>
           </div>
-        `).join('')}
+        ` : ""}
       </div>
-      
-      <div class="footer">
-        CV generado con <span style="color: ${primaryColor}">T2W CV Builder</span>
-      </div>
-    </aside>
+    </header>
     
-    <main class="main-content">
-      <section class="main-section">
-        <h2 class="main-title">Sobre mí</h2>
+    <div class="content">
+      <section class="section">
+        <h2 class="section-title">Perfil Profesional</h2>
         <p class="summary">${version.content.summary}</p>
       </section>
       
-      <section class="main-section">
-        <h2 class="main-title">Experiencia</h2>
-        ${version.content.experience.map(exp => `
-          <div class="exp-item">
-            <h3 class="exp-role">${exp.position}</h3>
-            <div class="exp-company">${exp.company}</div>
-            <div class="exp-dates">${exp.startDate} - ${exp.endDate}</div>
-            <p class="exp-desc">${exp.description}</p>
-          </div>
-        `).join('')}
+      <section class="section">
+        <h2 class="section-title">Experiencia Profesional</h2>
+        <div class="experience-list">
+          ${(version.content.experience || []).map(exp => {
+    const company = (exp as any).company || (exp as any).empresa || (exp as any).organization || "";
+    const position = (exp as any).position || (exp as any).puesto || (exp as any).cargo || (exp as any).role || "";
+    const startDate = (exp as any).startDate || (exp as any).start_date || (exp as any).fecha_inicio || "";
+    const endDate = (exp as any).endDate || (exp as any).end_date || (exp as any).fecha_fin || "";
+    const description = (exp as any).description || (exp as any).descripcion || (exp as any).desc || "";
+    const achievements = (exp as any).achievements || (exp as any).logros || [];
+
+    return `
+            <div class="exp-item">
+              <div class="exp-dot"></div>
+              <div class="exp-header">
+                <h3 class="exp-role">${position}</h3>
+                <span class="exp-dates">${startDate} — ${endDate}</span>
+              </div>
+              <div class="exp-company">${company}</div>
+              <p class="exp-desc">${description}</p>
+              ${achievements.length > 0 ? `
+              <ul class="achievement-list">
+                ${achievements.map((ach: string) => `<li class="achievement-item">${ach}</li>`).join('')}
+              </ul>` : ""}
+            </div>`;
+  }).join('')}
+        </div>
       </section>
-    </main>
+      
+      <div class="grid-cols">
+        <section class="section">
+          <h2 class="section-title">Formación Académica</h2>
+          ${(version.content.education || []).map(edu => {
+    const institution = (edu as any).institution || (edu as any).institucion || (edu as any).school || (edu as any).university || "";
+    const degree = (edu as any).degree || (edu as any).titulo || (edu as any).degree_name || "";
+    const field = (edu as any).field || (edu as any).campo || (edu as any).area || "";
+    const endDate = (edu as any).endDate || (edu as any).end_date || (edu as any).fecha_fin || "";
+
+    return `
+            <div class="edu-item">
+              <h3 class="edu-degree">${degree}</h3>
+              <p class="edu-field">${field}</p>
+              <p class="edu-meta">${institution} • ${endDate}</p>
+            </div>`;
+  }).join('')}
+        </section>
+        
+        <div class="space-y-6">
+          <section class="section">
+            <h2 class="section-title">Competencias</h2>
+            <div class="skills-container">
+              ${version.content.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            </div>
+          </section>
+          
+          ${languages.length > 0 ? `
+          <section class="section">
+            <h2 class="section-title">Idiomas</h2>
+            <div class="space-y-2">
+              ${languages.map((lang: any) => `
+                <div class="lang-item">
+                  <span style="font-weight: 500; color: #111827;">${lang.language}</span>
+                  <span style="color: #6b7280;">${lang.level}</span>
+                </div>
+              `).join('')}
+            </div>
+          </section>` : ""}
+        </div>
+      </div>
+    </div>
+    
+    <footer class="footer">
+      CV generado con T2W CV Builder • training2work.com
+    </footer>
   </div>
 </body>
 </html>`;
@@ -576,9 +728,10 @@ function generateCreativeHTML(version: CVVersion, hasWatermark: boolean, waterma
 export function printTemplatePDF(
   version: CVVersion,
   template: TemplateType,
-  hasWatermark: boolean
+  hasWatermark: boolean,
+  userData?: { name: string; email: string; phone?: string; targetJob?: string }
 ): void {
-  const html = generateTemplateHTML(version, template, hasWatermark);
+  const html = generateTemplateHTML(version, template, hasWatermark, userData);
   const printWindow = window.open("", "_blank");
   if (printWindow) {
     printWindow.document.write(html);

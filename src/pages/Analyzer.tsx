@@ -124,6 +124,7 @@ const Analyzer = () => {
         targetJob,
         experienceYears
       });
+      console.log("Frontend Analysis Result:", result);
       setAnalysisResult(result);
 
       // Also generate action plan and extract data automatically
@@ -226,8 +227,9 @@ const Analyzer = () => {
   const handleDownload = () => {
     if (cvVersions && selectedVersion) {
       const version = cvVersions[selectedVersion];
-      const templateType = selectedVersion === 'formal' ? 'modern' : 'creative';
-      printTemplatePDF(version, templateType, false);
+      const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
+      const userData = { name, email, phone, targetJob };
+      printTemplatePDF(version, templateType, false, userData);
     } else {
       window.print();
     }
@@ -847,8 +849,8 @@ const Analyzer = () => {
                                   {problem.category || 'General'}
                                 </span>
                                 <span className={`text-xs font-medium px-2 py-0.5 rounded ${(problem.severity || '').toLowerCase() === "critical" ? "bg-red-100 text-red-700" :
-                                    (problem.severity || '').toLowerCase() === "warning" ? "bg-yellow-100 text-yellow-700" :
-                                      "bg-blue-100 text-blue-700"
+                                  (problem.severity || '').toLowerCase() === "warning" ? "bg-yellow-100 text-yellow-700" :
+                                    "bg-blue-100 text-blue-700"
                                   }`}>
                                   {(problem.severity || '').toLowerCase() === "critical" ? "Crítico" :
                                     (problem.severity || '').toLowerCase() === "warning" ? "Importante" : "Sugerencia"}
@@ -856,7 +858,7 @@ const Analyzer = () => {
                               </div>
                               <p className="font-medium text-gray-900">{problem.message || problem.problem || problem.issue || problem.descripcion}</p>
                               <p className="text-sm text-muted-foreground mt-1">
-                                <strong>Solución:</strong> {problem.suggestion || problem.solution || problem.solucion || problem.recomendacion}
+                                <strong>Solución:</strong> {problem.suggestion || problem.solution || problem.solucion || problem.recomendacion || "No se proporcionó una solución específica."}
                               </p>
                             </div>
                           </div>

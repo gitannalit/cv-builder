@@ -1,4 +1,5 @@
-project_id = "vdmwsxxsqvumrckkrokz"
+project_id = "izluhghnfiruylhsgopp"
+
 
 [functions.analyze-cv]
 verify_jwt = false

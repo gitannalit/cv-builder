@@ -93,6 +93,7 @@ export interface CVVersion {
       startDate: string;
       endDate: string;
       description: string;
+      achievements?: string[];
     }[];
     education: {
       institution: string;
@@ -102,5 +103,6 @@ export interface CVVersion {
       endDate: string;
     }[];
     skills: string[];
+    languages?: { language: string; level: string }[];
   };
 }
