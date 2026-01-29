@@ -9,6 +9,9 @@ interface LockedCVPreviewProps {
     type: 'formal' | 'creative';
     onEdit: () => void;
     onUnlock: () => void;
+    onUnlockBasic: () => void;
+    onUnlockPremium: () => void;
+    isProcessing?: boolean;
     userData?: {
         name: string;
         email: string;
@@ -17,7 +20,7 @@ interface LockedCVPreviewProps {
     };
 }
 
-export function LockedCVPreview({ version, type, onEdit, onUnlock, userData }: LockedCVPreviewProps) {
+export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic, onUnlockPremium, isProcessing, userData }: LockedCVPreviewProps) {
     return (
         <div className="relative min-h-screen pb-32">
             {/* Header */}
@@ -78,11 +81,16 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, userData }: L
 
                     <div className="space-y-3">
                         <Button
-                            onClick={onUnlock}
+                            onClick={onUnlockBasic}
+                            disabled={isProcessing}
                             className="w-full bg-[#00D1A0] hover:bg-[#00B88D] text-white h-12 text-base font-bold rounded-xl shadow-lg shadow-green-500/20"
                         >
-                            <Download className="w-4 h-4 mr-2" />
-                            Descargar CV (4,99€)
+                            {isProcessing ? "Procesando..." : (
+                                <>
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Básico: 2 descargas (4,99€)
+                                </>
+                            )}
                         </Button>
 
                         <div className="relative">
@@ -90,12 +98,17 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, userData }: L
                                 MÁS POPULAR
                             </div>
                             <Button
-                                onClick={onUnlock}
+                                onClick={onUnlockPremium}
+                                disabled={isProcessing}
                                 variant="outline"
                                 className="w-full border-2 border-[#00D1A0] text-[#00D1A0] hover:bg-green-50 h-12 text-base font-bold rounded-xl"
                             >
-                                <Sparkles className="w-4 h-4 mr-2" />
-                                Pack Completo (17,99€)
+                                {isProcessing ? "Procesando..." : (
+                                    <>
+                                        <Sparkles className="w-4 h-4 mr-2" />
+                                        Premium: Ilimitado (17,99€)
+                                    </>
+                                )}
                             </Button>
                         </div>
                     </div>
@@ -119,19 +132,19 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, userData }: L
                 <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
                     <div className="flex w-full gap-4 max-w-md">
                         <Button
-                            onClick={onUnlock}
+                            onClick={onUnlockBasic}
+                            disabled={isProcessing}
                             className="flex-1 bg-[#00D1A0] hover:bg-[#00B88D] text-white font-bold rounded-xl"
                         >
-                            <Download className="w-4 h-4 mr-2" />
-                            Descargar CV (4,99€)
+                            {isProcessing ? "..." : "Básico (4,99€)"}
                         </Button>
                         <Button
-                            onClick={onUnlock}
+                            onClick={onUnlockPremium}
+                            disabled={isProcessing}
                             variant="outline"
                             className="flex-1 border-[#00D1A0] text-[#00D1A0] font-bold rounded-xl"
                         >
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Pack Completo (17,99€)
+                            {isProcessing ? "..." : "Premium (17,99€)"}
                         </Button>
                     </div>
                     <button

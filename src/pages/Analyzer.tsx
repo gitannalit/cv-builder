@@ -16,10 +16,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 import { LockedCVPreview } from "@/components/analyzer/LockedCVPreview";
 import { CVVersionsCard } from "@/components/analyzer/CVVersionsCard";
+import { StripeEmbeddedCheckout } from "@/components/analyzer/StripeEmbeddedCheckout";
 import { extractTextFromPDF } from "@/lib/pdfExtractor";
 import { analyzeCVText, generateActionPlan, generateCVVersions, extractCVData } from "@/lib/cvAnalyzer";
 import { printTemplatePDF } from "@/lib/templatePdfGenerator";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 const Analyzer = () => {
   const [cvText, setCVText] = useState("");
@@ -37,6 +40,10 @@ const Analyzer = () => {
   const [selectedVersion, setSelectedVersion] = useState<'formal' | 'creative' | null>(null);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [extractedData, setExtractedData] = useState<Partial<CVData> | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [hasActivePlan, setHasActivePlan] = useState(false);
+  const [downloadCount, setDownloadCount] = useState(0);
+  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
 
   // Form state
   const [name, setName] = useState("");
@@ -46,6 +53,94 @@ const Analyzer = () => {
   const [experienceYears, setExperienceYears] = useState("");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (email && email.includes('@') && email.includes('.')) {
+      checkPaymentStatus(email);
+    }
+  }, [email]);
+
+  // Load state from localStorage on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem('cv_analyzer_state');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        if (state.analysisResult) setAnalysisResult(state.analysisResult);
+        if (state.actionPlan) setActionPlan(state.actionPlan);
+        if (state.cvVersions) setCVVersions(state.cvVersions);
+        if (state.extractedData) setExtractedData(state.extractedData);
+        if (state.name) setName(state.name);
+        if (state.email) setEmail(state.email);
+        if (state.phone) setPhone(state.phone);
+        if (state.targetJob) setTargetJob(state.targetJob);
+        if (state.experienceYears) setExperienceYears(state.experienceYears);
+        if (state.cvText) setCVText(state.cvText);
+        if (state.selectedVersion) setSelectedVersion(state.selectedVersion);
+        if (state.isUnlocked) setIsUnlocked(state.isUnlocked);
+        if (state.isCustomizing) setIsCustomizing(state.isCustomizing);
+      } catch (e) {
+        console.error("Error loading state:", e);
+      }
+    }
+  }, []);
+
+  // Save state to localStorage when important data changes
+  useEffect(() => {
+    const state = {
+      analysisResult,
+      actionPlan,
+      cvVersions,
+      extractedData,
+      name,
+      email,
+      phone,
+      targetJob,
+      experienceYears,
+      cvText,
+      selectedVersion,
+      isUnlocked,
+      isCustomizing
+    };
+    localStorage.setItem('cv_analyzer_state', JSON.stringify(state));
+  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, phone, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (sessionId) {
+      handleVerifyPayment(sessionId);
+    }
+  }, []);
+
+  const handleVerifyPayment = async (sessionId: string) => {
+    setIsProcessingPayment(true);
+    toast.loading("Verificando pago...");
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: { sessionId }
+      });
+      if (error) throw error;
+      if (data.success) {
+        toast.dismiss();
+        toast.success("¡Pago verificado con éxito!");
+        setIsUnlocked(true);
+        setHasActivePlan(true);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else {
+        toast.dismiss();
+        toast.error("El pago no se ha completado.");
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", error);
+      toast.dismiss();
+      toast.error("Error al verificar el pago");
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
 
   const step = useMemo(() => {
     if (isAnalyzing) return "analyzing";
@@ -195,10 +290,79 @@ const Analyzer = () => {
     setUploadedFileName(null);
     setIsCustomizing(false);
     setIsUnlocked(false);
+    localStorage.removeItem('cv_analyzer_state');
   };
 
   const handleContinueToQuestions = () => {
     setIsCustomizing(true);
+  };
+
+  const checkPaymentStatus = async (userEmail: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-payment-status', {
+        body: { email: userEmail }
+      });
+      if (error) throw error;
+      setHasActivePlan(data.hasAccess);
+      setDownloadCount(data.count || 0);
+      if (data.hasAccess) setIsUnlocked(true);
+      return data;
+    } catch (error) {
+      console.error("Error checking payment status:", error);
+      return { hasAccess: false };
+    }
+  };
+
+  const handleUnlockBasic = async () => {
+    setIsProcessingPayment(true);
+    const cleanUrl = window.location.origin + window.location.pathname;
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: {
+          email,
+          planType: 'basic',
+          amount: 499,
+          planName: 'CV Básico (2 descargas)',
+          successUrl: cleanUrl,
+          cancelUrl: cleanUrl,
+        }
+      });
+      if (error) throw error;
+      if (data.clientSecret) {
+        setStripeClientSecret(data.clientSecret);
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      toast.error("Error al iniciar el pago");
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const handleUnlockPremium = async () => {
+    setIsProcessingPayment(true);
+    const cleanUrl = window.location.origin + window.location.pathname;
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: {
+          email,
+          planType: 'premium',
+          amount: 1799,
+          planName: 'CV Premium (Ilimitado)',
+          successUrl: cleanUrl,
+          cancelUrl: cleanUrl,
+        }
+      });
+      if (error) throw error;
+      if (data.clientSecret) {
+        setStripeClientSecret(data.clientSecret);
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
+      toast.error("Error al iniciar el pago");
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -224,12 +388,31 @@ const Analyzer = () => {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (cvVersions && selectedVersion) {
-      const version = cvVersions[selectedVersion];
-      const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-      const userData = { name, email, phone, targetJob };
-      printTemplatePDF(version, templateType, false, userData);
+      try {
+        // Record download in DB
+        const { data, error } = await supabase.functions.invoke('check-payment-status', {
+          body: { email, action: 'record_download' }
+        });
+
+        if (error) throw error;
+
+        if (!data.hasAccess) {
+          setIsUnlocked(false);
+          toast.error("Has alcanzado el límite de descargas de tu plan.");
+          return;
+        }
+
+        const version = cvVersions[selectedVersion];
+        const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
+        const userData = { name, email, phone, targetJob };
+        printTemplatePDF(version, templateType, false, userData);
+        setDownloadCount(data.count);
+      } catch (error) {
+        console.error("Error recording download:", error);
+        toast.error("Error al procesar la descarga");
+      }
     } else {
       window.print();
     }
@@ -682,10 +865,10 @@ const Analyzer = () => {
                   version={cvVersions[selectedVersion]}
                   type={selectedVersion}
                   onEdit={() => setSelectedVersion(null)}
-                  onUnlock={() => {
-                    setIsUnlocked(true);
-                    toast.success("¡CV desbloqueado con éxito!");
-                  }}
+                  onUnlock={() => { }}
+                  onUnlockBasic={handleUnlockBasic}
+                  onUnlockPremium={handleUnlockPremium}
+                  isProcessing={isProcessingPayment}
                   userData={{
                     name,
                     email,
@@ -1038,6 +1221,14 @@ const Analyzer = () => {
           </AnimatePresence>
         </div>
       </main>
+
+      {stripeClientSecret && (
+        <StripeEmbeddedCheckout
+          clientSecret={stripeClientSecret}
+          onClose={() => setStripeClientSecret(null)}
+        />
+      )}
+
       <footer className="border-t mt-auto py-8 bg-white no-print">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>© 2026 Training to Work. Todos los derechos reservados.</p>
