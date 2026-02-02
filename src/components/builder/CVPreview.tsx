@@ -27,8 +27,7 @@ export function CVPreview({ cvData }: CVPreviewProps) {
     setResult(null);
     setGenerating(true);
     try {
-      const { generateAnalysisHTML, downloadPDF } = await import("@/lib/pdfGenerator");
-      const { generatePdfOnServer } = await import("@/lib/serverPdf");
+      const { generatePDFWithWatermark, downloadPDF } = await import("@/lib/pdfGenerator");
       const placeholder: AnalysisResult = {
         atsScore: 0,
         formatScore: 0,
@@ -41,8 +40,11 @@ export function CVPreview({ cvData }: CVPreviewProps) {
         recommendations: [],
         salaryRange: { min: 0, max: 0, currency: "" },
       };
-      const html = generateAnalysisHTML(JSON.stringify(cvData, null, 2), placeholder, false);
-      const pdfBlob = await generatePdfOnServer(html);
+      const pdfBlob = await generatePDFWithWatermark(
+        JSON.stringify(cvData, null, 2),
+        placeholder,
+        false
+      );
       downloadPDF(pdfBlob, `${personalInfo.fullName || "cv"}.pdf`);
       setResult("Descarga iniciada");
     } catch (e: any) {
@@ -60,8 +62,7 @@ export function CVPreview({ cvData }: CVPreviewProps) {
     setResult(null);
     setSending(true);
     try {
-      const { generateAnalysisHTML } = await import("@/lib/pdfGenerator");
-      const { generateAndUploadPdf } = await import("@/lib/serverPdf");
+      const { generatePDFWithWatermark } = await import("@/lib/pdfGenerator");
       const { sendCVEmail } = await import("@/lib/resendClient");
       const placeholder: AnalysisResult = {
         atsScore: 0,
@@ -75,10 +76,12 @@ export function CVPreview({ cvData }: CVPreviewProps) {
         recommendations: [],
         salaryRange: { min: 0, max: 0, currency: "" },
       };
-      const html = generateAnalysisHTML(JSON.stringify(cvData, null, 2), placeholder, false);
-      const uploadRes = await generateAndUploadPdf(html, `${personalInfo.fullName || 'cv'}.pdf`);
-      // uploadRes: { success: true, url, path }
-      await sendCVEmail(personalInfo.email, undefined, uploadRes.url);
+      const pdfBlob = await generatePDFWithWatermark(
+        JSON.stringify(cvData, null, 2),
+        placeholder,
+        false
+      );
+      await sendCVEmail(personalInfo.email, pdfBlob);
       setResult("¡CV enviado exitosamente!");
     } catch (e: any) {
       setResult("Error al enviar el CV: " + (e?.message || e));

@@ -724,7 +724,56 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
 </html>`;
 }
 
-// Print template as PDF
+// Download template as real PDF (not print dialog)
+export async function downloadTemplatePDF(
+  version: CVVersion,
+  template: TemplateType,
+  hasWatermark: boolean,
+  userData?: { name: string; email: string; phone?: string; targetJob?: string }
+): Promise<void> {
+  const html = generateTemplateHTML(version, template, hasWatermark, userData);
+
+  // Generate filename
+  const baseName = userData?.name || version.title || 'CV';
+  const timestamp = new Date().toISOString().split('T')[0];
+  const filename = `${baseName.replace(/\s+/g, '_')}_${template}_${timestamp}.pdf`;
+
+  try {
+    // Call API endpoint to generate PDF
+    const response = await fetch('/api/generate-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ html, filename }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to generate PDF');
+    }
+
+    // Get PDF blob from response
+    const blob = await response.blob();
+
+    // Create download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('PDF download error:', error);
+    throw error;
+  }
+}
+
+// Legacy print function (keep for backwards compatibility)
 export function printTemplatePDF(
   version: CVVersion,
   template: TemplateType,

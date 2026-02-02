@@ -47,13 +47,15 @@ const Builder = () => {
     setSendResult(null);
     try {
       // Lazy import para evitar problemas SSR
-      const { generateAnalysisHTML } = await import("@/lib/pdfGenerator");
-      const { generateAndUploadPdf } = await import("@/lib/serverPdf");
+      const { generatePDFWithWatermark } = await import("@/lib/pdfGenerator");
       const { sendCVEmail } = await import("@/lib/resendClient");
-      const placeholder = { recommendations: [], problems: [], atsScore: 0, formatScore: 0, keywordsScore: 0, experienceScore: 0, skillsScore: 0, achievementsScore: 0, missingKeywords: [], salaryRange: { min: 0, max: 0, currency: "" } } as any;
-      const html = generateAnalysisHTML(JSON.stringify(cvData, null, 2), placeholder, false);
-      const uploadRes = await generateAndUploadPdf(html, `${cvData.personalInfo.fullName || 'cv'}.pdf`);
-      await sendCVEmail(cvData.personalInfo.email, undefined, uploadRes.url);
+      // Generar PDF (puedes ajustar los parámetros según tu lógica)
+      const pdfBlob = await generatePDFWithWatermark(
+        JSON.stringify(cvData, null, 2),
+        { recommendations: [], problems: [], atsScore: 0, formatScore: 0, keywordsScore: 0, experienceScore: 0, skillsScore: 0, achievementsScore: 0, missingKeywords: [], salaryRange: { min: 0, max: 0, currency: "" } },
+        false
+      );
+      await sendCVEmail(cvData.personalInfo.email, pdfBlob);
       setSendResult("¡CV enviado exitosamente!");
     } catch (e: any) {
       setSendResult("Error al enviar el CV: " + (e?.message || e));

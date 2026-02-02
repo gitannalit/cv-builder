@@ -19,9 +19,7 @@ import { CVVersionsCard } from "@/components/analyzer/CVVersionsCard";
 import { StripeEmbeddedCheckout } from "@/components/analyzer/StripeEmbeddedCheckout";
 import { extractTextFromPDF } from "@/lib/pdfExtractor";
 import { analyzeCVText, generateActionPlan, generateCVVersions, extractCVData } from "@/lib/cvAnalyzer";
-import { generateTemplateHTML } from "@/lib/templatePdfGenerator";
-import { generatePdfOnServer } from "@/lib/serverPdf";
-import { downloadPDF } from "@/lib/pdfGenerator";
+import { downloadTemplatePDF } from "@/lib/templatePdfGenerator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
@@ -393,6 +391,8 @@ const Analyzer = () => {
   const handleDownload = async () => {
     if (cvVersions && selectedVersion) {
       try {
+        toast.loading("Generando PDF...");
+
         // Record download in DB
         const { data, error } = await supabase.functions.invoke('check-payment-status', {
           body: { email, action: 'record_download' }
@@ -401,6 +401,7 @@ const Analyzer = () => {
         if (error) throw error;
 
         if (!data.hasAccess) {
+          toast.dismiss();
           setIsUnlocked(false);
           toast.error("Has alcanzado el límite de descargas de tu plan.");
           return;
@@ -409,21 +410,17 @@ const Analyzer = () => {
         const version = cvVersions[selectedVersion];
         const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
         const userData = { name, email, phone, targetJob };
-        try {
-          toast.loading('Generando PDF en servidor...');
-          const html = generateTemplateHTML(version, templateType as any, false, userData);
-          const pdfBlob = await generatePdfOnServer(html);
-          downloadPDF(pdfBlob, `${version.title || 'cv'}.pdf`);
-          toast.dismiss();
-          toast.success('Descarga iniciada');
-          setDownloadCount(data.count);
-        } catch (err) {
-          console.error('Error generating server PDF:', err);
-          toast.error('Error al generar el PDF');
-        }
+
+        // Use real PDF download instead of print dialog
+        await downloadTemplatePDF(version, templateType, false, userData);
+
+        toast.dismiss();
+        toast.success("PDF descargado correctamente");
+        setDownloadCount(data.count);
       } catch (error) {
-        console.error("Error recording download:", error);
-        toast.error("Error al procesar la descarga");
+        console.error("Error downloading PDF:", error);
+        toast.dismiss();
+        toast.error("Error al generar el PDF. Inténtalo de nuevo.");
       }
     } else {
       window.print();
@@ -438,20 +435,16 @@ const Analyzer = () => {
     }
 
     try {
-      toast.loading('Generando PDF en servidor...');
+      toast.loading('Generando PDF...');
       const version = cvVersions[selectedVersion];
       const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-      // Build HTML using the existing template generator
-      const { generateTemplateHTML } = await import('@/lib/templatePdfGenerator');
-      const html = generateTemplateHTML(version, templateType as any, false, { name, email, phone, targetJob });
-
-      // Send HTML to serverless upload endpoint to get a signed URL
-      const { generateAndUploadPdf } = await import('@/lib/serverPdf');
-      const uploadRes = await generateAndUploadPdf(html, `${version.title || 'cv'}.pdf`);
+      // Use the client-side generator to create a blob (may be HTML placeholder)
+      const { generateCVVersionPDF } = await import('@/lib/pdfGenerator');
+      const pdfBlob = await generateCVVersionPDF(version, false);
 
       toast.loading('Enviando email...');
       const { sendCVEmail } = await import('@/lib/resendClient');
-      await sendCVEmail(email, undefined, uploadRes.url);
+      await sendCVEmail(email, pdfBlob as Blob);
       toast.dismiss();
       toast.success('CV enviado por email');
     } catch (err) {
