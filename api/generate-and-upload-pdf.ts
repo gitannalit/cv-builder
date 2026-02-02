@@ -34,13 +34,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('chromium.headless:', chromium.headless);
     console.log('chromium.args length:', Array.isArray(chromium.args) ? chromium.args.length : 0);
 
-    browser = await puppeteer.launch({
+    // If chrome-aws-lambda doesn't provide an executable path (common on Vercel),
+    // fall back to the full `puppeteer` package which bundles Chromium.
+    let launcher: any = puppeteer;
+    let launchOptions: any = {
       args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: executablePath || process.env.CHROMIUM_PATH || undefined,
       headless: chromium.headless ?? true,
       defaultViewport: chromium.defaultViewport || { width: 1200, height: 800 },
       ignoreHTTPSErrors: true,
-    });
+    };
+
+    if (executablePath) {
+      launchOptions.executablePath = executablePath;
+      browser = await launcher.launch(launchOptions);
+    } else {
+      try {
+        const full = await import('puppeteer');
+        launcher = full;
+        launchOptions.args = launchOptions.args.concat(['--no-sandbox', '--disable-setuid-sandbox']);
+        browser = await launcher.launch(launchOptions);
+      } catch (e) {
+        console.warn('Full puppeteer not available, attempting puppeteer-core (may fail)');
+        launchOptions.executablePath = process.env.CHROMIUM_PATH || undefined;
+        browser = await launcher.launch(launchOptions);
+      }
+    }
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
