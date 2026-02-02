@@ -30,17 +30,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let browser = null;
   try {
     const executablePath = await chromium.executablePath;
+    console.log('chromium.executablePath:', executablePath);
+    console.log('chromium.headless:', chromium.headless);
+    console.log('chromium.args length:', Array.isArray(chromium.args) ? chromium.args.length : 0);
+
     browser = await puppeteer.launch({
-      args: chromium.args,
-      executablePath: executablePath || undefined,
-      headless: chromium.headless,
+      args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: executablePath || process.env.CHROMIUM_PATH || undefined,
+      headless: chromium.headless ?? true,
       defaultViewport: chromium.defaultViewport || { width: 1200, height: 800 },
+      ignoreHTTPSErrors: true,
     });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });
+    await page.waitForTimeout(300);
+    const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, preferCSSPageSize: true });
 
     // Prepare path
     const name = filename && typeof filename === 'string' ? filename.replace(/[^a-zA-Z0-9._-]/g, '') : null;
@@ -73,9 +79,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     res.status(200).json({ success: true, url: signedData.signedUrl, path: uploadData.path });
-  } catch (err) {
-    console.error('PDF generation/upload error:', err);
-    res.status(500).json({ error: 'PDF generation/upload failed' });
+  } catch (err: any) {
+    console.error('PDF generation/upload error:', err && err.stack ? err.stack : err);
+    res.status(500).json({ error: 'PDF generation/upload failed', details: String(err && err.message ? err.message : err) });
   } finally {
     try {
       if (browser) await browser.close();
