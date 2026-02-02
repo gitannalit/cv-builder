@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import chromium from 'chrome-aws-lambda';
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 import { createClient } from '@supabase/supabase-js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -29,36 +28,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let browser = null;
   try {
-    const executablePath = await chromium.executablePath;
-    console.log('chromium.executablePath:', executablePath);
-    console.log('chromium.headless:', chromium.headless);
-    console.log('chromium.args length:', Array.isArray(chromium.args) ? chromium.args.length : 0);
-
-    // If chrome-aws-lambda doesn't provide an executable path (common on Vercel),
-    // fall back to the full `puppeteer` package which bundles Chromium.
-    let launcher: any = puppeteer;
-    let launchOptions: any = {
-      args: chromium.args || ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: chromium.headless ?? true,
-      defaultViewport: chromium.defaultViewport || { width: 1200, height: 800 },
+    // Use full puppeteer on a VPS. Allow overriding the executable via
+    // the CHROMIUM_PATH env var if a system-installed Chrome/Chromium should be used.
+    const launchOptions: any = {
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      headless: process.env.PUPPETEER_HEADLESS !== 'false',
+      defaultViewport: { width: 1200, height: 800 },
       ignoreHTTPSErrors: true,
     };
-
-    if (executablePath) {
-      launchOptions.executablePath = executablePath;
-      browser = await launcher.launch(launchOptions);
-    } else {
-      try {
-        const full = await import('puppeteer');
-        launcher = full;
-        launchOptions.args = launchOptions.args.concat(['--no-sandbox', '--disable-setuid-sandbox']);
-        browser = await launcher.launch(launchOptions);
-      } catch (e) {
-        console.warn('Full puppeteer not available, attempting puppeteer-core (may fail)');
-        launchOptions.executablePath = process.env.CHROMIUM_PATH || undefined;
-        browser = await launcher.launch(launchOptions);
-      }
-    }
+    const execPath = process.env.CHROMIUM_PATH;
+    if (execPath) launchOptions.executablePath = execPath;
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });

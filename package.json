@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "postinstall": "npx puppeteer install --product=chrome",
+    "start": "node server/server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
