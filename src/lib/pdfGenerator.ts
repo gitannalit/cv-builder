@@ -10,6 +10,11 @@ export async function generatePDFWithWatermark(
   return createPDFFromHTML(htmlContent);
 }
 
+// Export helper to get the raw HTML for analysis documents (useful for server-side PDF generation)
+export function generateAnalysisHTML(cvContent: string, analysisResult: AnalysisResult, hasWatermark: boolean = true): string {
+  return createHTMLDocument(cvContent, analysisResult, hasWatermark);
+}
+
 export async function generateCVVersionPDF(
   version: CVVersion,
   hasWatermark: boolean = true
@@ -417,25 +422,58 @@ async function createPDFFromHTML(htmlContent: string): Promise<Blob> {
   iframeDoc.close();
 
   // Wait for content to render
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 700));
 
-  // Use print-to-PDF approach via opening in new window
-  const printWindow = window.open("", "_blank");
-  if (printWindow) {
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-    printWindow.focus();
-    
-    // Give time to render then trigger print
-    setTimeout(() => {
-      printWindow.print();
-    }, 500);
+  try {
+    // Dynamically import html2canvas and jsPDF
+    const html2canvas = (await import('html2canvas')).default as any;
+    const { jsPDF } = await import('jspdf');
+
+    // Render the iframe body to a canvas
+    const canvas = await html2canvas(iframeDoc.body as any, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    // Calculate image size in mm to preserve aspect ratio
+    const imgWidthMm = pdfWidth;
+    const imgHeightMm = (canvas.height * imgWidthMm) / canvas.width;
+
+    if (imgHeightMm <= pdfHeight) {
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMm, imgHeightMm);
+    } else {
+      // Split into multiple pages if content is taller than a page
+      const pxPerMm = canvas.width / imgWidthMm;
+      let remainingHeight = canvas.height;
+      let position = 0;
+
+      while (remainingHeight > 0) {
+        const pageCanvas = document.createElement('canvas');
+        const pageHeightPx = Math.min(Math.floor(pdfHeight * pxPerMm), remainingHeight);
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = pageHeightPx;
+        const ctx = pageCanvas.getContext('2d')!;
+        ctx.drawImage(canvas, 0, position, canvas.width, pageHeightPx, 0, 0, canvas.width, pageHeightPx);
+        const pageData = pageCanvas.toDataURL('image/png');
+        const pageImgHeightMm = (pageCanvas.height * imgWidthMm) / canvas.width;
+        pdf.addImage(pageData, 'PNG', 0, 0, imgWidthMm, pageImgHeightMm);
+        remainingHeight -= pageCanvas.height;
+        position += pageCanvas.height;
+        if (remainingHeight > 0) pdf.addPage();
+      }
+    }
+
+    const blob = pdf.output('blob');
+    document.body.removeChild(iframe);
+    return blob;
+  } catch (err) {
+    document.body.removeChild(iframe);
+    // Fallback to previous behavior (HTML blob) if libs are not available
+    console.error('PDF generation libs not available or failed:', err);
+    return new Blob([htmlContent], { type: 'text/html' });
   }
-
-  document.body.removeChild(iframe);
-
-  // Return a placeholder blob - actual PDF is generated via browser print dialog
-  return new Blob([htmlContent], { type: "text/html" });
 }
 
 export function downloadPDF(blob: Blob, filename: string): void {

@@ -1,5 +1,7 @@
-import { CVData } from "@/types/cv";
-import { Mail, Phone, MapPin, Linkedin, Globe } from "lucide-react";
+import React, { useState } from "react";
+import { CVData, AnalysisResult } from "@/types/cv";
+import { Mail, Phone, MapPin, Linkedin, Globe, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface CVPreviewProps {
   cvData: CVData;
@@ -7,6 +9,10 @@ interface CVPreviewProps {
 
 export function CVPreview({ cvData }: CVPreviewProps) {
   const { personalInfo, professionalSummary, workExperience, education, skills, languages, certifications } = cvData;
+
+  const [generating, setGenerating] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
 
   const formatDate = (date: string) => {
     if (!date) return "";
@@ -16,6 +22,70 @@ export function CVPreview({ cvData }: CVPreviewProps) {
   };
 
   const hasContent = personalInfo.fullName || professionalSummary || workExperience.length > 0 || education.length > 0;
+
+  async function handleDownload() {
+    setResult(null);
+    setGenerating(true);
+    try {
+      const { generateAnalysisHTML, downloadPDF } = await import("@/lib/pdfGenerator");
+      const { generatePdfOnServer } = await import("@/lib/serverPdf");
+      const placeholder: AnalysisResult = {
+        atsScore: 0,
+        formatScore: 0,
+        keywordsScore: 0,
+        experienceScore: 0,
+        skillsScore: 0,
+        achievementsScore: 0,
+        problems: [],
+        missingKeywords: [],
+        recommendations: [],
+        salaryRange: { min: 0, max: 0, currency: "" },
+      };
+      const html = generateAnalysisHTML(JSON.stringify(cvData, null, 2), placeholder, false);
+      const pdfBlob = await generatePdfOnServer(html);
+      downloadPDF(pdfBlob, `${personalInfo.fullName || "cv"}.pdf`);
+      setResult("Descarga iniciada");
+    } catch (e: any) {
+      setResult("Error al generar el PDF: " + (e?.message || e));
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  async function handleSendEmail() {
+    if (!personalInfo.email) {
+      setResult("Introduce un correo en Información Personal.");
+      return;
+    }
+    setResult(null);
+    setSending(true);
+    try {
+      const { generateAnalysisHTML } = await import("@/lib/pdfGenerator");
+      const { generateAndUploadPdf } = await import("@/lib/serverPdf");
+      const { sendCVEmail } = await import("@/lib/resendClient");
+      const placeholder: AnalysisResult = {
+        atsScore: 0,
+        formatScore: 0,
+        keywordsScore: 0,
+        experienceScore: 0,
+        skillsScore: 0,
+        achievementsScore: 0,
+        problems: [],
+        missingKeywords: [],
+        recommendations: [],
+        salaryRange: { min: 0, max: 0, currency: "" },
+      };
+      const html = generateAnalysisHTML(JSON.stringify(cvData, null, 2), placeholder, false);
+      const uploadRes = await generateAndUploadPdf(html, `${personalInfo.fullName || 'cv'}.pdf`);
+      // uploadRes: { success: true, url, path }
+      await sendCVEmail(personalInfo.email, undefined, uploadRes.url);
+      setResult("¡CV enviado exitosamente!");
+    } catch (e: any) {
+      setResult("Error al enviar el CV: " + (e?.message || e));
+    } finally {
+      setSending(false);
+    }
+  }
 
   return (
     <div className="bg-card rounded-2xl shadow-medium border border-border overflow-hidden">
@@ -157,6 +227,20 @@ export function CVPreview({ cvData }: CVPreviewProps) {
             </div>
           )}
         </div>
+
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2">
+          <Button variant="outline" onClick={handleDownload} disabled={generating}>
+            <Download className="w-4 h-4" />
+            {generating ? "Generando..." : "Descargar PDF"}
+          </Button>
+
+          <Button variant="secondary" onClick={handleSendEmail} disabled={sending || !personalInfo.email}>
+            <Mail className="w-4 h-4" />
+            {sending ? "Enviando..." : "Enviar por correo"}
+          </Button>
+        </div>
+
+        {result && <p className="mt-2 text-sm text-muted-foreground">{result}</p>}
       </div>
     </div>
   );

@@ -39,6 +39,28 @@ const Builder = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [cvData, setCVData] = useState<CVData>(initialCVData);
   const [showPreview, setShowPreview] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendResult, setSendResult] = useState<string | null>(null);
+
+  async function handleSendEmail() {
+    setSending(true);
+    setSendResult(null);
+    try {
+      // Lazy import para evitar problemas SSR
+      const { generateAnalysisHTML } = await import("@/lib/pdfGenerator");
+      const { generateAndUploadPdf } = await import("@/lib/serverPdf");
+      const { sendCVEmail } = await import("@/lib/resendClient");
+      const placeholder = { recommendations: [], problems: [], atsScore: 0, formatScore: 0, keywordsScore: 0, experienceScore: 0, skillsScore: 0, achievementsScore: 0, missingKeywords: [], salaryRange: { min: 0, max: 0, currency: "" } } as any;
+      const html = generateAnalysisHTML(JSON.stringify(cvData, null, 2), placeholder, false);
+      const uploadRes = await generateAndUploadPdf(html, `${cvData.personalInfo.fullName || 'cv'}.pdf`);
+      await sendCVEmail(cvData.personalInfo.email, undefined, uploadRes.url);
+      setSendResult("¡CV enviado exitosamente!");
+    } catch (e: any) {
+      setSendResult("Error al enviar el CV: " + (e?.message || e));
+    } finally {
+      setSending(false);
+    }
+  }
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -149,10 +171,18 @@ const Builder = () => {
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 ) : (
-                  <Button variant="accent">
-                    <FileText className="w-4 h-4" />
-                    Generar CV
-                  </Button>
+                  <div className="flex flex-col gap-2 items-end">
+                    <Button variant="accent">
+                      <FileText className="w-4 h-4" />
+                      Generar CV
+                    </Button>
+                    <Button variant="secondary" onClick={handleSendEmail} disabled={sending || !cvData.personalInfo.email}>
+                      {sending ? "Enviando..." : "Enviar CV por email"}
+                    </Button>
+                    {sendResult && (
+                      <span className={`text-sm ${sendResult.startsWith("¡CV enviado") ? "text-green-600" : "text-red-600"}`}>{sendResult}</span>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>

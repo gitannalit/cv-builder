@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap } from "lucide-react";
+import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 import { LockedCVPreview } from "@/components/analyzer/LockedCVPreview";
@@ -19,7 +19,9 @@ import { CVVersionsCard } from "@/components/analyzer/CVVersionsCard";
 import { StripeEmbeddedCheckout } from "@/components/analyzer/StripeEmbeddedCheckout";
 import { extractTextFromPDF } from "@/lib/pdfExtractor";
 import { analyzeCVText, generateActionPlan, generateCVVersions, extractCVData } from "@/lib/cvAnalyzer";
-import { printTemplatePDF } from "@/lib/templatePdfGenerator";
+import { generateTemplateHTML } from "@/lib/templatePdfGenerator";
+import { generatePdfOnServer } from "@/lib/serverPdf";
+import { downloadPDF } from "@/lib/pdfGenerator";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
@@ -407,14 +409,54 @@ const Analyzer = () => {
         const version = cvVersions[selectedVersion];
         const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
         const userData = { name, email, phone, targetJob };
-        printTemplatePDF(version, templateType, false, userData);
-        setDownloadCount(data.count);
+        try {
+          toast.loading('Generando PDF en servidor...');
+          const html = generateTemplateHTML(version, templateType as any, false, userData);
+          const pdfBlob = await generatePdfOnServer(html);
+          downloadPDF(pdfBlob, `${version.title || 'cv'}.pdf`);
+          toast.dismiss();
+          toast.success('Descarga iniciada');
+          setDownloadCount(data.count);
+        } catch (err) {
+          console.error('Error generating server PDF:', err);
+          toast.error('Error al generar el PDF');
+        }
       } catch (error) {
         console.error("Error recording download:", error);
         toast.error("Error al procesar la descarga");
       }
     } else {
       window.print();
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!cvVersions || !selectedVersion) return;
+    if (!email || !email.includes('@')) {
+      toast.error('Introduce un email válido arriba para enviar el CV');
+      return;
+    }
+
+    try {
+      toast.loading('Generando PDF en servidor...');
+      const version = cvVersions[selectedVersion];
+      const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
+      // Build HTML using the existing template generator
+      const { generateTemplateHTML } = await import('@/lib/templatePdfGenerator');
+      const html = generateTemplateHTML(version, templateType as any, false, { name, email, phone, targetJob });
+
+      // Send HTML to serverless upload endpoint to get a signed URL
+      const { generateAndUploadPdf } = await import('@/lib/serverPdf');
+      const uploadRes = await generateAndUploadPdf(html, `${version.title || 'cv'}.pdf`);
+
+      toast.loading('Enviando email...');
+      const { sendCVEmail } = await import('@/lib/resendClient');
+      await sendCVEmail(email, undefined, uploadRes.url);
+      toast.dismiss();
+      toast.success('CV enviado por email');
+    } catch (err) {
+      console.error('Error sending email:', err);
+      toast.error('Error al enviar el email');
     }
   };
 
@@ -910,6 +952,14 @@ const Analyzer = () => {
                     >
                       <Download className="w-5 h-5" />
                       Descargar PDF
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={handleSendEmail}
+                      className="gap-2"
+                    >
+                      <Mail className="w-5 h-5" />
+                      Enviar por email
                     </Button>
                     <Button variant="outline" onClick={() => setSelectedVersion(null)} className="text-gray-600">
                       Cambiar diseño

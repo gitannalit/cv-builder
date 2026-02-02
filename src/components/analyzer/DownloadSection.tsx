@@ -3,7 +3,9 @@ import { Download, Sparkles, FileText } from "lucide-react";
 import { AnalysisResult, CVVersion } from "@/types/cv";
 import { TemplateSelector } from "./TemplateSelector";
 import { TemplateType } from "./templates";
-import { printTemplatePDF } from "@/lib/templatePdfGenerator";
+import { generateTemplateHTML } from "@/lib/templatePdfGenerator";
+import { generatePdfOnServer } from "@/lib/serverPdf";
+import { downloadPDF } from "@/lib/pdfGenerator";
 import { toast } from "sonner";
 
 interface DownloadSectionProps {
@@ -13,13 +15,23 @@ interface DownloadSectionProps {
 }
 
 export function DownloadSection({ cvText, analysisResult, cvVersions }: DownloadSectionProps) {
-  const handleDownload = (version: CVVersion, template: TemplateType, isPremium: boolean) => {
+  const handleDownload = async (version: CVVersion, template: TemplateType, isPremium: boolean) => {
     if (isPremium) {
       // TODO: Integrate Stripe payment
       toast.info("Próximamente: Pago con Stripe para descargar sin marca de agua");
-    } else {
-      printTemplatePDF(version, template, true);
-      toast.success("Se abrirá el diálogo de impresión. Guarda como PDF.");
+      return;
+    }
+
+    try {
+      toast.loading('Generando PDF en servidor...');
+      const html = generateTemplateHTML(version, template, true);
+      const blob = await generatePdfOnServer(html);
+      downloadPDF(blob, `${version.title || 'cv'}.pdf`);
+      toast.dismiss();
+      toast.success('Descarga iniciada');
+    } catch (err) {
+      console.error('Error generando PDF:', err);
+      toast.error('Error al generar el PDF');
     }
   };
 
