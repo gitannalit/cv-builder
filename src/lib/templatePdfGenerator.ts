@@ -315,9 +315,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   }).join('')}
       </div>
       
-      <div class="footer">
-        CV generado con <span style="color: ${primaryColor}">T2W CV Builder</span>
-      </div>
+      <!-- Footer removed as per user request -->
     </aside>
     
     <main class="main-content">
@@ -716,15 +714,13 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
       </div>
     </div>
     
-    <footer class="footer">
-      CV generado con T2W CV Builder • training2work.com
-    </footer>
+    <!-- Footer removed as per user request -->
   </div>
 </body>
 </html>`;
 }
 
-// Download template as real PDF (not print dialog)
+// Download template as real PDF (100% client-side using html2canvas + jsPDF)
 export async function downloadTemplatePDF(
   version: CVVersion,
   template: TemplateType,
@@ -739,36 +735,210 @@ export async function downloadTemplatePDF(
   const filename = `${baseName.replace(/\s+/g, '_')}_${template}_${timestamp}.pdf`;
 
   try {
-    // Call API endpoint to generate PDF
-    const response = await fetch('/api/generate-pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ html, filename }),
+    // Dynamically import libraries
+    const [html2canvasModule, jsPDFModule] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf')
+    ]);
+    const html2canvas = html2canvasModule.default;
+    const { jsPDF } = jsPDFModule;
+
+    // Create a hidden container to render the HTML
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+    `;
+
+    // Create an iframe to isolate styles
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = `
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 794px;
+      height: 1123px;
+      border: none;
+    `;
+    document.body.appendChild(iframe);
+
+    // Wait for iframe to be ready
+    await new Promise<void>((resolve) => {
+      iframe.onload = () => resolve();
+      iframe.src = 'about:blank';
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to generate PDF');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) {
+      throw new Error('Could not access iframe document');
     }
 
-    // Get PDF blob from response
-    const blob = await response.blob();
+    // Write HTML to iframe
+    iframeDoc.open();
+    iframeDoc.write(html);
+    iframeDoc.close();
 
-    // Create download link
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
+    // Wait for fonts and content to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Get the container element from iframe
+    const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
+
+    // Convert to canvas
+    const canvas = await html2canvas(contentElement as HTMLElement, {
+      scale: 2, // Higher quality
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 794, // A4 width at 96 DPI
+      height: 1123, // A4 height at 96 DPI
+      logging: false,
+    });
+
+    // Create PDF
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    // Calculate dimensions
+    const imgWidth = 210; // A4 width in mm
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    // Add image to PDF
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    // Handle multi-page if content is longer than one page
+    const pageHeight = 297; // A4 height in mm
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Use a small threshold (2mm) to prevent blank pages due to rounding errors
+    while (heightLeft > 2) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // Save the PDF
+    pdf.save(filename);
 
     // Cleanup
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    document.body.removeChild(iframe);
   } catch (error) {
     console.error('PDF download error:', error);
+    throw error;
+  }
+}
+
+// Generate PDF as Blob (for email attachments)
+export async function generateTemplatePDFBlob(
+  version: CVVersion,
+  template: TemplateType,
+  hasWatermark: boolean,
+  userData?: { name: string; email: string; phone?: string; targetJob?: string }
+): Promise<Blob> {
+  const html = generateTemplateHTML(version, template, hasWatermark, userData);
+
+  try {
+    // Dynamically import libraries
+    const [html2canvasModule, jsPDFModule] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf')
+    ]);
+    const html2canvas = html2canvasModule.default;
+    const { jsPDF } = jsPDFModule;
+
+    // Create an iframe to isolate styles
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = `
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 794px;
+      height: 1123px;
+      border: none;
+    `;
+    document.body.appendChild(iframe);
+
+    // Wait for iframe to be ready
+    await new Promise<void>((resolve) => {
+      iframe.onload = () => resolve();
+      iframe.src = 'about:blank';
+    });
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) {
+      throw new Error('Could not access iframe document');
+    }
+
+    // Write HTML to iframe
+    iframeDoc.open();
+    iframeDoc.write(html);
+    iframeDoc.close();
+
+    // Wait for fonts and content to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Get the container element from iframe
+    const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
+
+    // Convert to canvas
+    const canvas = await html2canvas(contentElement as HTMLElement, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      width: 794,
+      height: 1123,
+      logging: false,
+    });
+
+    // Create PDF
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    // Calculate dimensions
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    // Add image to PDF
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    // Handle multi-page
+    const pageHeight = 297;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 2) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // Cleanup iframe
+    document.body.removeChild(iframe);
+
+    // Return as Blob
+    return pdf.output('blob');
+  } catch (error) {
+    console.error('PDF generation error:', error);
     throw error;
   }
 }

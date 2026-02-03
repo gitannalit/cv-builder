@@ -438,17 +438,20 @@ const Analyzer = () => {
       toast.loading('Generando PDF...');
       const version = cvVersions[selectedVersion];
       const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-      // Use the client-side generator to create a blob (may be HTML placeholder)
-      const { generateCVVersionPDF } = await import('@/lib/pdfGenerator');
-      const pdfBlob = await generateCVVersionPDF(version, false);
+      const userData = { name, email, phone, targetJob };
+
+      // Generate PDF using the same template as download
+      const { generateTemplatePDFBlob } = await import('@/lib/templatePdfGenerator');
+      const pdfBlob = await generateTemplatePDFBlob(version, templateType, false, userData);
 
       toast.loading('Enviando email...');
       const { sendCVEmail } = await import('@/lib/resendClient');
-      await sendCVEmail(email, pdfBlob as Blob);
+      await sendCVEmail(email, pdfBlob);
       toast.dismiss();
       toast.success('CV enviado por email');
     } catch (err) {
       console.error('Error sending email:', err);
+      toast.dismiss();
       toast.error('Error al enviar el email');
     }
   };
