@@ -1,14 +1,20 @@
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 
+// Disable headless mode check for Vercel
+chromium.setHeadlessMode = true;
+chromium.setGraphicsMode = false;
+
 export const config = {
-    maxDuration: 30,
+    maxDuration: 60, // 60 seconds for Pro plan
 };
 
 export default async function handler(req: any, res: any) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+
+    let browser = null;
 
     try {
         const { html, filename = 'cv.pdf' } = req.body;
@@ -17,11 +23,23 @@ export default async function handler(req: any, res: any) {
             return res.status(400).json({ error: 'HTML content is required' });
         }
 
+        // Get the executable path for the current environment
+        const executablePath = await chromium.executablePath();
+
+        console.log('Chromium path:', executablePath);
+
         // Launch browser with @sparticuz/chromium for Vercel
-        const browser = await puppeteer.launch({
-            args: chromium.args,
+        browser = await puppeteer.launch({
+            args: [
+                ...chromium.args,
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--single-process',
+            ],
             defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
+            executablePath: executablePath,
             headless: chromium.headless,
         });
 
@@ -30,6 +48,7 @@ export default async function handler(req: any, res: any) {
         // Set content and wait for fonts/images to load
         await page.setContent(html, {
             waitUntil: ['networkidle0', 'load'],
+            timeout: 30000,
         });
 
         // Generate PDF with high quality settings
@@ -41,6 +60,7 @@ export default async function handler(req: any, res: any) {
         });
 
         await browser.close();
+        browser = null;
 
         // Return PDF as buffer
         res.setHeader('Content-Type', 'application/pdf');
@@ -50,6 +70,15 @@ export default async function handler(req: any, res: any) {
         return res.status(200).send(pdf);
     } catch (error) {
         console.error('PDF generation error:', error);
+
+        if (browser) {
+            try {
+                await browser.close();
+            } catch (e) {
+                console.error('Error closing browser:', e);
+            }
+        }
+
         return res.status(500).json({
             error: 'Failed to generate PDF',
             message: error instanceof Error ? error.message : 'Unknown error',
