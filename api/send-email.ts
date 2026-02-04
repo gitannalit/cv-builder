@@ -8,9 +8,9 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
-        const apiKey = process.env.RESEND_API_KEY;
+        const apiKey = process.env.VITE_RESEND_API_KEY;
         if (!apiKey) {
-            console.error('RESEND_API_KEY is not defined in environment variables');
+            console.error('VITE_RESEND_API_KEY is not defined in environment variables');
             return res.status(500).json({
                 error: 'Configuration error',
                 message: 'La clave de API de Resend no está configurada en el servidor.'
