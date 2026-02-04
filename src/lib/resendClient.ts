@@ -1,24 +1,37 @@
 // resendClient.ts
-// Cliente para enviar emails usando la API de Resend
-
-const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY;
+// Cliente para enviar emails usando nuestra API serverless
 
 export async function sendCVEmail(to: string, pdfBlob: Blob) {
-  if (!RESEND_API_KEY) throw new Error('Falta la clave de API de Resend');
-  const formData = new FormData();
-  formData.append('to', to);
-  formData.append('from', 'cv-builder@tudominio.com');
-  formData.append('subject', 'Tu CV generado');
-  formData.append('text', 'Adjunto encontrarás tu CV generado.');
-  formData.append('attachments', new File([pdfBlob], 'cv.pdf', { type: 'application/pdf' }));
+  // Convertir el Blob a base64 para enviarlo a la API
+  const reader = new FileReader();
+  const pdfBase64Promise = new Promise<string>((resolve, reject) => {
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(pdfBlob);
+  });
 
-  const res = await fetch('https://api.resend.com/emails', {
+  const pdfBase64 = await pdfBase64Promise;
+
+  const res = await fetch('/api/send-email', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`
+      'Content-Type': 'application/json',
     },
-    body: formData
+    body: JSON.stringify({
+      to,
+      pdfBase64,
+      filename: 'cv.pdf'
+    })
   });
-  if (!res.ok) throw new Error('Error enviando el email');
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || 'Error enviando el email');
+  }
+
   return res.json();
 }
