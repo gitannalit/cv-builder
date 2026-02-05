@@ -30,7 +30,11 @@ export async function sendCVEmail(to: string, pdfBlob: Blob) {
 
   if (!res.ok) {
     const errorData = await res.json();
-    throw new Error(errorData.message || 'Error enviando el email');
+    console.error('Error sending email:', errorData);
+    const errorMessage = errorData.details
+      ? `Error: ${errorData.error} - ${JSON.stringify(errorData.details)}`
+      : errorData.error || errorData.message || 'Error enviando el email';
+    throw new Error(errorMessage);
   }
 
   return res.json();
