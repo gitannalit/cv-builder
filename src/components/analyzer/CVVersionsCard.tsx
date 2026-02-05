@@ -1,8 +1,59 @@
+import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CVVersion } from "@/types/cv";
-import { Layers, Briefcase, Sparkles, GraduationCap, Wrench } from "lucide-react";
+import { Layers, Briefcase, Sparkles, GraduationCap, Wrench, ZoomIn } from "lucide-react";
 import { CVTemplateModern } from "./templates/CVTemplateModern";
 import { CVTemplateExecutive } from "./templates/CVTemplateExecutive";
+
+const ResponsivePreview = ({ children }: { children: React.ReactNode }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.5); // Start small to avoid flash
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current) {
+        const parentWidth = containerRef.current.offsetWidth;
+        const cvWidthPx = 794; // 210mm @ 96dpi approx
+        const cvHeightPx = 1123; // 297mm @ 96dpi approx
+
+        // Calculate fit scale
+        // Subtract a bit of padding margin to be safe
+        const newScale = Math.min((parentWidth - 32) / cvWidthPx, 1);
+        setScale(newScale);
+        setHeight(cvHeightPx * newScale);
+      }
+    };
+
+    // Initial delay to let layout settle
+    const timer = setTimeout(updateScale, 100);
+    window.addEventListener('resize', updateScale);
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      clearTimeout(timer);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full relative bg-gray-50/50 rounded-xl border border-gray-200 overflow-hidden flex justify-center transition-all duration-300"
+      style={{ height: height ? `${height}px` : '600px' }}
+    >
+      {!height && (
+        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+          Cargando vista previa...
+        </div>
+      )}
+      <div
+        className="origin-top shadow-lg transition-transform duration-300 ease-out mt-4"
+        style={{ transform: `scale(${scale})` }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
 
 interface CVVersionsCardProps {
   versions: {
@@ -52,16 +103,26 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
       languages: (content as any).languages || (content as any).idiomas || []
     };
 
-    if (isCreative) {
-      return <CVTemplateModern data={cvData} />;
-    }
+    const TemplateComponent = isCreative ? CVTemplateModern : CVTemplateExecutive;
 
-    return <CVTemplateExecutive data={cvData} />;
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <h4 className="font-semibold text-lg flex items-center gap-2">
+            {isCreative ? <Sparkles className="w-4 h-4 text-purple-500" /> : <Briefcase className="w-4 h-4 text-blue-500" />}
+            {version?.title || (isCreative ? "Versión Creativa" : "Versión Ejecutiva")}
+          </h4>
+        </div>
+        <ResponsivePreview>
+          <TemplateComponent data={cvData} />
+        </ResponsivePreview>
+      </div>
+    );
   };
 
   if (selectedOnly) {
     return (
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {selectedOnly === 'formal'
           ? renderVersion(versions.formal, false)
           : renderVersion(versions.creative, true)}
@@ -70,7 +131,7 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
   }
 
   return (
-    <div className="bg-card rounded-2xl shadow-medium p-8 border border-border">
+    <div className="bg-card rounded-2xl shadow-medium p-4 md:p-8 border border-border">
       <h3 className="text-2xl font-display font-bold mb-6 flex items-center gap-3">
         <div className="w-10 h-10 rounded-lg gradient-accent flex items-center justify-center">
           <Layers className="w-5 h-5 text-accent-foreground" />
@@ -78,7 +139,7 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
         Versiones Optimizadas del CV
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {renderVersion(versions.formal, false)}
         {renderVersion(versions.creative, true)}
       </div>

@@ -31,7 +31,7 @@ serve(async (req) => {
             .select("*")
             .eq("email", email)
             .eq("status", "completed")
-            .gte("created_at", thirtyDaysAgo.toISOString())
+            // Removed 30-day filter to allow Basic plans to last indefinitely until consumed
             .order("created_at", { ascending: false });
 
         if (paymentError) throw paymentError;
@@ -44,8 +44,15 @@ serve(async (req) => {
             });
         }
 
-        // If premium, always allow
+        // If premium, check 30-day expiration
         if (activePayment.plan_type === "premium") {
+            const paymentDate = new Date(activePayment.created_at);
+            if (paymentDate < thirtyDaysAgo) {
+                return new Response(JSON.stringify({ hasAccess: false, reason: "expired_subscription" }), {
+                    headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+            }
+
             if (action === "record_download") {
                 await supabase.from("downloads").insert({ email });
             }
@@ -59,7 +66,9 @@ serve(async (req) => {
             .from("downloads")
             .select("*", { count: "exact", head: true })
             .eq("email", email)
-            .gte("download_at", thirtyDaysAgo.toISOString());
+            // Fix: Only count downloads linked to this specific payment (made after the payment)
+            // usage: We use the most recent payment as the "active" session. Downloads match this session.
+            .gte("download_at", activePayment.created_at);
 
         if (downloadError) throw downloadError;
 

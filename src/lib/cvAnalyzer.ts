@@ -4,13 +4,23 @@ import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 const FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-cv`;
 
 async function callAnalyzeFunction(cvText: string, action?: string, extraData?: any) {
+  // If cvText starts with 'data:image', treating it as an image payload
+  const isImage = cvText.startsWith("data:image");
+
+  const payload = {
+    cvText: isImage ? "" : cvText,
+    cvImage: isImage ? cvText : undefined,
+    action,
+    ...extraData
+  };
+
   const response = await fetch(FUNCTION_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ cvText, action, ...extraData }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -74,4 +84,10 @@ export async function generateCVVersions(
   keyAchievements?: string
 ): Promise<{ formal: CVVersion; creative: CVVersion }> {
   return callAnalyzeFunction(cvText, "versions", { targetJob, keyAchievements });
+}
+
+export async function transcribeCV(cvImageBase64: string): Promise<string> {
+  // Directly pass the base64 string. The helper will put it in cvImage.
+  const result = await callAnalyzeFunction(cvImageBase64, "transcribe");
+  return result.text || "";
 }

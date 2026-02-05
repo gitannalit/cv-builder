@@ -16,10 +16,41 @@ Criterios de evaluación:
 4. PALABRAS CLAVE FALTANTES: Lista específica de keywords del sector que faltan en el CV.
 5. RECOMENDACIONES PRIORITARIAS: Mínimo 5 acciones concretas para mejorar el CV.
 6. ESTIMACIÓN SALARIAL: Basada en el mercado español actual, años de experiencia y sector.
+7. CONSISTENCIA DE DATOS: Verifica si los 'Datos del candidato' proporcionados coinciden con el contenido del CV.
 
-Sé extremadamente crítico y profesional.`;
+RÚBRICA DE PUNTUACIÓN ESTRICTA (Sigue estos baremos para asegurar consistencia):
 
-const USER_PROMPT = (cvText: string) => `Analiza el siguiente currículum vitae y proporciona un análisis detallado en formato JSON siguiendo los estándares ATS más estrictos:
+1. FORMATO (Máx 15 pts):
+   - Perfecto (limpio, sin tablas complejas, estructura estándar): 15 pts
+   - Bueno (legible pero con columnas complejas o iconos): 10 pts
+   - Regular (desordenado o diseño anticuado): 5 pts
+   - Malo (ilegible para ATS, todo imagen): 0 pts
+
+2. KEYWORDS (Máx 25 pts):
+   - Excelencia (>80% palabras clave del sector): 25 pts
+   - Bueno (>50% palabras clave): 15 pts
+   - Pobre (pocas palabras clave): 5 pts
+
+3. EXPERIENCIA (Máx 25 pts):
+   - Alto Impacto (con logros cuantificables %, €): 25 pts
+   - Estándar (descripción de tareas sin métricas): 15 pts
+   - Básico (solo lista de puestos): 5 pts
+
+4. HABILIDADES (Máx 15 pts):
+   - Completas (Hard + Soft skills relevantes y separadas): 15 pts
+   - Genéricas: 5 pts
+
+5. LOGROS (Máx 20 pts):
+   - Claramente definidos y destacados: 20 pts
+   - Mencionados vagamente: 10 pts
+   - Inexistentes: 0 pts
+
+NOTA: Si detectas discrepancias en "Consistencia de Datos", RESTA 10 PUNTOS a la nota final.
+
+Sé extremadamente crítico, rígido y profesional. No regales puntos.`;
+
+const USER_PROMPT = (cvText: string) => `Analiza el siguiente currículum vitae y proporciona un análisis detallado en formato JSON siguiendo los estándares ATS más estrictos.
+Ten en cuenta los "Datos del candidato" proporcionados al inicio (si los hay) y compáralos con el texto del CV.
 
 CV a analizar:
 """
@@ -51,7 +82,9 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
   }
 }
 
-IMPORTANTE: Debes encontrar al menos 3 problemas o áreas de mejora, incluso si el CV es bueno. Sé muy riguroso.`;
+IMPORTANTE: 
+1. Debes encontrar al menos 3 problemas o áreas de mejora, incluso si el CV es bueno. Sé muy riguroso.
+2. SI los "Datos del candidato" (Nombre, Email, Teléfono, Puesto Objetivo) NO coinciden con los del CV, genera obligatoriamente un problema (severity: warning/critical) avisando de la discrepancia. Ej: "El email proporcionado no coincide con el del CV".`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -59,7 +92,7 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, action, targetJob, keyAchievements, name, email, phone, experienceYears } = await req.json();
+    const { cvText, cvImage, action, targetJob, keyAchievements, name, email, phone, experienceYears } = await req.json();
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) {
@@ -67,33 +100,25 @@ serve(async (req) => {
     }
 
     let systemPrompt = SYSTEM_PROMPT;
-    let userPrompt = USER_PROMPT(cvText);
+    let userPromptText = USER_PROMPT(cvText || "El usuario ha proporcionado una imagen del CV.");
 
-    // Add user context to the prompt if available (for default analysis)
+    // User context formatting
+    let userContext = "";
     if (!action || action === "analyze") {
-      const userContext = [
+      userContext = [
         name ? `Nombre: ${name}` : "",
         email ? `Email: ${email}` : "",
         phone ? `Teléfono: ${phone}` : "",
         targetJob ? `Puesto objetivo: ${targetJob}` : "",
         experienceYears ? `Años de experiencia: ${experienceYears}` : ""
       ].filter(Boolean).join("\n");
-
-      if (userContext) {
-        userPrompt = `Analiza el siguiente currículum vitae teniendo en cuenta estos datos del candidato:\n${userContext}\n\n` + userPrompt;
-      }
     }
 
-    // Handle different actions
+    // Handle different actions setup (prompts)
     if (action === "extract") {
       systemPrompt = `Eres un experto en extracción de datos de currículums. Respondes SOLO con JSON válido.`;
-      userPrompt = `Extrae los datos del siguiente CV y devuélvelos en formato JSON estructurado:
-
-CV:
-"""
-${cvText}
-"""
-
+      userPromptText = `Extrae los datos del siguiente CV y devuélvelos en formato JSON estructurado:
+      
 Responde ÚNICAMENTE con un JSON válido con esta estructura:
 {
   "fullName": "<nombre completo>",
@@ -125,79 +150,56 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
   "languages": ["<idioma1 (nivel)>", "<idioma2 (nivel)>"],
   "certifications": ["<certificación1>", "<certificación2>"]
 }`;
+    } else if (action === "transcribe") {
+      systemPrompt = "Eres un asistente útil que transcribe texto de imágenes de documentos con alta precisión. Tu única tarea es extraer todo el texto visible del documento tal cual aparece. Mantén el formato básico (saltos de línea) pero no añadas explicaciones, ni markdown, ni JSON. Solo el texto plano.";
+      userPromptText = "Transcribe todo el texto que veas en esta imagen del CV. Devuelve solo el texto extraído.";
     } else if (action === "actionPlan") {
       systemPrompt = `Eres un coach de carrera profesional. Proporcionas planes de acción detallados y personalizados para mejorar la empleabilidad. Respondes SOLO con JSON válido.`;
-      userPrompt = `Basándote en el siguiente CV, crea un plan de acción detallado para mejorar la empleabilidad:
-
-CV:
-"""
-${cvText}
-"""
-
+      userPromptText = `Basándote en el CV proporcionado, crea un plan de acción detallado para mejorar la empleabilidad.
+       
 Responde ÚNICAMENTE con un JSON válido con esta estructura:
 {
-  "immediate": [
-    {
-      "action": "<título de la acción>",
-      "howTo": "<descripción detallada de cómo hacerlo>",
-      "priority": "<high|medium|low>"
-    }
-  ],
-  "shortTerm": [
-    {
-      "action": "<título>",
-      "howTo": "<descripción>",
-      "priority": "<high|medium|low>"
-    }
-  ],
-  "longTerm": [
-    {
-      "action": "<título>",
-      "howTo": "<descripción>",
-      "priority": "<high|medium|low>"
-    }
-  ],
-  "trainingRecommendations": [
-    {
-      "course": "<nombre del curso>",
-      "provider": "<plataforma/proveedor>",
-      "reason": "<por qué es importante para este perfil>"
-    }
-  ],
-  "linkedInTips": ["<consejo1>", "<consejo2>"],
-  "interviewPrep": ["<consejo1>", "<consejo2>"]
+  "immediate": [{ "action": "", "howTo": "", "priority": "high|medium|low" }],
+  "shortTerm": [{ "action": "", "howTo": "", "priority": "high|medium|low" }],
+  "longTerm": [{ "action": "", "howTo": "", "priority": "high|medium|low" }],
+  "trainingRecommendations": [{ "course": "", "provider": "", "reason": "" }],
+  "linkedInTips": [],
+  "interviewPrep": []
 }`;
     } else if (action === "versions") {
-      systemPrompt = `Eres un experto en redacción de currículums profesionales. Generas contenido profesional y atractivo adaptado a diferentes estilos. Respondes SOLO con JSON válido.`;
-      userPrompt = `Basándote en el siguiente CV, genera dos versiones optimizadas con contenido completo.
-${targetJob ? `El usuario quiere optimizar su CV para el puesto de: "${targetJob}".` : ""}
-${keyAchievements ? `El usuario quiere destacar estos logros específicos:
-"${keyAchievements}"` : ""}
+      systemPrompt = `Eres un experto redactor de CVs de alto rendimiento. Tu objetivo es generar CVs que obtengan una puntuación de 100/100 en sistemas ATS estrictos. Generas contenido optimizado para pasar cualquier filtro automático.`;
+      userPromptText = `Basándote en el CV proporcionado, genera dos versiones optimizadas para obtener la MÁXIMA PUNTUACIÓN (100/100).
+${targetJob ? `Puesto objetivo: "${targetJob}".` : ""}
+${keyAchievements ? `Logros clave MANUALES introducidos por el usuario: "${keyAchievements}".` : ""}
 
-CV original:
-"""
-${cvText}
-"""
+INSTRUCCIONES DE GENERACIÓN PARA PUNTUACIÓN PERFECTA:
+1. EXPERIENCIA (Vital): Mejora cada descripción incluyendo métricas cuantificables (%, €, reducción de tiempo, aumento de ingresos). Si el original no tiene números, estímales de forma realista y profesional.
+2. HABILIDADES: Asegúrate de incluir una lista completa de "Hard Skills" (técnicas) y "Soft Skills" relevantes.
+3. LOGROS: Si hay logros manuales, úsalos. Si no, extrae y destaca los logros del texto original en una sección clara o bullets destacados.
+4. KEYWORDS: Satura el texto (de forma natural) con palabras clave técnicas del sector del "${targetJob || "puesto actual"}".
+
+INSTRUCCIÓN CRÍTICA MANUAL:
+Si hay "Logros clave MANUALES", es OBLIGATORIO que los integres. Reescríbelos profesionalmente pero asegúrate de que estén presentes.
 
 Genera:
-1. Versión Ejecutiva/Formal: Tono sobrio, enfocado en resultados, ideal para banca/consultoría.
-2. Versión Moderna/Creativa: Tono dinámico, storytelling, ideal para startups/tech.
+1. Versión Ejecutiva/Formal
+2. Versión Moderna/Creativa
 
 Responde ÚNICAMENTE con un JSON válido con esta estructura:
 {
   "formal": {
     "type": "formal",
-    "title": "Versión Ejecutiva",
+    "title": "Versión Ejecutiva (Optimizada ATS)",
     "description": "Ideal para banca, consultoría y corporaciones",
     "content": {
-      "summary": "<resumen profesional formal reescrito, 3-4 oraciones>",
+      "summary": "<resumen profesional potente, con métricas y keywords>",
       "experience": [
         {
           "company": "<empresa>",
           "position": "<puesto optimizado>",
           "startDate": "<fecha inicio>",
           "endDate": "<fecha fin o Presente>",
-          "description": "<descripción mejorada con logros cuantificables>"
+          "description": "<descripción con logros cuantificables (ej: 'Aumenté ventas un 20%...')>"
         }
       ],
       "education": [
@@ -214,17 +216,17 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
   },
   "creative": {
     "type": "creative",
-    "title": "Versión Moderna",
+    "title": "Versión Moderna (Alto Impacto)",
     "description": "Ideal para startups, tech y creativos",
     "content": {
-      "summary": "<resumen profesional creativo con storytelling>",
+      "summary": "<resumen profesional con storytelling y valor único>",
       "experience": [
         {
           "company": "<empresa>",
           "position": "<puesto con enfoque dinámico>",
           "startDate": "<fecha inicio>",
           "endDate": "<fecha fin o Presente>",
-          "description": "<descripción con narrativa atractiva>"
+          "description": "<descripción orientada a resultados y capacidades>"
         }
       ],
       "education": [
@@ -242,7 +244,38 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
 }`;
     }
 
-    console.log(`Processing CV analysis with action: ${action || "analyze"}`);
+    // Prepend user context if it exists and we're not extracting (extraction needs raw data usually, but context helps disambiguate)
+    if (userContext && action !== "extract") {
+      userPromptText = `Datos del candidato:\n${userContext}\n\n` + userPromptText;
+    }
+
+    // Construct messages payload
+    let messages;
+    if (cvImage) {
+      messages = [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userPromptText },
+            { type: "image_url", image_url: { url: cvImage } }
+          ]
+        }
+      ];
+    } else {
+      // Original text-based flow
+      // Re-insert the cvText into the prompt if it was pulled out
+      const finalUserPrompt = cvText
+        ? userPromptText.replace("CV a analizar:", `CV a analizar:\n"""\n${cvText}\n"""\n`)
+        : userPromptText;
+
+      messages = [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: finalUserPrompt }
+      ];
+    }
+
+    console.log(`Processing CV analysis with action: ${action || "analyze"}, hasImage: ${!!cvImage}`);
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -252,12 +285,9 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
       },
       body: JSON.stringify({
         model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.3,
-        response_format: { type: "json_object" }
+        messages: messages,
+        temperature: 0.0,
+        response_format: action === "transcribe" ? undefined : { type: "json_object" }
       }),
     });
 
@@ -288,28 +318,35 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
 
     // Parse the JSON response
     let result;
-    try {
-      // Clean the response - remove markdown code blocks if present
-      let cleanContent = content.trim();
-      if (cleanContent.startsWith("```json")) {
-        cleanContent = cleanContent.slice(7);
+    if (action === "transcribe") {
+      // For transcription, we just want the raw text
+      result = { text: content };
+    } else {
+      try {
+        // Clean the response - remove markdown code blocks if present
+        let cleanContent = content.trim();
+        if (cleanContent.startsWith("```json")) {
+          cleanContent = cleanContent.slice(7);
+        }
+        if (cleanContent.startsWith("```")) {
+          cleanContent = cleanContent.slice(3);
+        }
+        if (cleanContent.endsWith("```")) {
+          cleanContent = cleanContent.slice(0, -3);
+        }
+        result = JSON.parse(cleanContent.trim());
+
+        if (action === "analyze") {
+          console.log(`AI Analysis Result: ${JSON.stringify({
+            atsScore: result.atsScore,
+            problemsCount: result.problems?.length || 0,
+            hasSalary: !!result.salaryRange
+          })}`);
+        }
+      } catch (parseError) {
+        console.error("Failed to parse AI response:", content);
+        throw new Error("Failed to parse AI response as JSON");
       }
-      if (cleanContent.startsWith("```")) {
-        cleanContent = cleanContent.slice(3);
-      }
-      if (cleanContent.endsWith("```")) {
-        cleanContent = cleanContent.slice(0, -3);
-      }
-      result = JSON.parse(cleanContent.trim());
-      console.log(`AI Analysis Result: ${JSON.stringify({
-        atsScore: result.atsScore,
-        problemsCount: result.problems?.length || 0,
-        hasSalary: !!result.salaryRange
-      })}`);
-      console.log("Full AI Content:", content);
-    } catch (parseError) {
-      console.error("Failed to parse AI response:", content);
-      throw new Error("Failed to parse AI response as JSON");
     }
 
     return new Response(JSON.stringify(result), {

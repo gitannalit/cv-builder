@@ -154,28 +154,89 @@ const Analyzer = () => {
     return "form";
   }, [isAnalyzing, isGeneratingVersions, selectedVersion, isUnlocked, cvVersions, isCustomizing, analysisResult]);
 
-  const handleFileUpload = async (file: File) => {
+  const [useSmartScan, setUseSmartScan] = useState(false);
+
+  const handleFileUpload = async (file: File, forceSmartScan: boolean = false) => {
     if (file.type !== "application/pdf" && file.type !== "text/plain") {
       toast.error("Por favor, sube un archivo PDF o TXT");
       return;
     }
 
+    const effectiveSmartScan = useSmartScan || forceSmartScan;
+
     setIsExtractingPDF(true);
     try {
-      toast.loading("Extrayendo texto...");
+      toast.loading(effectiveSmartScan ? "Escaneando imagen del CV..." : "Extrayendo texto...");
       let text = "";
       if (file.type === "application/pdf") {
-        text = await extractTextFromPDF(file);
+        if (effectiveSmartScan) {
+          const { extractImageFromPDF } = await import("@/lib/pdfExtractor");
+          const { transcribeCV } = await import("@/lib/cvAnalyzer");
+
+          // 1. Convert PDF page 1 to Image Base64
+          const imageBase64 = await extractImageFromPDF(file);
+
+          // 2. Send Image to AI to transcribe text
+          toast.loading("Analizando imagen con IA...");
+          text = await transcribeCV(imageBase64);
+
+          if (!text) {
+            throw new Error("No se pudo leer texto de la imagen");
+          }
+        } else {
+          text = await extractTextFromPDF(file);
+
+          // Check if extraction failed (likely an image-based PDF)
+          if (!text || text.trim().length < 50) {
+            toast.dismiss();
+            // Show a prominent suggestion
+            toast.custom((t) => (
+              <div className="bg-white p-4 rounded-lg shadow-lg border border-red-200 flex flex-col gap-3 max-w-md pointer-events-auto">
+                <div className="flex items-start gap-3">
+                  <div className="bg-red-100 p-2 rounded-full">
+                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-gray-900">Ooops! No pudimos leer tu PDF</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Parece que tu documento no tiene texto seleccionable (es una imagen o escaneo).
+                    </p>
+                  </div>
+                  <button onClick={() => toast.dismiss(t)} className="text-gray-400 hover:text-gray-600">
+                    ✕
+                  </button>
+                </div>
+
+                <Button
+                  size="sm"
+                  className="bg-[#00d1a0] hover:bg-[#00b88d] text-white w-full gap-2 font-semibold"
+                  onClick={() => {
+                    toast.dismiss(t);
+                    setUseSmartScan(true);
+                    // Retry automatically with smart scan enabled
+                    handleFileUpload(file, true);
+                  }}
+                >
+                  <Zap className="w-4 h-4" />
+                  Activar Escaneo Inteligente y Reintentar
+                </Button>
+              </div>
+            ), { duration: Infinity }); // Keep open until user interacts
+
+            setCVText("");
+            return;
+          }
+        }
       } else {
         text = await file.text();
       }
       setCVText(text);
       setUploadedFileName(file.name);
       toast.dismiss();
-      toast.success("Archivo procesado correctamente");
+      toast.success(effectiveSmartScan ? "Texto transcrito de la imagen correctamente" : "Texto extraído correctamente");
     } catch (error) {
       toast.dismiss();
-      toast.error("Error al procesar el archivo");
+      toast.error("Error al procesar el archivo: " + (error instanceof Error ? error.message : "Error desconocido"));
       console.error(error);
     } finally {
       setIsExtractingPDF(false);
@@ -494,7 +555,7 @@ const Analyzer = () => {
             </div>
             <span className="font-bold text-xl">T2W CV Builder</span>
           </a>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground hidden sm:block">
             {step === "form" && "Paso 1 de 5: Sube tu CV"}
             {step === "analyzing" && "Analizando..."}
             {step === "results" && "Paso 2 de 5: Resultados"}
@@ -609,7 +670,12 @@ const Analyzer = () => {
                         type="file"
                         accept=".pdf,.txt"
                         className="hidden"
-                        onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                        onChange={(e) => {
+                          if (e.target.files?.[0]) {
+                            handleFileUpload(e.target.files[0]);
+                            e.target.value = ''; // Reset to allow re-selecting same file
+                          }
+                        }}
                         disabled={isExtractingPDF}
                       />
                       {isExtractingPDF ? (
@@ -647,6 +713,23 @@ const Analyzer = () => {
                       value={cvText}
                       onChange={(e) => setCVText(e.target.value)}
                     />
+
+                    <div className="flex items-center space-x-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id="smart-scan"
+                        className="rounded border-gray-300 text-primary focus:ring-primary"
+                        checked={useSmartScan}
+                        onChange={(e) => setUseSmartScan(e.target.checked)}
+                      />
+                      <Label htmlFor="smart-scan" className="text-sm font-medium cursor-pointer flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-yellow-500" />
+                        Escaneo Inteligente (Imagen/OCR)
+                        <span className="text-xs text-muted-foreground font-normal ml-1">
+                          - Úsalo si tu PDF es una imagen o no se lee bien
+                        </span>
+                      </Label>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -940,7 +1023,7 @@ const Analyzer = () => {
                     }}
                   />
 
-                  <div className="flex justify-center gap-4 pb-8 no-print">
+                  <div className="flex flex-wrap justify-center gap-4 pb-8 no-print">
                     <Button
                       variant="hero"
                       onClick={handleDownload}
@@ -984,7 +1067,7 @@ const Analyzer = () => {
                 {/* Main Score */}
                 <Card className="overflow-hidden">
                   <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                       <div>
                         <p className="text-sm font-medium text-muted-foreground mb-1">Puntuación ATS</p>
                         <p className={`text-6xl font-bold ${getScoreColor(analysisResult.atsScore)}`}>
