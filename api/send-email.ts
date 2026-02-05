@@ -27,7 +27,7 @@ export default async function handler(req: any, res: any) {
         console.log(`Attempting to send email to ${to} with attachment ${filename}`);
 
         const { data, error } = await resend.emails.send({
-            from: 'CV Builder <onboarding@resend.dev>',
+            from: process.env.VITE_RESEND_FROM_EMAIL || 'CV Builder <onboarding@resend.dev>',
             to: [to],
             subject: 'Tu CV generado',
             text: 'Adjunto encontrarás tu CV generado.',
