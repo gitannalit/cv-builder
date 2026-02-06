@@ -44,6 +44,12 @@ const Analyzer = () => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [hasActivePlan, setHasActivePlan] = useState(false);
   const [downloadCount, setDownloadCount] = useState(0);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [generateSummary, setGenerateSummary] = useState(true);
+  // Available contact options from CV extraction
+  const [availableNames, setAvailableNames] = useState<string[]>([]);
+  const [availableEmails, setAvailableEmails] = useState<string[]>([]);
+  const [availablePhones, setAvailablePhones] = useState<string[]>([]);
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
 
   // Form state
@@ -80,6 +86,8 @@ const Analyzer = () => {
         if (state.selectedVersion) setSelectedVersion(state.selectedVersion);
         if (state.isUnlocked) setIsUnlocked(state.isUnlocked);
         if (state.isCustomizing) setIsCustomizing(state.isCustomizing);
+        if (state.selectedKeywords) setSelectedKeywords(state.selectedKeywords);
+        if (state.generateSummary !== undefined) setGenerateSummary(state.generateSummary);
       } catch (e) {
         console.error("Error loading state:", e);
       }
@@ -101,10 +109,12 @@ const Analyzer = () => {
       cvText,
       selectedVersion,
       isUnlocked,
-      isCustomizing
+      isCustomizing,
+      selectedKeywords,
+      generateSummary
     };
     localStorage.setItem('cv_analyzer_state', JSON.stringify(state));
-  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, phone, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing]);
+  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, phone, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -293,10 +303,22 @@ const Analyzer = () => {
         setActionPlan(plan);
         setExtractedData(data);
 
-        // Auto-populate form if empty
-        if (!name && data.personalInfo?.fullName) setName(data.personalInfo.fullName);
-        if (!email && data.personalInfo?.email) setEmail(data.personalInfo.email);
-        if (!phone && data.personalInfo?.phone) setPhone(data.personalInfo.phone);
+        // Store available options for user selection if multiple exist
+        const extData = data as any;
+        if (extData.names && extData.names.length > 0) {
+          setAvailableNames(extData.names);
+        }
+        if (extData.emails && extData.emails.length > 0) {
+          setAvailableEmails(extData.emails);
+        }
+        if (extData.phones && extData.phones.length > 0) {
+          setAvailablePhones(extData.phones);
+        }
+
+        // Set default values from primary extracted data
+        if (data.personalInfo?.fullName) setName(data.personalInfo.fullName);
+        if (data.personalInfo?.email) setEmail(data.personalInfo.email);
+        if (data.personalInfo?.phone) setPhone(data.personalInfo.phone);
       } catch (extraError) {
         console.error("Extra analysis error:", extraError);
       }
@@ -332,7 +354,16 @@ const Analyzer = () => {
     setIsGeneratingVersions(true);
     setIsCustomizing(false);
     try {
-      const versions = await generateCVVersions(cvText, targetJob, keyAchievements);
+      const versions = await generateCVVersions(
+        cvText,
+        targetJob,
+        name,
+        email,
+        phone,
+        keyAchievements,
+        selectedKeywords,
+        generateSummary
+      );
       setCVVersions(versions);
       toast.success("Versiones generadas");
     } catch (error) {
@@ -352,6 +383,8 @@ const Analyzer = () => {
     setUploadedFileName(null);
     setIsCustomizing(false);
     setIsUnlocked(false);
+    setSelectedKeywords([]);
+    setGenerateSummary(true);
     localStorage.removeItem('cv_analyzer_state');
   };
 
@@ -848,6 +881,61 @@ const Analyzer = () => {
                       onChange={(e) => setKeyAchievements(e.target.value)}
                       className="min-h-[150px] resize-none"
                     />
+                  </CardContent>
+                </Card>
+
+                {analysisResult && analysisResult.missingKeywords && analysisResult.missingKeywords.length > 0 && (
+                  <Card className="border-gray-200 shadow-sm rounded-2xl">
+                    <CardHeader>
+                      <CardTitle className="text-lg font-bold">Aptitudes sugeridas</CardTitle>
+                      <CardDescription>
+                        Selecciona las aptitudes que realmente posees para añadirlas a tu CV. No marques las que no sepas usar.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {analysisResult.missingKeywords.map((keyword, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              setSelectedKeywords(prev =>
+                                prev.includes(keyword)
+                                  ? prev.filter(k => k !== keyword)
+                                  : [...prev, keyword]
+                              );
+                            }}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border ${selectedKeywords.includes(keyword)
+                              ? "bg-primary text-white border-primary shadow-md"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-primary/50"
+                              }`}
+                          >
+                            {selectedKeywords.includes(keyword) && <Check className="w-4 h-4" />}
+                            {keyword}
+                          </button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Summary generation option */}
+                <Card className="border-gray-200 shadow-sm rounded-2xl">
+                  <CardContent className="pt-6">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={generateSummary}
+                        onChange={(e) => setGenerateSummary(e.target.checked)}
+                        className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <div>
+                        <span className="font-medium text-gray-900">Generar resumen profesional</span>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                          Si tu CV original no tiene resumen, la IA creará uno basado en tu experiencia.
+                          Desmarca si prefieres no incluir resumen.
+                        </p>
+                      </div>
+                    </label>
                   </CardContent>
                 </Card>
 

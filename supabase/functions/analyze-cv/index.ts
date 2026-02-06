@@ -98,7 +98,7 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, cvImage, action, targetJob, keyAchievements, name, email, phone, experienceYears } = await req.json();
+    const { cvText, cvImage, action, targetJob, keyAchievements, name, email, phone, experienceYears, selectedKeywords, generateSummary } = await req.json();
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) {
@@ -110,7 +110,7 @@ serve(async (req) => {
 
     // User context formatting
     let userContext = "";
-    if (!action || action === "analyze") {
+    if (!action || action === "analyze" || action === "versions" || action === "actionPlan") {
       userContext = [
         name ? `Nombre: ${name}` : "",
         email ? `Email: ${email}` : "",
@@ -122,18 +122,32 @@ serve(async (req) => {
 
     // Handle different actions setup (prompts)
     if (action === "extract") {
-      systemPrompt = `Eres un experto en extracción de datos de currículums. Respondes SOLO con JSON válido.`;
-      userPromptText = `Extrae los datos del siguiente CV y devuélvelos en formato JSON estructurado:
+      systemPrompt = `Eres un experto en extracción de datos de currículums. Respondes SOLO con JSON válido.
+
+REGLAS ESTRICTAS DE EXTRACCIÓN:
+- Extrae ÚNICAMENTE la información que aparece EXPLÍCITAMENTE en el texto del CV.
+- NO INVENTES datos. Si un campo no está visible en el texto, devuelve un array vacío [] o cadena vacía "".
+- NO "corrijas" ni "adivines" direcciones de email o números de teléfono.
+- Si encuentras MÚLTIPLES nombres, emails o teléfonos, inclúyelos TODOS en sus respectivos arrays.`;
+      userPromptText = `Extrae los datos del siguiente CV y devuélvelos en formato JSON estructurado.
+
+IMPORTANTE: 
+- Si un dato NO aparece claramente en el CV, devuelve array vacío [] o cadena vacía "".
+- Si hay VARIOS nombres, emails o teléfonos, devuélvelos TODOS en los arrays correspondientes.
+- NO INVENTES NADA.
       
 Responde ÚNICAMENTE con un JSON válido con esta estructura:
 {
-  "fullName": "<nombre completo>",
-  "email": "<email>",
-  "phone": "<teléfono>",
-  "location": "<ubicación>",
+  "names": ["<nombre/apellido 1>", "<nombre/apellido 2 si existe>"],
+  "emails": ["<email 1>", "<email 2 si existe>"],
+  "phones": ["<teléfono 1>", "<teléfono 2 si existe>"],
+  "fullName": "<nombre completo principal o vacío>",
+  "email": "<email principal o vacío>",
+  "phone": "<teléfono principal o vacío>",
+  "location": "<ubicación o vacío>",
   "linkedIn": "<url linkedin o vacío>",
   "portfolio": "<url portfolio o vacío>",
-  "professionalSummary": "<resumen profesional>",
+  "professionalSummary": "<resumen profesional o vacío>",
   "workExperience": [
     {
       "company": "<empresa>",
@@ -161,7 +175,10 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
       userPromptText = "Transcribe todo el texto que veas en esta imagen del CV. Devuelve solo el texto extraído.";
     } else if (action === "actionPlan") {
       systemPrompt = `Eres un coach de carrera profesional. Proporcionas planes de acción detallados y personalizados para mejorar la empleabilidad. Respondes SOLO con JSON válido.`;
-      userPromptText = `Basándote en el CV proporcionado, crea un plan de acción detallado para mejorar la empleabilidad.
+      userPromptText = `Analiza el currículum proporcionado abajo.
+    
+CV a analizar:
+Basándote en el CV proporcionado, crea un plan de acción detallado para mejorar la empleabilidad.
        
 Responde ÚNICAMENTE con un JSON válido con esta estructura:
 {
@@ -173,24 +190,52 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
   "interviewPrep": []
 }`;
     } else if (action === "versions") {
-      systemPrompt = `Eres un experto redactor de CVs optimizados. Generas contenido basado EXCLUSIVAMENTE en la información proporcionada.
-NO INVENTES experiencia laboral, títulos ni empresas que no estén en el texto original.
-Tu objetivo es MEJORAR la redacción y presentación de lo que YA EXISTE, u optimizarlo con palabras clave, pero sin fabricar datos.`;
-      userPromptText = `Basándote en el CV proporcionado, genera dos versiones optimizadas para obtener la MÁXIMA PUNTUACIÓN (100/100).
+      // selectedKeywords and generateSummary come from the request body destructuring at line 101
+      const effectiveSelectedKeywords = selectedKeywords || [];
+      const effectiveGenerateSummary = generateSummary !== false; // Default true for backwards compat
+
+      systemPrompt = `Eres un experto redactor de CVs. Tu trabajo es MEJORAR LA REDACCIÓN del contenido existente, NO inventar contenido nuevo.
+
+REGLA FUNDAMENTAL: Estás PROHIBIDO de inventar, fabricar, o añadir información que no esté en el texto original.
+
+LISTA DE PROHIBICIONES ABSOLUTAS:
+❌ NO inventes puestos de trabajo nuevos
+❌ NO inventes empresas donde no trabajó
+❌ NO inventes títulos universitarios o certificaciones
+❌ NO inventes habilidades o tecnologías
+❌ NO inventes métricas o porcentajes específicos (ej: "aumenté ventas un 35%")
+❌ NO inventes proyectos o logros
+❌ NO añadas "experiencia en liderazgo" si no se menciona
+❌ NO añadas idiomas que no estén listados
+❌ NO cambies fechas de empleo
+❌ NO añadas responsabilidades que no se mencionan
+
+LO QUE SÍ PUEDES HACER:
+✓ Mejorar la redacción y gramática del texto existente
+✓ Usar sinónimos más profesionales para las mismas ideas
+✓ Reorganizar información para mejor legibilidad
+✓ Añadir ÚNICAMENTE las habilidades de la lista "Habilidades adicionales seleccionadas" proporcionada
+✓ Incluir los logros manuales proporcionados por el usuario
+
+DATOS DE CONTACTO: Usa EXCLUSIVAMENTE el nombre, email y teléfono que aparecen en el texto del CV o en los datos del candidato proporcionados.`;
+
+      userPromptText = `CV a analizar:
+
+INSTRUCCIONES ESTRICTAS:
 ${targetJob ? `Puesto objetivo: "${targetJob}".` : ""}
-${keyAchievements ? `Logros clave MANUALES introducidos por el usuario: "${keyAchievements}".` : ""}
+${keyAchievements ? `Logros proporcionados manualmente por el usuario (estos SÍ puedes incluir): "${keyAchievements}".` : ""}
+${effectiveSelectedKeywords.length > 0 ? `Habilidades adicionales APROBADAS por el usuario para añadir: "${effectiveSelectedKeywords.join(", ")}".` : "NO hay habilidades adicionales aprobadas. Usa SOLO las del CV original."}
+${!effectiveGenerateSummary ? `RESUMEN PROFESIONAL: El usuario NO quiere resumen profesional. Deja el campo "summary" VACÍO ("").` : `RESUMEN PROFESIONAL: Genera un resumen basado ÚNICAMENTE en la información del CV, sin inventar logros ni características.`}
 
-INSTRUCCIONES DE GENERACIÓN PARA PUNTUACIÓN PERFECTA:
-1. EXPERIENCIA (Vital): Mejora la redacción de cada descripción. Hazlas más profesionales y orientadas a resultados. SOLO añade métricas si son deducibles o genéricas de mejora ("mejoré la eficiencia"), NO inventes cifras exactas ("23.5%") si no hay base para ello.
-2. HABILIDADES: Asegúrate de incluir una lista completa de "Hard Skills" (técnicas) y "Soft Skills" relevantes deducibles del perfil.
-3. LOGROS: Si hay logros manuales, úsalos. Si no, extrae y destaca los logros del texto original.
-4. KEYWORDS: Satura el texto (de forma natural) con palabras clave técnicas del sector del "${targetJob || "puesto actual"}".
+PROCESO DE GENERACIÓN:
+1. Lee el CV original cuidadosamente
+2. Identifica CADA pieza de información
+3. Mejora la redacción SIN añadir información nueva
+4. Incluye SOLO las habilidades del CV + las de la lista aprobada
+5. Si hay logros manuales, inclúyelos como logros destacados
 
-INSTRUCCIÓN CRÍTICA DE VERACIDAD:
-- NO agregues puestos de trabajo que no existen en el input.
-- NO agregues títulos universitarios que no existen en el input.
-- Si el usuario proporciona "Logros clave MANUALES", úsalos prioritariamente.
-- DATOS PERSONALES: Extrae el Nombre, Email y Teléfono EXACTAMENTE como aparecen en el CV. Si hay conflicto con los datos del usuario, DA PRIORIDAD AL CV.
+VERIFICACIÓN FINAL:
+Antes de generar, pregúntate: "¿Esta información está en el CV original o fue proporcionada explícitamente por el usuario?" Si la respuesta es NO, NO la incluyas.
 
 Genera:
 1. Versión Ejecutiva/Formal
@@ -203,31 +248,31 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
     "title": "Versión Ejecutiva (Optimizada ATS)",
     "description": "Ideal para banca, consultoría y corporaciones",
     "personalDetails": {
-      "name": "<nombre del CV>",
-      "email": "<email del CV>",
-      "phone": "<teléfono del CV>"
+      "name": "<nombre EXACTO del CV>",
+      "email": "<email EXACTO del CV>",
+      "phone": "<teléfono EXACTO del CV>"
     },
     "content": {
-      "summary": "<resumen profesional potente, con métricas y keywords>",
+      "summary": "<resumen basado en info real del CV o vacío si no aprobado>",
       "experience": [
         {
-          "company": "<empresa>",
-          "position": "<puesto optimizado>",
-          "startDate": "<fecha inicio>",
-          "endDate": "<fecha fin o Presente>",
-          "description": "<descripción optimizada>"
+          "company": "<empresa EXACTA del CV>",
+          "position": "<puesto EXACTO del CV>",
+          "startDate": "<fecha EXACTA>",
+          "endDate": "<fecha EXACTA o Presente>",
+          "description": "<descripción mejorada en redacción, misma información>"
         }
       ],
       "education": [
         {
-          "institution": "<institución>",
-          "degree": "<título>",
-          "field": "<campo>",
-          "startDate": "<fecha inicio>",
-          "endDate": "<fecha fin>"
+          "institution": "<institución EXACTA del CV>",
+          "degree": "<título EXACTO del CV>",
+          "field": "<campo EXACTO del CV>",
+          "startDate": "<fecha>",
+          "endDate": "<fecha>"
         }
       ],
-      "skills": ["<habilidad1>", "<habilidad2>", "<habilidad3>"]
+      "skills": ["<habilidades del CV + aprobadas ÚNICAMENTE>"]
     }
   },
   "creative": {
@@ -235,31 +280,31 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
     "title": "Versión Moderna (Alto Impacto)",
     "description": "Ideal para startups, tech y creativos",
     "personalDetails": {
-      "name": "<nombre del CV>",
-      "email": "<email del CV>",
-      "phone": "<teléfono del CV>"
+      "name": "<nombre EXACTO del CV>",
+      "email": "<email EXACTO del CV>",
+      "phone": "<teléfono EXACTO del CV>"
     },
     "content": {
-      "summary": "<resumen profesional con storytelling y valor único>",
+      "summary": "<resumen con tono más dinámico, misma información real>",
       "experience": [
         {
-          "company": "<empresa>",
-          "position": "<puesto con enfoque dinámico>",
-          "startDate": "<fecha inicio>",
-          "endDate": "<fecha fin o Presente>",
-          "description": "<descripción orientada a resultados y capacidades>"
+          "company": "<empresa del CV>",
+          "position": "<puesto del CV>",
+          "startDate": "<fecha>",
+          "endDate": "<fecha o Presente>",
+          "description": "<descripción con enfoque en impacto, misma información>"
         }
       ],
       "education": [
         {
-          "institution": "<institución>",
-          "degree": "<título>",
-          "field": "<campo>",
-          "startDate": "<fecha inicio>",
-          "endDate": "<fecha fin>"
+          "institution": "<institución del CV>",
+          "degree": "<título del CV>",
+          "field": "<campo del CV>",
+          "startDate": "<fecha>",
+          "endDate": "<fecha>"
         }
       ],
-      "skills": ["<habilidad1>", "<habilidad2>", "<habilidad3>"]
+      "skills": ["<habilidades del CV + aprobadas ÚNICAMENTE>"]
     }
   }
 }`;

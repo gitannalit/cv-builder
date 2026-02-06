@@ -24,8 +24,21 @@ async function callAnalyzeFunction(cvText: string, action?: string, extraData?: 
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Error al procesar el CV");
+    let errorMessage = `Error ${response.status}: ${response.statusText}`;
+    try {
+      const errorBody = await response.text();
+      if (errorBody) {
+        try {
+          const errorJson = JSON.parse(errorBody);
+          errorMessage = errorJson.error || errorMessage;
+        } catch {
+          errorMessage = errorBody;
+        }
+      }
+    } catch {
+      // Ignore body parsing errors
+    }
+    throw new Error(errorMessage);
   }
 
   const result = await response.json();
@@ -37,11 +50,15 @@ export async function analyzeCVText(cvText: string, options?: any): Promise<Anal
   return callAnalyzeFunction(cvText, "analyze", options);
 }
 
-export async function extractCVData(cvText: string): Promise<Partial<CVData>> {
+export async function extractCVData(cvText: string): Promise<Partial<CVData> & { names?: string[]; emails?: string[]; phones?: string[] }> {
   const result = await callAnalyzeFunction(cvText, "extract");
 
   // Transform the extracted data to match our CVData structure
   return {
+    // Arrays for user selection when multiple options exist
+    names: result.names || [],
+    emails: result.emails || [],
+    phones: result.phones || [],
     personalInfo: {
       fullName: result.fullName || "",
       email: result.email || "",
@@ -81,9 +98,22 @@ export async function generateActionPlan(cvText: string): Promise<ActionPlan> {
 export async function generateCVVersions(
   cvText: string,
   targetJob?: string,
-  keyAchievements?: string
+  name?: string,
+  email?: string,
+  phone?: string,
+  keyAchievements?: string,
+  selectedKeywords?: string[],
+  generateSummary?: boolean
 ): Promise<{ formal: CVVersion; creative: CVVersion }> {
-  return callAnalyzeFunction(cvText, "versions", { targetJob, keyAchievements });
+  return callAnalyzeFunction(cvText, "versions", {
+    targetJob,
+    name,
+    email,
+    phone,
+    keyAchievements,
+    selectedKeywords,
+    generateSummary
+  });
 }
 
 export async function transcribeCV(cvImageBase64: string): Promise<string> {
