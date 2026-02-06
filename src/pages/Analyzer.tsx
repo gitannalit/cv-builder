@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail } from "lucide-react";
+import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 import { LockedCVPreview } from "@/components/analyzer/LockedCVPreview";
@@ -20,6 +20,7 @@ import { StripeEmbeddedCheckout } from "@/components/analyzer/StripeEmbeddedChec
 import { extractTextFromPDF } from "@/lib/pdfExtractor";
 import { analyzeCVText, generateActionPlan, generateCVVersions, extractCVData } from "@/lib/cvAnalyzer";
 import { downloadTemplatePDF } from "@/lib/templatePdfGenerator";
+import { downloadATSGuidePDF } from "@/lib/atsGuide";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
@@ -514,6 +515,19 @@ const Analyzer = () => {
       console.error('Error sending email:', err);
       toast.dismiss();
       toast.error('Error al enviar el email');
+    }
+  };
+
+  const handleDownloadGuide = async () => {
+    try {
+      toast.loading("Generando Guía ATS...");
+      await downloadATSGuidePDF(name || "Candidato");
+      toast.dismiss();
+      toast.success("Guía descargada correctamente");
+    } catch (error) {
+      console.error("Error downloading guide:", error);
+      toast.dismiss();
+      toast.error("Error al descargar la guía");
     }
   };
 
@@ -1031,6 +1045,14 @@ const Analyzer = () => {
                     >
                       <Download className="w-5 h-5" />
                       Descargar PDF
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleDownloadGuide}
+                      className="gap-2 border-primary text-primary hover:bg-primary/10"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      Guía ATS
                     </Button>
                     <Button
                       variant="secondary"
