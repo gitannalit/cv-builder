@@ -9,6 +9,11 @@ const SYSTEM_PROMPT = `Eres un experto senior en recursos humanos y sistemas ATS
 Proporcionas análisis exhaustivos, rigurosos y detallados de currículums vitae.
 Respondes SOLO con JSON válido, sin texto adicional antes o después.
 
+PRINCIPIO FUNDAMENTAL: VERACIDAD ESTRICTA.
+- NO INVENTES información que no aparezca explícitamente en el texto.
+- Si falta información (fechas, métricas, estudios), SEÑÁLALO como problema, NO intentes rellenarlo.
+- Basa tu análisis EXCLUSIVAMENTE en el texto proporcionado.
+
 Criterios de evaluación:
 1. PUNTUACIÓN ATS (0-100): Evalúa rigurosamente la compatibilidad con sistemas automáticos.
 2. ANÁLISIS POR CATEGORÍAS: Puntúa Formato, Keywords, Experiencia, Habilidades y Logros.
@@ -84,7 +89,8 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
 
 IMPORTANTE: 
 1. Debes encontrar al menos 3 problemas o áreas de mejora, incluso si el CV es bueno. Sé muy riguroso.
-2. SI los "Datos del candidato" (Nombre, Email, Teléfono, Puesto Objetivo) NO coinciden con los del CV, genera obligatoriamente un problema (severity: warning/critical) avisando de la discrepancia. Ej: "El email proporcionado no coincide con el del CV".`;
+2. SI los "Datos del candidato" (Nombre, Email, Teléfono, Puesto Objetivo) NO coinciden con los del CV, genera obligatoriamente un problema (severity: warning/critical) avisando de la discrepancia. Ej: "El email proporcionado no coincide con el del CV".
+3. NO INVENTES NADA. Si el CV no menciona algo, no asumas que lo tiene.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -167,19 +173,24 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
   "interviewPrep": []
 }`;
     } else if (action === "versions") {
-      systemPrompt = `Eres un experto redactor de CVs de alto rendimiento. Tu objetivo es generar CVs que obtengan una puntuación de 100/100 en sistemas ATS estrictos. Generas contenido optimizado para pasar cualquier filtro automático.`;
+      systemPrompt = `Eres un experto redactor de CVs optimizados. Generas contenido basado EXCLUSIVAMENTE en la información proporcionada.
+NO INVENTES experiencia laboral, títulos ni empresas que no estén en el texto original.
+Tu objetivo es MEJORAR la redacción y presentación de lo que YA EXISTE, u optimizarlo con palabras clave, pero sin fabricar datos.`;
       userPromptText = `Basándote en el CV proporcionado, genera dos versiones optimizadas para obtener la MÁXIMA PUNTUACIÓN (100/100).
 ${targetJob ? `Puesto objetivo: "${targetJob}".` : ""}
 ${keyAchievements ? `Logros clave MANUALES introducidos por el usuario: "${keyAchievements}".` : ""}
 
 INSTRUCCIONES DE GENERACIÓN PARA PUNTUACIÓN PERFECTA:
-1. EXPERIENCIA (Vital): Mejora cada descripción incluyendo métricas cuantificables (%, €, reducción de tiempo, aumento de ingresos). Si el original no tiene números, estímales de forma realista y profesional.
-2. HABILIDADES: Asegúrate de incluir una lista completa de "Hard Skills" (técnicas) y "Soft Skills" relevantes.
-3. LOGROS: Si hay logros manuales, úsalos. Si no, extrae y destaca los logros del texto original en una sección clara o bullets destacados.
+1. EXPERIENCIA (Vital): Mejora la redacción de cada descripción. Hazlas más profesionales y orientadas a resultados. SOLO añade métricas si son deducibles o genéricas de mejora ("mejoré la eficiencia"), NO inventes cifras exactas ("23.5%") si no hay base para ello.
+2. HABILIDADES: Asegúrate de incluir una lista completa de "Hard Skills" (técnicas) y "Soft Skills" relevantes deducibles del perfil.
+3. LOGROS: Si hay logros manuales, úsalos. Si no, extrae y destaca los logros del texto original.
 4. KEYWORDS: Satura el texto (de forma natural) con palabras clave técnicas del sector del "${targetJob || "puesto actual"}".
 
-INSTRUCCIÓN CRÍTICA MANUAL:
-Si hay "Logros clave MANUALES", es OBLIGATORIO que los integres. Reescríbelos profesionalmente pero asegúrate de que estén presentes.
+INSTRUCCIÓN CRÍTICA DE VERACIDAD:
+- NO agregues puestos de trabajo que no existen en el input.
+- NO agregues títulos universitarios que no existen en el input.
+- Si el usuario proporciona "Logros clave MANUALES", úsalos prioritariamente.
+- DATOS PERSONALES: Extrae el Nombre, Email y Teléfono EXACTAMENTE como aparecen en el CV. Si hay conflicto con los datos del usuario, DA PRIORIDAD AL CV.
 
 Genera:
 1. Versión Ejecutiva/Formal
@@ -191,6 +202,11 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
     "type": "formal",
     "title": "Versión Ejecutiva (Optimizada ATS)",
     "description": "Ideal para banca, consultoría y corporaciones",
+    "personalDetails": {
+      "name": "<nombre del CV>",
+      "email": "<email del CV>",
+      "phone": "<teléfono del CV>"
+    },
     "content": {
       "summary": "<resumen profesional potente, con métricas y keywords>",
       "experience": [
@@ -199,7 +215,7 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
           "position": "<puesto optimizado>",
           "startDate": "<fecha inicio>",
           "endDate": "<fecha fin o Presente>",
-          "description": "<descripción con logros cuantificables (ej: 'Aumenté ventas un 20%...')>"
+          "description": "<descripción optimizada>"
         }
       ],
       "education": [
@@ -218,6 +234,11 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
     "type": "creative",
     "title": "Versión Moderna (Alto Impacto)",
     "description": "Ideal para startups, tech y creativos",
+    "personalDetails": {
+      "name": "<nombre del CV>",
+      "email": "<email del CV>",
+      "phone": "<teléfono del CV>"
+    },
     "content": {
       "summary": "<resumen profesional con storytelling y valor único>",
       "experience": [
@@ -284,7 +305,7 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: action === "transcribe" ? "gpt-4o" : "gpt-4o-mini",
         messages: messages,
         temperature: 0.0,
         response_format: action === "transcribe" ? undefined : { type: "json_object" }

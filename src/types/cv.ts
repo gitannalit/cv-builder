@@ -105,4 +105,10 @@ export interface CVVersion {
     skills: string[];
     languages?: { language: string; level: string }[];
   };
+  personalDetails?: {
+    name: string;
+    email: string;
+    phone: string;
+    location?: string;
+  };
 }
