@@ -173,11 +173,11 @@ const Analyzer = () => {
       return;
     }
 
-    const effectiveSmartScan = useSmartScan || forceSmartScan;
+    const effectiveSmartScan = file.type === "application/pdf";
 
     setIsExtractingPDF(true);
     try {
-      toast.loading(effectiveSmartScan ? "Escaneando imagen del CV..." : "Extrayendo texto...");
+      toast.loading(effectiveSmartScan ? "Analizando tu CV con IA..." : "Extrayendo texto...");
       let text = "";
       if (file.type === "application/pdf") {
         if (effectiveSmartScan) {
@@ -244,7 +244,7 @@ const Analyzer = () => {
       setCVText(text);
       setUploadedFileName(file.name);
       toast.dismiss();
-      toast.success(effectiveSmartScan ? "Texto transcrito de la imagen correctamente" : "Texto extraído correctamente");
+      toast.success(effectiveSmartScan ? "Análisis inteligente completado" : "Texto extraído correctamente");
     } catch (error) {
       toast.dismiss();
       toast.error("Error al procesar el archivo: " + (error instanceof Error ? error.message : "Error desconocido"));
@@ -761,21 +761,11 @@ const Analyzer = () => {
                       onChange={(e) => setCVText(e.target.value)}
                     />
 
-                    <div className="flex items-center space-x-2 pt-2">
-                      <input
-                        type="checkbox"
-                        id="smart-scan"
-                        className="rounded border-gray-300 text-primary focus:ring-primary"
-                        checked={useSmartScan}
-                        onChange={(e) => setUseSmartScan(e.target.checked)}
-                      />
-                      <Label htmlFor="smart-scan" className="text-sm font-medium cursor-pointer flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-yellow-500" />
-                        Escaneo Inteligente (Imagen/OCR)
-                        <span className="text-xs text-muted-foreground font-normal ml-1">
-                          - Úsalo si tu PDF es una imagen o no se lee bien
-                        </span>
-                      </Label>
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+                        <Zap className="w-3 h-3 text-yellow-500" />
+                        Usamos Escaneo Inteligente con IA para la máxima precisión
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

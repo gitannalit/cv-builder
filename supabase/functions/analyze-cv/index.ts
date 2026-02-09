@@ -112,9 +112,7 @@ serve(async (req) => {
     let userContext = "";
     if (!action || action === "analyze" || action === "versions" || action === "actionPlan") {
       userContext = [
-        name ? `Nombre: ${name}` : "",
-        email ? `Email: ${email}` : "",
-        phone ? `Teléfono: ${phone}` : "",
+
         targetJob ? `Puesto objetivo: ${targetJob}` : "",
         experienceYears ? `Años de experiencia: ${experienceYears}` : ""
       ].filter(Boolean).join("\n");
@@ -129,9 +127,11 @@ REGLAS ESTRICTAS DE EXTRACCIÓN:
 - NO INVENTES datos. Si un campo no está visible en el texto, devuelve un array vacío [] o cadena vacía "".
 - NO "corrijas" ni "adivines" direcciones de email o números de teléfono.
 - Si encuentras MÚLTIPLES nombres, emails o teléfonos, inclúyelos TODOS en sus respectivos arrays.`;
-      userPromptText = `Extrae los datos del siguiente CV y devuélvelos en formato JSON estructurado.
+      userPromptText = `Extrae TODOS los datos del siguiente CV de forma exhaustiva y devuélvelos en formato JSON estructurado.
 
 IMPORTANTE: 
+- Extrae todas y cada una de las experiencias laborales y formación académica que aparezcan. NO resumas ni omitas ninguna.
+- Para las descripciones de experiencia, mantén el detalle original, incluyendo logros y responsabilidades.
 - Si un dato NO aparece claramente en el CV, devuelve array vacío [] o cadena vacía "".
 - Si hay VARIOS nombres, emails o teléfonos, devuélvelos TODOS en los arrays correspondientes.
 - NO INVENTES NADA.
@@ -194,28 +194,24 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura:
       const effectiveSelectedKeywords = selectedKeywords || [];
       const effectiveGenerateSummary = generateSummary !== false; // Default true for backwards compat
 
-      systemPrompt = `Eres un experto redactor de CVs. Tu trabajo es MEJORAR LA REDACCIÓN del contenido existente, NO inventar contenido nuevo.
+      systemPrompt = `Eres un experto redactor de CVs senior. Tu trabajo es TRANSFORMAR el contenido original en un CV profesional de alto impacto.
 
-REGLA FUNDAMENTAL: Estás PROHIBIDO de inventar, fabricar, o añadir información que no esté en el texto original.
+REGLAS DE ORO:
+1. NO inventes hechos (empresas, cargos, fechas, títulos o certificaciones que no existan).
+2. SÍ puedes (y debes) mejorar la redacción, expandir puntos clave y usar un lenguaje profesional para que el CV brille.
+3. Asegúrate de incluir TODA la experiencia laboral relevante sin omitir detalles importantes.
+4. Si se proporcionan logros manuales o habilidades adicionales, intégralos de forma natural y destacada.
 
-LISTA DE PROHIBICIONES ABSOLUTAS:
-❌ NO inventes puestos de trabajo nuevos
-❌ NO inventes empresas donde no trabajó
-❌ NO inventes títulos universitarios o certificaciones
-❌ NO inventes habilidades o tecnologías
-❌ NO inventes métricas o porcentajes específicos (ej: "aumenté ventas un 35%")
-❌ NO inventes proyectos o logros
-❌ NO añadas "experiencia en liderazgo" si no se menciona
-❌ NO añadas idiomas que no estén listados
-❌ NO cambies fechas de empleo
-❌ NO añadas responsabilidades que no se mencionan
+LO QUE ESTÁ PROHIBIDO:
+❌ NO inventes puestos de trabajo nuevos.
+❌ NO inventes títulos universitarios.
+❌ NO inventes métricas específicas falsas si no hay una base en el CV (ej: no pongas "35%" si el CV no menciona un aumento).
 
-LO QUE SÍ PUEDES HACER:
-✓ Mejorar la redacción y gramática del texto existente
-✓ Usar sinónimos más profesionales para las mismas ideas
-✓ Reorganizar información para mejor legibilidad
-✓ Añadir ÚNICAMENTE las habilidades de la lista "Habilidades adicionales seleccionadas" proporcionada
-✓ Incluir los logros manuales proporcionados por el usuario
+LO QUE SE FOMENTA:
+✓ Usar verbos de acción potentes (Lideré, Implementé, Optimicé).
+✓ Mejorar la estructura y flujo de las descripciones.
+✓ Articular responsabilidades vagas para que suenen profesionales y orientadas a resultados.
+✓ Incluir habilidades de la lista "Habilidades adicionales seleccionadas" y los logros manuales.
 
 DATOS DE CONTACTO: Usa EXCLUSIVAMENTE el nombre, email y teléfono que aparecen en el texto del CV o en los datos del candidato proporcionados.`;
 
