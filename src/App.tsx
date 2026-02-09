@@ -17,7 +17,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <div className="bg-gradient-to-r from-orange-400 to-amber-400 text-white text-center py-1.5 text-xs font-bold uppercase tracking-wider sticky top-0 z-[100] shadow-sm">
-          Versión 4.59 • Estado Beta
+          Versión 1.2 • Estado Beta
         </div>
         <Routes>
           <Route path="/" element={<Index />} />

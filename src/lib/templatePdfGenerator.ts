@@ -13,7 +13,7 @@ export function generateTemplateHTML(
     : "";
 
   const baseStyles = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
     
     * { 
       margin: 0; 
@@ -28,21 +28,28 @@ export function generateTemplateHTML(
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
       line-height: 1.5; 
       background: white;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      margin: 0;
+      padding: 0;
     }
     
     @media print { 
-      body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; margin: 0; padding: 0; }
       @page { margin: 0; size: A4; }
-      .container { box-shadow: none !important; }
+      .container { box-shadow: none !important; margin: 0; padding: 0; }
     }
     
     .container { 
       width: 210mm; 
-      min-height: 297mm; 
-      margin: 0 auto; 
+      height: 297mm; 
+      margin: 0; 
+      padding: 0;
       background: white; 
       position: relative; 
       overflow: hidden;
+      box-sizing: border-box;
     }
   `;
 
@@ -69,7 +76,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
   const email = version.personalDetails?.email || "";
   const phone = version.personalDetails?.phone || "";
-  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
 
   const languages = version.content.languages || [];
 
@@ -86,7 +93,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       width: 35%; 
       background-color: ${darkColor} !important; 
       color: white !important; 
-      padding: 30px; 
+      padding: 32px; 
       display: flex; 
       flex-direction: column;
       -webkit-print-color-adjust: exact !important;
@@ -171,7 +178,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
     .edu-inst { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
     .edu-dates { font-size: 11px; color: ${primaryColor} !important; margin-top: 4px; }
     
-    .main-content { flex: 1; padding: 40px; background: white !important; }
+    .main-content { flex: 1; padding: 32px; background: white !important; }
     .main-section { margin-bottom: 40px; }
     .main-title { 
       font-size: 18px; 
@@ -387,7 +394,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
   const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
   const email = version.personalDetails?.email || "";
   const phone = version.personalDetails?.phone || "";
-  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
 
   const languages = version.content.languages || [];
 
@@ -578,7 +585,7 @@ function generateClassicHTML(version: CVVersion, hasWatermark: boolean, watermar
   const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
   const email = version.personalDetails?.email || "";
   const phone = version.personalDetails?.phone || "";
-  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
 
   return `<!DOCTYPE html>
 <html>
@@ -587,8 +594,8 @@ function generateClassicHTML(version: CVVersion, hasWatermark: boolean, watermar
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
-    body { font-family: 'Playfair Display', Georgia, serif; }
-    .container { padding: 60px; }
+    body { font-family: 'Playfair Display', 'Times New Roman', serif; }
+    .container { padding: 56px; background-color: #fdfcfa !important; }
     .header { text-align: center; border-bottom: 2px solid #111827 !important; padding-bottom: 32px; margin-bottom: 40px; }
     .header h1 { font-size: 32px; color: #111827; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; }
     .header p { color: #4b5563; font-style: italic; font-size: 16px; }
@@ -672,7 +679,7 @@ function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermar
   const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
   const email = version.personalDetails?.email || "";
   const phone = version.personalDetails?.phone || "";
-  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
 
   return `<!DOCTYPE html>
 <html>
@@ -681,7 +688,7 @@ function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermar
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
-    .container { padding: 80px; }
+    .container { padding: 64px; }
     .header { margin-bottom: 60px; }
     .header h1 { font-size: 40px; font-weight: 300; color: #111827; margin-bottom: 16px; letter-spacing: -1px; }
     .header .accent-line { width: 40px; height: 4px; background: #00cca9 !important; }
@@ -781,9 +788,11 @@ export async function downloadTemplatePDF(
       position: absolute;
       left: -9999px;
       top: 0;
-      width: 794px;
-      height: 1123px;
+      width: 210mm;
+      height: 297mm;
       border: none;
+      padding: 0;
+      margin: 0;
     `;
     document.body.appendChild(iframe);
 
@@ -811,12 +820,14 @@ export async function downloadTemplatePDF(
 
     // Convert to canvas
     const canvas = await html2canvas(contentElement as HTMLElement, {
-      scale: 2, // Higher quality
+      scale: 3,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
-      width: 794, // A4 width at 96 DPI
-      height: 1123, // A4 height at 96 DPI
+      windowWidth: 794,
+      windowHeight: 1123,
+      scrollX: 0,
+      scrollY: 0,
       logging: false,
     });
 
@@ -834,22 +845,7 @@ export async function downloadTemplatePDF(
     // Add image to PDF
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-    // Handle multi-page if content is longer than one page
-    const pageHeight = 297; // A4 height in mm
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Use a small threshold (2mm) to prevent blank pages due to rounding errors
-    while (heightLeft > 2) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
     // Save the PDF
     pdf.save(filename);
 
@@ -878,7 +874,7 @@ export async function generateTemplatePDFBlob(
     const { jsPDF } = jsPDFModule;
 
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = `position: absolute; left: -9999px; top: 0; width: 794px; height: 1123px; border: none;`;
+    iframe.style.cssText = `position: absolute; left: -9999px; top: 0; width: 210mm; height: 297mm; border: none; padding: 0; margin: 0;`;
     document.body.appendChild(iframe);
 
     await new Promise<void>((resolve) => {
@@ -898,12 +894,14 @@ export async function generateTemplatePDFBlob(
     const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
 
     const canvas = await html2canvas(contentElement as HTMLElement, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
-      width: 794,
-      height: 1123,
+      windowWidth: 794,
+      windowHeight: 1123,
+      scrollX: 0,
+      scrollY: 0,
       logging: false,
     });
 
@@ -917,20 +915,7 @@ export async function generateTemplatePDFBlob(
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-    const pageHeight = 297;
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft > 2) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
     document.body.removeChild(iframe);
     return pdf.output('blob');
   } catch (error) {

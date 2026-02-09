@@ -108,7 +108,7 @@ export interface CVVersion {
   personalDetails?: {
     name: string;
     email: string;
-    phone: string;
+    phone?: string;
     location?: string;
   };
 }
