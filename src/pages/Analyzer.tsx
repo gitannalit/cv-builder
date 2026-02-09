@@ -43,19 +43,18 @@ const Analyzer = () => {
   const [extractedData, setExtractedData] = useState<Partial<CVData> | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [hasActivePlan, setHasActivePlan] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<string | null>(null);
   const [downloadCount, setDownloadCount] = useState(0);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [generateSummary, setGenerateSummary] = useState(true);
   // Available contact options from CV extraction
   const [availableNames, setAvailableNames] = useState<string[]>([]);
   const [availableEmails, setAvailableEmails] = useState<string[]>([]);
-  const [availablePhones, setAvailablePhones] = useState<string[]>([]);
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
 
   // Form state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [targetJob, setTargetJob] = useState("");
   const [experienceYears, setExperienceYears] = useState("");
 
@@ -79,7 +78,6 @@ const Analyzer = () => {
         if (state.extractedData) setExtractedData(state.extractedData);
         if (state.name) setName(state.name);
         if (state.email) setEmail(state.email);
-        if (state.phone) setPhone(state.phone);
         if (state.targetJob) setTargetJob(state.targetJob);
         if (state.experienceYears) setExperienceYears(state.experienceYears);
         if (state.cvText) setCVText(state.cvText);
@@ -103,7 +101,6 @@ const Analyzer = () => {
       extractedData,
       name,
       email,
-      phone,
       targetJob,
       experienceYears,
       cvText,
@@ -114,7 +111,7 @@ const Analyzer = () => {
       generateSummary
     };
     localStorage.setItem('cv_analyzer_state', JSON.stringify(state));
-  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, phone, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary]);
+  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -287,7 +284,6 @@ const Analyzer = () => {
       const result = await analyzeCVText(cvText, {
         name,
         email,
-        phone,
         targetJob,
         experienceYears
       });
@@ -311,14 +307,10 @@ const Analyzer = () => {
         if (extData.emails && extData.emails.length > 0) {
           setAvailableEmails(extData.emails);
         }
-        if (extData.phones && extData.phones.length > 0) {
-          setAvailablePhones(extData.phones);
-        }
 
         // Set default values from primary extracted data
         if (data.personalInfo?.fullName) setName(data.personalInfo.fullName);
         if (data.personalInfo?.email) setEmail(data.personalInfo.email);
-        if (data.personalInfo?.phone) setPhone(data.personalInfo.phone);
       } catch (extraError) {
         console.error("Extra analysis error:", extraError);
       }
@@ -359,7 +351,6 @@ const Analyzer = () => {
         targetJob,
         name,
         email,
-        phone,
         keyAchievements,
         selectedKeywords,
         generateSummary
@@ -399,6 +390,7 @@ const Analyzer = () => {
       });
       if (error) throw error;
       setHasActivePlan(data.hasAccess);
+      setCurrentPlan(data.planType || null);
       setDownloadCount(data.count || 0);
       if (data.hasAccess) setIsUnlocked(true);
       return data;
@@ -504,7 +496,7 @@ const Analyzer = () => {
 
         const version = cvVersions[selectedVersion];
         const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-        const userData = { name, email, phone, targetJob };
+        const userData = { name, email, targetJob };
 
         // Use real PDF download instead of print dialog
         await downloadTemplatePDF(version, templateType, false, userData);
@@ -533,7 +525,7 @@ const Analyzer = () => {
       toast.loading('Generando PDF...');
       const version = cvVersions[selectedVersion];
       const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-      const userData = { name, email, phone, targetJob };
+      const userData = { name, email, targetJob };
 
       // Generate PDF using the same template as download
       const { generateTemplatePDFBlob } = await import('@/lib/templatePdfGenerator');
@@ -552,6 +544,11 @@ const Analyzer = () => {
   };
 
   const handleDownloadGuide = async () => {
+    if (currentPlan !== 'premium') {
+      toast.error("La Guía ATS solo está disponible para usuarios con plan Premium.");
+      return;
+    }
+
     try {
       toast.loading("Generando Guía ATS...");
       await downloadATSGuidePDF(name || "Candidato");
@@ -683,15 +680,6 @@ const Analyzer = () => {
                           onChange={(e) => setEmail(e.target.value)}
                         />
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Teléfono (opcional)</Label>
-                      <Input
-                        id="phone"
-                        placeholder="+34 600 000 000"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -1000,15 +988,10 @@ const Analyzer = () => {
                             <CVVersionsCard
                               versions={cvVersions || mockVersions!}
                               selectedOnly="formal"
-                              userData={{ name, email, phone, targetJob }}
+                              userData={{ name, email, targetJob }}
                             />
                           )}
                         </div>
-                        {selectedVersion === 'formal' && (
-                          <div className="absolute top-4 right-4 w-10 h-10 bg-[#00D1A0] rounded-full flex items-center justify-center shadow-lg z-10">
-                            <Check className="w-6 h-6 text-white" />
-                          </div>
-                        )}
                       </div>
                     </div>
                     <Button
@@ -1043,7 +1026,7 @@ const Analyzer = () => {
                             <CVVersionsCard
                               versions={cvVersions || mockVersions!}
                               selectedOnly="creative"
-                              userData={{ name, email, phone, targetJob }}
+                              userData={{ name, email, targetJob }}
                             />
                           )}
                         </div>
@@ -1085,7 +1068,6 @@ const Analyzer = () => {
                   userData={{
                     name,
                     email,
-                    phone,
                     targetJob
                   }}
                 />
@@ -1110,7 +1092,6 @@ const Analyzer = () => {
                     userData={{
                       name,
                       email,
-                      phone,
                       targetJob
                     }}
                   />
@@ -1127,10 +1108,10 @@ const Analyzer = () => {
                     <Button
                       variant="outline"
                       onClick={handleDownloadGuide}
-                      className="gap-2 border-primary text-primary hover:bg-primary/10"
+                      className={`gap-2 ${currentPlan === 'premium' ? 'border-primary text-primary hover:bg-primary/10' : 'border-gray-300 text-gray-400 opacity-70'}`}
                     >
                       <BookOpen className="w-5 h-5" />
-                      Guía ATS
+                      Guía ATS {currentPlan !== 'premium' && <Zap className="w-3 h-3 ml-1 fill-yellow-500 text-yellow-500" />}
                     </Button>
                     <Button
                       variant="secondary"
@@ -1449,7 +1430,7 @@ const Analyzer = () => {
             )}
           </AnimatePresence>
         </div>
-      </main>
+      </main >
 
       {stripeClientSecret && (
         <StripeEmbeddedCheckout
@@ -1468,7 +1449,7 @@ const Analyzer = () => {
           </p>
         </div>
       </footer>
-    </div>
+    </div >
   );
 };
 

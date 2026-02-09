@@ -80,8 +80,8 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
 
     const cvData = {
       name: version.personalDetails?.name || userData?.name || "Tu Nombre",
-      email: version.personalDetails?.email || userData?.email || "tu@email.com",
-      phone: version.personalDetails?.phone || userData?.phone,
+      email: version.personalDetails?.email || "",
+      phone: version.personalDetails?.phone,
       targetJob: userData?.targetJob || version?.title || "Profesional",
       professionalSummary: content.summary || "",
       workExperience: (content.experience || []).map((exp: any) => ({

@@ -49,14 +49,14 @@ export function generateTemplateHTML(
   switch (template) {
     case 'modern':
       return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
-    case 'classic':
-      return generateClassicHTML(version, hasWatermark, watermarkHTML, baseStyles);
-    case 'minimal':
-      return generateMinimalHTML(version, hasWatermark, watermarkHTML, baseStyles);
     case 'creative':
       return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     case 'executive':
       return generateExecutiveHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+    case 'classic':
+      return generateClassicHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+    case 'minimal':
+      return generateMinimalHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     default:
       return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
   }
@@ -66,10 +66,10 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   const primaryColor = "#00BFA6"; // T2W Turquoise
   const darkColor = "#0d1117";
 
-  const name = userData?.name || "Tu Nombre";
-  const email = userData?.email || "tu@email.com";
-  const phone = userData?.phone || "";
-  const targetJob = userData?.targetJob || version.title || "Profesional";
+  const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
+  const email = version.personalDetails?.email || "";
+  const phone = version.personalDetails?.phone || "";
+  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
 
   const languages = version.content.languages || [];
 
@@ -80,13 +80,13 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
-    .container { display: flex; min-height: 297mm; background: white !important; }
+    .container { display: flex; min-height: 297mm; background: white !important; font-family: 'Inter', sans-serif; position: relative; }
     
     .sidebar { 
       width: 35%; 
       background-color: ${darkColor} !important; 
       color: white !important; 
-      padding: 40px 30px; 
+      padding: 30px; 
       display: flex; 
       flex-direction: column;
       -webkit-print-color-adjust: exact !important;
@@ -104,6 +104,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       font-size: 48px;
       font-weight: bold;
       color: white !important;
+      -webkit-print-color-adjust: exact !important;
     }
     
     .sidebar h1 { 
@@ -118,7 +119,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       text-align: center; 
       color: ${primaryColor} !important; 
       font-size: 14px; 
-      margin-bottom: 40px; 
+      margin-bottom: 32px; 
     }
     
     .sidebar-section { margin-bottom: 32px; }
@@ -128,7 +129,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       text-transform: uppercase; 
       letter-spacing: 2px; 
       color: ${primaryColor} !important; 
-      border-bottom: 1px solid ${primaryColor}44 !important; 
+      border-bottom: 1px solid ${primaryColor} !important; 
       padding-bottom: 8px; 
       margin-bottom: 16px; 
     }
@@ -144,23 +145,25 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       justify-content: center; 
       color: ${primaryColor} !important; 
       flex-shrink: 0;
+      -webkit-print-color-adjust: exact !important;
     }
     .contact-icon svg { width: 16px; height: 16px; }
     
     .skill-tag { 
       display: inline-block;
       padding: 4px 12px;
-      background: rgba(0, 204, 169, 0.15) !important;
+      background: rgba(0, 191, 166, 0.12) !important;
       color: ${primaryColor} !important;
       border-radius: 20px;
       font-size: 12px;
       margin: 0 4px 8px 0;
+      -webkit-print-color-adjust: exact !important;
     }
     
     .lang-item { margin-bottom: 12px; }
     .lang-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
     .lang-bar { height: 6px; background: #374151 !important; border-radius: 3px; overflow: hidden; }
-    .lang-progress { height: 100%; background: ${primaryColor} !important; border-radius: 3px; }
+    .lang-progress { height: 100%; background: ${primaryColor} !important; border-radius: 3px; -webkit-print-color-adjust: exact !important; }
     
     .edu-item { margin-bottom: 16px; }
     .edu-degree { font-size: 14px; font-weight: 600; color: white !important; }
@@ -168,13 +171,13 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
     .edu-inst { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
     .edu-dates { font-size: 11px; color: ${primaryColor} !important; margin-top: 4px; }
     
-    .main-content { flex: 1; padding: 48px; background: white !important; }
+    .main-content { flex: 1; padding: 40px; background: white !important; }
     .main-section { margin-bottom: 40px; }
     .main-title { 
-      font-size: 20px; 
+      font-size: 18px; 
       font-weight: bold; 
       color: ${darkColor} !important; 
-      margin-bottom: 20px; 
+      margin-bottom: 24px; 
       display: flex; 
       align-items: center; 
       gap: 12px;
@@ -190,57 +193,59 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       align-items: center; 
       justify-content: center; 
       color: white !important; 
+      -webkit-print-color-adjust: exact !important;
     }
     
-    .summary { color: #4b5563 !important; line-height: 1.8; font-size: 15px; }
+    .summary { color: #4b5563 !important; line-height: 1.6; font-size: 14.5px; }
     
-    .exp-item { position: relative; padding-left: 24px; margin-bottom: 32px; }
-    .exp-item::before { 
-      content: ''; 
+    .exp-item { position: relative; padding-left: 20px; margin-bottom: 32px; }
+    .exp-dot { 
       position: absolute; 
-      left: -4px; 
-      top: 6px; 
+      left: -20px; 
+      top: 8px; 
       width: 10px; 
       height: 10px; 
       border-radius: 50%; 
       border: 2px solid ${primaryColor} !important; 
       background: white !important; 
       z-index: 2; 
+      -webkit-print-color-adjust: exact !important;
     }
-    .exp-item::after { 
-      content: ''; 
+    .exp-line { 
       position: absolute; 
-      left: 0px; 
-      top: 16px; 
+      left: -16px; 
+      top: 18px; 
       bottom: -32px; 
       width: 2px; 
-      background: rgba(0, 204, 169, 0.2) !important; 
+      background: rgba(0, 191, 166, 0.2) !important; 
+      -webkit-print-color-adjust: exact !important;
     }
-    .exp-item:last-child::after { display: none; }
+    .exp-item:last-child .exp-line { display: none; }
     
-    .exp-role { font-size: 17px; font-weight: 700; color: #111827 !important; margin-bottom: 4px; }
-    .exp-company { color: ${primaryColor} !important; font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+    .exp-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
+    .exp-role { font-size: 16px; font-weight: 700; color: #111827 !important; }
+    .exp-company { color: ${primaryColor} !important; font-weight: 600; font-size: 14px; }
     .exp-dates { 
-      font-size: 11px; 
+      font-size: 12px; 
       color: ${primaryColor} !important; 
-      background: rgba(0, 204, 169, 0.1) !important; 
-      padding: 2px 10px; 
-      border-radius: 12px; 
-      display: inline-block;
-      margin-bottom: 8px;
+      background: rgba(0, 191, 166, 0.1) !important; 
+      padding: 4px 12px; 
+      border-radius: 20px; 
+      font-weight: 500;
+      -webkit-print-color-adjust: exact !important;
     }
-    .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.7; margin-bottom: 8px; }
-    .achievement-list { padding-left: 16px; margin-top: 8px; }
-    .achievement-item { font-size: 13px; color: #374151 !important; margin-bottom: 4px; list-style-type: disc; }
+    .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.6; margin-bottom: 8px; }
+    .achievement-item { font-size: 13.5px; color: #374151 !important; margin-bottom: 4px; display: flex; gap: 8px; }
+    .achievement-bullet { color: ${primaryColor} !important; }
     
     .footer { 
-      margin-top: auto; 
+      padding: 12px; 
       text-align: center; 
       font-size: 11px; 
-      color: #6b7280 !important; 
-      background-color: ${darkColor} !important;
-      padding: 16px;
-      margin: 0 -30px -40px;
+      background-color: ${darkColor} !important; 
+      color: #6b7280 !important;
+      margin-top: auto;
+      -webkit-print-color-adjust: exact !important;
     }
   </style>
 </head>
@@ -280,7 +285,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       <div class="sidebar-section">
         <h2 class="sidebar-title">Idiomas</h2>
         ${languages.map((lang: any) => {
-    const level = lang.level.toLowerCase();
+    const level = (lang.level || "").toLowerCase();
     const percentage = level.includes("nativo") || level.includes("c2") ? "100%" :
       level.includes("avanzado") || level.includes("c1") ? "85%" :
         level.includes("intermedio") || level.includes("b") ? "60%" : "40%";
@@ -288,7 +293,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
           <div class="lang-item">
             <div class="lang-header">
               <span>${lang.language}</span>
-              <span style="color: #9ca3af;">${lang.level}</span>
+              <span style="color: #9ca3af;">${lang.level || ""}</span>
             </div>
             <div class="lang-bar">
               <div class="lang-progress" style="width: ${percentage};"></div>
@@ -314,15 +319,13 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
           </div>`;
   }).join('')}
       </div>
-      
-      <!-- Footer removed as per user request -->
     </aside>
     
     <main class="main-content">
       <section class="main-section">
         <h2 class="main-title">
           <span class="main-title-icon">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
           </span>
           Sobre Mí
         </h2>
@@ -332,11 +335,11 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       <section class="main-section">
         <h2 class="main-title">
           <span class="main-title-icon">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
           </span>
           Experiencia Laboral
         </h2>
-        <div class="experience-list">
+        <div class="experience-list" style="margin-left: 10px;">
           ${(version.content.experience || []).map(exp => {
     const company = (exp as any).company || (exp as any).empresa || (exp as any).organization || "";
     const position = (exp as any).position || (exp as any).puesto || (exp as any).cargo || (exp as any).role || "";
@@ -347,195 +350,44 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
 
     return `
             <div class="exp-item">
-              <h3 class="exp-role">${position}</h3>
-              <div class="exp-company">${company}</div>
-              <div class="exp-dates">${startDate} - ${endDate}</div>
+              <div class="exp-dot"></div>
+              <div class="exp-line"></div>
+              <div class="exp-header">
+                <div>
+                  <h3 class="exp-role">${position}</h3>
+                  <div class="exp-company">${company}</div>
+                </div>
+                <div class="exp-dates">${startDate} - ${endDate}</div>
+              </div>
               <p class="exp-desc">${description}</p>
               ${achievements.length > 0 ? `
-              <ul class="achievement-list">
-                ${achievements.map((ach: string) => `<li class="achievement-item">${ach}</li>`).join('')}
-              </ul>` : ""}
+              <div style="margin-top: 10px;">
+                ${achievements.map((ach: string) => `
+                  <div class="achievement-item">
+                    <span class="achievement-bullet">▸</span>
+                    <span>${ach}</span>
+                  </div>`).join('')}
+              </div>` : ""}
             </div>`;
   }).join('')}
         </div>
       </section>
     </main>
   </div>
+  <footer class="footer">
+    CV generado con <span style="color: ${primaryColor}">T2W CV Builder</span> • training2work.com
+  </footer>
 </body>
 </html>`;
 }
-
-function generateClassicHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string): string {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${version.title} - CV</title>
-  <style>
-    ${baseStyles}
-    body { font-family: 'Playfair Display', Georgia, serif; }
-    .container { padding: 60px; }
-    .header { text-align: center; border-bottom: 2px solid #111827 !important; padding-bottom: 32px; margin-bottom: 40px; }
-    .header h1 { font-size: 32px; color: #111827; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; }
-    .header p { color: #4b5563; font-style: italic; font-size: 16px; }
-    
-    .section { margin-bottom: 32px; }
-    .section-title { font-size: 14px; font-weight: 700; color: #111827; border-bottom: 1px solid #e5e7eb !important; padding-bottom: 8px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
-    
-    .summary { color: #374151; line-height: 1.8; text-align: justify; font-size: 15px; font-family: 'Inter', sans-serif; }
-    
-    .experience-item { margin-bottom: 24px; font-family: 'Inter', sans-serif; }
-    .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
-    .exp-role { font-size: 16px; font-weight: 700; color: #111827; }
-    .exp-dates { color: #6b7280; font-style: italic; font-size: 13px; }
-    .exp-company { font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
-    .exp-desc { color: #4b5563; font-size: 14px; line-height: 1.7; text-align: justify; }
-    
-    .edu-row { display: flex; justify-content: space-between; margin-bottom: 16px; font-family: 'Inter', sans-serif; }
-    .edu-degree { font-size: 15px; font-weight: 700; color: #111827; }
-    .edu-inst { color: #4b5563; font-size: 14px; }
-    .edu-dates { color: #6b7280; font-style: italic; font-size: 13px; }
-    
-    .skills-list { display: flex; flex-wrap: wrap; gap: 12px; font-family: 'Inter', sans-serif; }
-    .skill-item { color: #374151; font-size: 14px; display: flex; align-items: center; }
-    .skill-item::before { content: '•'; color: #00cca9 !important; margin-right: 8px; font-weight: bold; }
-  </style>
-</head>
-<body>
-  ${watermarkHTML}
-  <div class="container">
-    <header class="header">
-      <h1>${version.content.experience[0]?.position || "CURRÍCULUM VITAE"}</h1>
-      <p>${version.description}</p>
-    </header>
-    
-    <section class="section">
-      <h2 class="section-title">Resumen Profesional</h2>
-      <p class="summary">${version.content.summary}</p>
-    </section>
-    
-    <section class="section">
-      <h2 class="section-title">Experiencia Laboral</h2>
-      ${version.content.experience.map(exp => `
-        <div class="experience-item">
-          <div class="exp-header">
-            <h3 class="exp-role">${exp.position}</h3>
-            <span class="exp-dates">${exp.startDate} — ${exp.endDate}</span>
-          </div>
-          <div class="exp-company">${exp.company}</div>
-          <p class="exp-desc">${exp.description}</p>
-        </div>
-      `).join('')}
-    </section>
-    
-    <section class="section">
-      <h2 class="section-title">Formación Académica</h2>
-      ${version.content.education.map(edu => `
-        <div class="edu-row">
-          <div>
-            <h3 class="edu-degree">${edu.degree} en ${edu.field}</h3>
-            <div class="edu-inst">${edu.institution}</div>
-          </div>
-          <span class="edu-dates">${edu.startDate} — ${edu.endDate}</span>
-        </div>
-      `).join('')}
-    </section>
-    
-    <section class="section">
-      <h2 class="section-title">Competencias</h2>
-      <div class="skills-list">
-        ${version.content.skills.map(skill => `<span class="skill-item">${skill}</span>`).join('')}
-      </div>
-    </section>
-  </div>
-</body>
-</html>`;
-}
-
-function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string): string {
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${version.title} - CV</title>
-  <style>
-    ${baseStyles}
-    .container { padding: 80px; }
-    .header { margin-bottom: 60px; }
-    .header h1 { font-size: 40px; font-weight: 300; color: #111827; margin-bottom: 16px; letter-spacing: -1px; }
-    .header .accent-line { width: 40px; height: 4px; background: #00cca9 !important; }
-    
-    .summary { color: #4b5563; font-size: 18px; line-height: 1.8; font-weight: 300; margin-bottom: 60px; }
-    
-    .section { margin-bottom: 48px; }
-    .section-title { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 32px; }
-    
-    .grid-item { display: grid; grid-template-columns: 140px 1fr; gap: 40px; margin-bottom: 32px; }
-    .item-dates { font-size: 14px; color: #9ca3af; line-height: 1.6; font-weight: 500; }
-    .item-content h3 { font-size: 18px; color: #111827; font-weight: 600; margin-bottom: 4px; }
-    .item-subtitle { color: #00cca9 !important; font-size: 14px; font-weight: 500; margin-bottom: 12px; }
-    .item-desc { color: #4b5563; font-size: 14px; line-height: 1.7; }
-    
-    .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .skill-minimal { font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6 !important; padding-bottom: 4px; }
-  </style>
-</head>
-<body>
-  ${watermarkHTML}
-  <div class="container">
-    <header class="header">
-      <h1>${version.content.experience[0]?.position || "Profesional"}</h1>
-      <div class="accent-line"></div>
-    </header>
-    
-    <p class="summary">${version.content.summary}</p>
-    
-    <div class="section">
-      <h2 class="section-title">Experiencia</h2>
-      ${version.content.experience.map(exp => `
-        <div class="grid-item">
-          <div class="item-dates">${exp.startDate}<br>— ${exp.endDate}</div>
-          <div class="item-content">
-            <h3>${exp.position}</h3>
-            <div class="item-subtitle">${exp.company}</div>
-            <p class="item-desc">${exp.description}</p>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    
-    <div class="section">
-      <h2 class="section-title">Educación</h2>
-      ${version.content.education.map(edu => `
-        <div class="grid-item">
-          <div class="item-dates">${edu.startDate}<br>— ${edu.endDate}</div>
-          <div class="item-content">
-            <h3>${edu.degree}</h3>
-            <div class="item-subtitle">${edu.institution} • ${edu.field}</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    
-    <div class="section">
-      <h2 class="section-title">Habilidades</h2>
-      <div class="skills-grid">
-        ${version.content.skills.map(skill => `<div class="skill-minimal">${skill}</div>`).join('')}
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
-}
-
 
 function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
   const primaryColor = "#1a1a2e"; // Dark Navy
 
-  const name = userData?.name || "Tu Nombre";
-  const email = userData?.email || "tu@email.com";
-  const phone = userData?.phone || "";
-  const targetJob = userData?.targetJob || version.title || "Profesional";
+  const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
+  const email = version.personalDetails?.email || "";
+  const phone = version.personalDetails?.phone || "";
+  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
 
   const languages = version.content.languages || [];
 
@@ -546,7 +398,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
-    .container { padding: 0; display: flex; flex-direction: column; background: white !important; }
+    .container { padding: 0; display: flex; flex-direction: column; background: white !important; font-family: 'Inter', sans-serif; }
     
     .header { 
       background-color: ${primaryColor} !important; 
@@ -577,7 +429,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
     .summary { color: #374151 !important; line-height: 1.6; font-size: 15px; }
     
     .exp-item { position: relative; padding-left: 16px; border-left: 2px solid #e5e7eb !important; margin-bottom: 24px; }
-    .exp-dot { position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #9ca3af !important; }
+    .exp-dot { position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #9ca3af !important; -webkit-print-color-adjust: exact !important; }
     .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
     .exp-role { font-size: 16px; font-weight: 700; color: #111827 !important; }
     .exp-company { font-size: 14px; font-weight: 600; color: #4b5563 !important; margin-bottom: 8px; }
@@ -714,7 +566,187 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
       </div>
     </div>
     
-    <!-- Footer removed as per user request -->
+    <footer class="footer">
+      CV generado con T2W CV Builder • training2work.com
+    </footer>
+  </div>
+</body>
+</html>`;
+}
+
+function generateClassicHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
+  const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
+  const email = version.personalDetails?.email || "";
+  const phone = version.personalDetails?.phone || "";
+  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${version.title} - CV</title>
+  <style>
+    ${baseStyles}
+    body { font-family: 'Playfair Display', Georgia, serif; }
+    .container { padding: 60px; }
+    .header { text-align: center; border-bottom: 2px solid #111827 !important; padding-bottom: 32px; margin-bottom: 40px; }
+    .header h1 { font-size: 32px; color: #111827; letter-spacing: 2px; margin-bottom: 12px; text-transform: uppercase; }
+    .header p { color: #4b5563; font-style: italic; font-size: 16px; }
+    .contact-info { text-align: center; font-size: 14px; color: #6b7280; margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+    
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 14px; font-weight: 700; color: #111827; border-bottom: 1px solid #e5e7eb !important; padding-bottom: 8px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+    
+    .summary { color: #374151; line-height: 1.8; text-align: justify; font-size: 15px; font-family: 'Inter', sans-serif; }
+    
+    .experience-item { margin-bottom: 24px; font-family: 'Inter', sans-serif; }
+    .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .exp-role { font-size: 16px; font-weight: 700; color: #111827; }
+    .exp-dates { color: #6b7280; font-style: italic; font-size: 13px; }
+    .exp-company { font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
+    .exp-desc { color: #4b5563; font-size: 14px; line-height: 1.7; text-align: justify; }
+    
+    .edu-row { display: flex; justify-content: space-between; margin-bottom: 16px; font-family: 'Inter', sans-serif; }
+    .edu-degree { font-size: 15px; font-weight: 700; color: #111827; }
+    .edu-inst { color: #4b5563; font-size: 14px; }
+    .edu-dates { color: #6b7280; font-style: italic; font-size: 13px; }
+    
+    .skills-list { display: flex; flex-wrap: wrap; gap: 12px; font-family: 'Inter', sans-serif; }
+    .skill-item { color: #374151; font-size: 14px; display: flex; align-items: center; }
+    .skill-item::before { content: '•'; color: #00cca9 !important; margin-right: 8px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  ${watermarkHTML}
+  <div class="container">
+    <header class="header">
+      <h1>${name}</h1>
+      <div class="contact-info">${email} ${phone ? `• ${phone}` : ""}</div>
+      <p>${targetJob}</p>
+    </header>
+    
+    <section class="section">
+      <h2 class="section-title">Resumen Profesional</h2>
+      <p class="summary">${version.content.summary}</p>
+    </section>
+    
+    <section class="section">
+      <h2 class="section-title">Experiencia Laboral</h2>
+      ${version.content.experience.map(exp => `
+        <div class="experience-item">
+          <div class="exp-header">
+            <h3 class="exp-role">${exp.position}</h3>
+            <span class="exp-dates">${exp.startDate} — ${exp.endDate}</span>
+          </div>
+          <div class="exp-company">${exp.company}</div>
+          <p class="exp-desc">${exp.description}</p>
+        </div>
+      `).join('')}
+    </section>
+    
+    <section class="section">
+      <h2 class="section-title">Formación Académica</h2>
+      ${version.content.education.map(edu => `
+        <div class="edu-row">
+          <div>
+            <h3 class="edu-degree">${edu.degree} en ${edu.field}</h3>
+            <div class="edu-inst">${edu.institution}</div>
+          </div>
+          <span class="edu-dates">${edu.startDate} — ${edu.endDate}</span>
+        </div>
+      `).join('')}
+    </section>
+    
+    <section class="section">
+      <h2 class="section-title">Competencias</h2>
+      <div class="skills-list">
+        ${version.content.skills.map(skill => `<span class="skill-item">${skill}</span>`).join('')}
+      </div>
+    </section>
+  </div>
+</body>
+</html>`;
+}
+
+function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
+  const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
+  const email = version.personalDetails?.email || "";
+  const phone = version.personalDetails?.phone || "";
+  const targetJob = userData?.targetJob || version.personalDetails?.title || version.title || "Profesional";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${version.title} - CV</title>
+  <style>
+    ${baseStyles}
+    .container { padding: 80px; }
+    .header { margin-bottom: 60px; }
+    .header h1 { font-size: 40px; font-weight: 300; color: #111827; margin-bottom: 16px; letter-spacing: -1px; }
+    .header .accent-line { width: 40px; height: 4px; background: #00cca9 !important; }
+    .contact-info { margin-top: 16px; font-size: 14px; color: #6b7280; }
+    
+    .summary { color: #4b5563; font-size: 18px; line-height: 1.8; font-weight: 300; margin-bottom: 60px; }
+    
+    .section { margin-bottom: 48px; }
+    .section-title { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 32px; }
+    
+    .grid-item { display: grid; grid-template-columns: 140px 1fr; gap: 40px; margin-bottom: 32px; }
+    .item-dates { font-size: 14px; color: #9ca3af; line-height: 1.6; font-weight: 500; }
+    .item-content h3 { font-size: 18px; color: #111827; font-weight: 600; margin-bottom: 4px; }
+    .item-subtitle { color: #00cca9 !important; font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+    .item-desc { color: #4b5563; font-size: 14px; line-height: 1.7; }
+    
+    .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .skill-minimal { font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6 !important; padding-bottom: 4px; }
+  </style>
+</head>
+<body>
+  ${watermarkHTML}
+  <div class="container">
+    <header class="header">
+      <h1>${name}</h1>
+      <div class="accent-line"></div>
+      <div class="contact-info">${email} ${phone ? `• ${phone}` : ""}</div>
+      <p style="font-size: 16px; color: #4b5563; margin-top: 8px;">${targetJob}</p>
+    </header>
+    
+    <p class="summary">${version.content.summary}</p>
+    
+    <div class="section">
+      <h2 class="section-title">Experiencia</h2>
+      ${version.content.experience.map(exp => `
+        <div class="grid-item">
+          <div class="item-dates">${exp.startDate}<br>— ${exp.endDate}</div>
+          <div class="item-content">
+            <h3>${exp.position}</h3>
+            <div class="item-subtitle">${exp.company}</div>
+            <p class="item-desc">${exp.description}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">Educación</h2>
+      ${version.content.education.map(edu => `
+        <div class="grid-item">
+          <div class="item-dates">${edu.startDate}<br>— ${edu.endDate}</div>
+          <div class="item-content">
+            <h3>${edu.degree}</h3>
+            <div class="item-subtitle">${edu.institution} • ${edu.field}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    
+    <div class="section">
+      <h2 class="section-title">Habilidades</h2>
+      <div class="skills-grid">
+        ${version.content.skills.map(skill => `<div class="skill-minimal">${skill}</div>`).join('')}
+      </div>
+    </div>
   </div>
 </body>
 </html>`;
@@ -730,7 +762,7 @@ export async function downloadTemplatePDF(
   const html = generateTemplateHTML(version, template, hasWatermark, userData);
 
   // Generate filename
-  const baseName = userData?.name || version.title || 'CV';
+  const baseName = version.personalDetails?.name || userData?.name || version.title || 'CV';
   const timestamp = new Date().toISOString().split('T')[0];
   const filename = `${baseName.replace(/\s+/g, '_')}_${template}_${timestamp}.pdf`;
 
@@ -742,17 +774,6 @@ export async function downloadTemplatePDF(
     ]);
     const html2canvas = html2canvasModule.default;
     const { jsPDF } = jsPDFModule;
-
-    // Create a hidden container to render the HTML
-    const container = document.createElement('div');
-    container.style.cssText = `
-      position: absolute;
-      left: -9999px;
-      top: 0;
-      width: 210mm;
-      min-height: 297mm;
-      background: white;
-    `;
 
     // Create an iframe to isolate styles
     const iframe = document.createElement('iframe');
@@ -783,7 +804,7 @@ export async function downloadTemplatePDF(
     iframeDoc.close();
 
     // Wait for fonts and content to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Get the container element from iframe
     const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
@@ -840,7 +861,6 @@ export async function downloadTemplatePDF(
   }
 }
 
-// Generate PDF as Blob (for email attachments)
 export async function generateTemplatePDFBlob(
   version: CVVersion,
   template: TemplateType,
@@ -850,7 +870,6 @@ export async function generateTemplatePDFBlob(
   const html = generateTemplateHTML(version, template, hasWatermark, userData);
 
   try {
-    // Dynamically import libraries
     const [html2canvasModule, jsPDFModule] = await Promise.all([
       import('html2canvas'),
       import('jspdf')
@@ -858,41 +877,26 @@ export async function generateTemplatePDFBlob(
     const html2canvas = html2canvasModule.default;
     const { jsPDF } = jsPDFModule;
 
-    // Create an iframe to isolate styles
     const iframe = document.createElement('iframe');
-    iframe.style.cssText = `
-      position: absolute;
-      left: -9999px;
-      top: 0;
-      width: 794px;
-      height: 1123px;
-      border: none;
-    `;
+    iframe.style.cssText = `position: absolute; left: -9999px; top: 0; width: 794px; height: 1123px; border: none;`;
     document.body.appendChild(iframe);
 
-    // Wait for iframe to be ready
     await new Promise<void>((resolve) => {
       iframe.onload = () => resolve();
       iframe.src = 'about:blank';
     });
 
     const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!iframeDoc) {
-      throw new Error('Could not access iframe document');
-    }
+    if (!iframeDoc) throw new Error('Could not access iframe document');
 
-    // Write HTML to iframe
     iframeDoc.open();
     iframeDoc.write(html);
     iframeDoc.close();
 
-    // Wait for fonts and content to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Get the container element from iframe
     const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
 
-    // Convert to canvas
     const canvas = await html2canvas(contentElement as HTMLElement, {
       scale: 2,
       useCORS: true,
@@ -903,21 +907,16 @@ export async function generateTemplatePDFBlob(
       logging: false,
     });
 
-    // Create PDF
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
     });
 
-    // Calculate dimensions
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    // Add image to PDF
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-    // Handle multi-page
     const pageHeight = 297;
     let heightLeft = imgHeight;
     let position = 0;
@@ -932,10 +931,7 @@ export async function generateTemplatePDFBlob(
       heightLeft -= pageHeight;
     }
 
-    // Cleanup iframe
     document.body.removeChild(iframe);
-
-    // Return as Blob
     return pdf.output('blob');
   } catch (error) {
     console.error('PDF generation error:', error);
@@ -943,7 +939,6 @@ export async function generateTemplatePDFBlob(
   }
 }
 
-// Legacy print function (keep for backwards compatibility)
 export function printTemplatePDF(
   version: CVVersion,
   template: TemplateType,
@@ -956,22 +951,11 @@ export function printTemplatePDF(
     printWindow.document.write(html);
     printWindow.document.close();
 
-    // Wait for fonts and images to load
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.focus();
         printWindow.print();
-        // Close window after printing (optional, but cleaner)
-        // printWindow.close();
-      }, 500);
+      }, 1000);
     };
-
-    // Fallback if onload doesn't fire
-    setTimeout(() => {
-      if (printWindow.document.readyState === 'complete') {
-        printWindow.focus();
-        printWindow.print();
-      }
-    }, 2000);
   }
 }

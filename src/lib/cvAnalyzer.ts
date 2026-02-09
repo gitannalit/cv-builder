@@ -50,7 +50,7 @@ export async function analyzeCVText(cvText: string, options?: any): Promise<Anal
   return callAnalyzeFunction(cvText, "analyze", options);
 }
 
-export async function extractCVData(cvText: string): Promise<Partial<CVData> & { names?: string[]; emails?: string[]; phones?: string[] }> {
+export async function extractCVData(cvText: string): Promise<Partial<CVData> & { names?: string[]; emails?: string[] }> {
   const result = await callAnalyzeFunction(cvText, "extract");
 
   // Transform the extracted data to match our CVData structure
@@ -58,11 +58,9 @@ export async function extractCVData(cvText: string): Promise<Partial<CVData> & {
     // Arrays for user selection when multiple options exist
     names: result.names || [],
     emails: result.emails || [],
-    phones: result.phones || [],
     personalInfo: {
       fullName: result.fullName || "",
       email: result.email || "",
-      phone: result.phone || "",
       location: result.location || "",
       linkedIn: result.linkedIn || "",
       portfolio: result.portfolio || "",
@@ -100,7 +98,6 @@ export async function generateCVVersions(
   targetJob?: string,
   name?: string,
   email?: string,
-  phone?: string,
   keyAchievements?: string,
   selectedKeywords?: string[],
   generateSummary?: boolean
@@ -109,7 +106,6 @@ export async function generateCVVersions(
     targetJob,
     name,
     email,
-    phone,
     keyAchievements,
     selectedKeywords,
     generateSummary
