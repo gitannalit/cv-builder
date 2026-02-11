@@ -95,7 +95,7 @@ export function CVPreview({ cvData }: CVPreviewProps) {
       <div className="bg-primary/5 px-6 py-4 border-b border-border">
         <h3 className="font-semibold text-lg">Vista previa del CV</h3>
       </div>
-      
+
       <div className="p-6">
         <div className="bg-white shadow-soft rounded-lg p-8 min-h-[600px] text-sm" style={{ aspectRatio: "210/297" }}>
           {!hasContent ? (

@@ -56,107 +56,114 @@ function createHTMLDocument(
       <meta charset="UTF-8">
       <title>CV Analizado - T2W CV Builder</title>
       <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+        ${watermarkStyle}
         body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          color: #111;
           line-height: 1.6;
-          color: #333;
-          padding: 40px;
+        }
+        .card {
+          background: #fff;
+          border-radius: 0.5rem;
+          box-shadow: 0 1px 2px rgba(0,0,0,.05);
+          padding: 2rem;
           max-width: 800px;
           margin: 0 auto;
         }
-        ${watermarkStyle}
         .header {
           text-align: center;
-          margin-bottom: 30px;
-          padding-bottom: 20px;
-          border-bottom: 2px solid #00cca9;
+          margin-bottom: 1.5rem;
         }
         .header h1 {
-          color: #00cca9;
-          font-size: 24px;
-          margin-bottom: 5px;
-        }
-        .score-section {
-          background: linear-gradient(135deg, #00cca9 0%, #00b396 100%);
-          color: white;
-          padding: 20px;
-          border-radius: 12px;
-          text-align: center;
-          margin-bottom: 30px;
-        }
-        .score-section h2 {
-          font-size: 48px;
-          margin-bottom: 5px;
-        }
-        .score-section p {
-          opacity: 0.9;
+          margin: 0;
         }
         .section {
-          margin-bottom: 25px;
+          margin-bottom: 1.5rem;
         }
         .section h3 {
-          color: #00cca9;
-          font-size: 18px;
-          margin-bottom: 15px;
-          padding-bottom: 8px;
-          border-bottom: 1px solid #e0e0e0;
+          color: #10b981;
+          font-size: 0.95rem;
+          margin-bottom: 0.5rem;
         }
-        .cv-content {
-          background: #f8f9fa;
-          padding: 20px;
-          border-radius: 8px;
-          white-space: pre-wrap;
-          font-size: 14px;
-          line-height: 1.8;
-        }
-        .recommendations ul {
-          list-style: none;
-          padding: 0;
-        }
-        .recommendations li {
-          padding: 10px 15px;
-          margin-bottom: 8px;
-          background: #f0fdf9;
-          border-left: 3px solid #00cca9;
-          border-radius: 0 8px 8px 0;
-        }
-        .keywords {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
-        .keyword {
-          background: #fff3e0;
-          color: #e65100;
-          padding: 5px 12px;
-          border-radius: 20px;
-          font-size: 13px;
+        .skill {
+          display: inline-block;
+          padding: 0.3rem 0.6rem;
+          background: #10b981;
+          color: #fff;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          margin: 0.1rem;
         }
         .footer {
-          margin-top: 40px;
+          margin-top: 1rem;
           text-align: center;
           color: #888;
-          font-size: 12px;
+          font-size: 0.75rem;
         }
         @media print {
-          body {
-            padding: 20px;
-          }
-          .watermark {
-            position: fixed;
-          }
+          body { padding: 20px; }
+          .watermark { position: fixed; }
         }
       </style>
     </head>
+<style>
+.avatar{
+  color:#fff;
+  background:#10b981;
+  border-radius:50%;
+  width:60px;
+  height:60px;
+  min-width:60px;
+  min-height:60px;
+  max-width:60px;
+  max-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:700;
+  text-transform:uppercase;
+  flex-shrink:0;
+  line-height:1;
+  margin:0 auto 15px;
+  aspect-ratio:1/1;
+  overflow:hidden;
+}
+.skill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#10b981;
+  color:#fff;
+  padding:10px 18px;
+  height:32px;
+  border-radius:16px;
+  font-size:13px;
+  line-height:1;
+  vertical-align:middle;
+  margin:4px;
+  white-space:nowrap;
+}
+@media print{
+  .avatar{
+    width:60px !important;
+    height:60px !important;
+    border-radius:50% !important;
+    print-color-adjust:exact;
+    -webkit-print-color-adjust:exact;
+  }
+  .skill{
+    print-color-adjust:exact;
+    -webkit-print-color-adjust:exact;
+  }
+}
+</style>
+
     <body>
       ${watermarkHTML}
       
       <div class="header">
+        <div class="avatar">AB</div>
         <h1>📄 Análisis de CV</h1>
         <p>Generado por T2W CV Builder</p>
       </div>
@@ -178,9 +185,8 @@ function createHTMLDocument(
         </ul>
       </div>
 
-      ${
-        analysisResult.missingKeywords.length > 0
-          ? `
+      ${analysisResult.missingKeywords.length > 0
+      ? `
       <div class="section">
         <h3>🔑 Palabras Clave Sugeridas</h3>
         <div class="keywords">
@@ -188,12 +194,11 @@ function createHTMLDocument(
         </div>
       </div>
       `
-          : ""
-      }
+      : ""
+    }
 
-      ${
-        analysisResult.salaryRange
-          ? `
+      ${analysisResult.salaryRange
+      ? `
       <div class="section">
         <h3>💰 Estimación Salarial</h3>
         <p style="font-size: 18px; color: #00cca9; font-weight: bold;">
@@ -202,8 +207,8 @@ function createHTMLDocument(
         <p style="color: #666; margin-top: 5px;">${analysisResult.salaryRange.currency}</p>
       </div>
       `
-          : ""
-      }
+      : ""
+    }
 
       <div class="footer">
         <p>Generado el ${new Date().toLocaleDateString("es-ES")} | T2W CV Builder</p>
@@ -313,7 +318,7 @@ function createVersionHTMLDocument(version: CVVersion, hasWatermark: boolean): s
           gap: 8px;
         }
         .skill {
-          background: #00cca9;
+          background: #cc0000;
           color: white;
           padding: 6px 14px;
           border-radius: 20px;
@@ -335,6 +340,59 @@ function createVersionHTMLDocument(version: CVVersion, hasWatermark: boolean): s
         }
       </style>
     </head>
+<style>
+.avatar{
+  color:#fff;
+  background:#10b981;
+  border-radius:50%;
+  width:60px;
+  height:60px;
+  min-width:60px;
+  min-height:60px;
+  max-width:60px;
+  max-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:700;
+  text-transform:uppercase;
+  flex-shrink:0;
+  line-height:1;
+  margin:0 auto 15px;
+  aspect-ratio:1/1;
+  overflow:hidden;
+}
+.skill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#10b981;
+  color:#fff;
+  padding:10px 18px;
+  height:32px;
+  border-radius:16px;
+  font-size:13px;
+  line-height:1;
+  vertical-align:middle;
+  margin:4px;
+  white-space:nowrap;
+}
+@media print{
+  .avatar{
+    width:60opx !important;
+    height:600px !important;
+    border-radius:0% !important;
+    print-color-adjust:exact;
+    -webkit-print-color-adjust:exact;
+  }
+  .skill{
+    print-color-adjust:exact;
+    -webkit-print-color-adjust:exact;
+  }
+}
+</style>
+
     <body>
       ${watermarkHTML}
       
@@ -353,8 +411,8 @@ function createVersionHTMLDocument(version: CVVersion, hasWatermark: boolean): s
       <div class="section">
         <h2>💼 Experiencia Profesional</h2>
         ${version.content.experience
-          .map(
-            (exp) => `
+      .map(
+        (exp) => `
           <div class="experience-item">
             <h3>${exp.position}</h3>
             <p class="company">${exp.company}</p>
@@ -362,23 +420,23 @@ function createVersionHTMLDocument(version: CVVersion, hasWatermark: boolean): s
             <p>${exp.description}</p>
           </div>
         `
-          )
-          .join("")}
+      )
+      .join("")}
       </div>
 
       <div class="section">
         <h2>🎓 Educación</h2>
         ${version.content.education
-          .map(
-            (edu) => `
+      .map(
+        (edu) => `
           <div class="education-item">
             <h3>${edu.degree} en ${edu.field}</h3>
             <p class="institution">${edu.institution}</p>
             <p class="dates">${edu.startDate} - ${edu.endDate}</p>
           </div>
         `
-          )
-          .join("")}
+      )
+      .join("")}
       </div>
 
       <div class="section">
@@ -425,7 +483,7 @@ async function createPDFFromHTML(htmlContent: string): Promise<Blob> {
     printWindow.document.write(htmlContent);
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Give time to render then trigger print
     setTimeout(() => {
       printWindow.print();

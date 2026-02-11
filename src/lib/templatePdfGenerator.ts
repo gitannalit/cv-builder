@@ -97,11 +97,16 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       display: flex; 
       flex-direction: column;
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     
     .profile-circle {
       width: 120px;
       height: 120px;
+      min-width: 120px;
+      min-height: 120px;
+      max-width: 120px;
+      max-height: 120px;
       border-radius: 50%;
       background-color: ${primaryColor} !important;
       margin: 0 auto 24px;
@@ -109,9 +114,15 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       align-items: center;
       justify-content: center;
       font-size: 48px;
-      font-weight: bold;
+      font-weight: 700;
+      line-height: 1;
       color: white !important;
+      flex-shrink: 0;
+      overflow: hidden;
+      aspect-ratio: 1/1;
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      padding-bottom: 24px;
     }
     
     .sidebar h1 { 
@@ -145,6 +156,8 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
     .contact-icon { 
       width: 32px; 
       height: 32px; 
+      min-width: 32px;
+      min-height: 32px;
       border-radius: 50%; 
       background: rgba(0, 191, 166, 0.1) !important; 
       display: flex; 
@@ -153,24 +166,50 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       color: ${primaryColor} !important; 
       flex-shrink: 0;
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     .contact-icon svg { width: 16px; height: 16px; }
     
-    .skill-tag { 
-      display: inline-block;
-      padding: 4px 12px;
-      background: rgba(0, 191, 166, 0.12) !important;
-      color: ${primaryColor} !important;
-      border-radius: 20px;
-      font-size: 12px;
-      margin: 0 4px 8px 0;
-      -webkit-print-color-adjust: exact !important;
-    }
+.skill-tag { 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: rgba(0, 191, 166, 0.12) !important;
+  color: ${primaryColor} !important;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 0 4px 8px 0;
+  padding-bottom: 22px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  text-align: center;
+
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
     
     .lang-item { margin-bottom: 12px; }
     .lang-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-    .lang-bar { height: 6px; background: #374151 !important; border-radius: 3px; overflow: hidden; }
-    .lang-progress { height: 100%; background: ${primaryColor} !important; border-radius: 3px; -webkit-print-color-adjust: exact !important; }
+    .lang-bar { 
+      height: 6px; 
+      background: #374151 !important; 
+      border-radius: 3px; 
+      overflow: hidden;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .lang-progress { 
+      height: 100%; 
+      background: ${primaryColor} !important; 
+      border-radius: 3px; 
+      -webkit-print-color-adjust: exact !important; 
+      print-color-adjust: exact !important;
+    }
     
     .edu-item { margin-bottom: 16px; }
     .edu-degree { font-size: 14px; font-weight: 600; color: white !important; }
@@ -178,7 +217,13 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
     .edu-inst { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
     .edu-dates { font-size: 11px; color: ${primaryColor} !important; margin-top: 4px; }
     
-    .main-content { flex: 1; padding: 32px; background: white !important; }
+    .main-content { 
+      flex: 1; 
+      padding: 32px; 
+      background: white !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
     .main-section { margin-bottom: 40px; }
     .main-title { 
       font-size: 18px; 
@@ -194,13 +239,17 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
     .main-title-icon { 
       width: 32px; 
       height: 32px; 
+      min-width: 32px;
+      min-height: 32px;
       background: ${primaryColor} !important; 
       border-radius: 8px; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       color: white !important; 
+      flex-shrink: 0;
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     
     .summary { color: #4b5563 !important; line-height: 1.6; font-size: 14.5px; }
@@ -212,11 +261,14 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       top: 8px; 
       width: 10px; 
       height: 10px; 
+      min-width: 10px;
+      min-height: 10px;
       border-radius: 50%; 
       border: 2px solid ${primaryColor} !important; 
       background: white !important; 
       z-index: 2; 
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     .exp-line { 
       position: absolute; 
@@ -226,6 +278,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       width: 2px; 
       background: rgba(0, 191, 166, 0.2) !important; 
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     .exp-item:last-child .exp-line { display: none; }
     
@@ -236,10 +289,13 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       font-size: 12px; 
       color: ${primaryColor} !important; 
       background: rgba(0, 191, 166, 0.1) !important; 
-      padding: 4px 12px; 
+      padding: 0px 12px; 
+      padding-bottom: 14px;
       border-radius: 20px; 
       font-weight: 500;
+      white-space: nowrap;
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
     .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.6; margin-bottom: 8px; }
     .achievement-item { font-size: 13.5px; color: #374151 !important; margin-bottom: 4px; display: flex; gap: 8px; }
@@ -253,6 +309,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       color: #6b7280 !important;
       margin-top: auto;
       -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
   </style>
 </head>
@@ -387,6 +444,8 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
 </body>
 </html>`;
 }
+
+// ... [resto de las funciones generateExecutiveHTML, generateClassicHTML, generateMinimalHTML permanecen iguales]
 
 function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
   const primaryColor = "#1a1a2e"; // Dark Navy
