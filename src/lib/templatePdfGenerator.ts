@@ -464,6 +464,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
   <title>${version.title} - CV</title>
   <style>
     ${baseStyles}
+    /* === BEGIN EXECUTIVE_CV_CSS === */
     .container { padding: 0; display: flex; flex-direction: column; background: white !important; font-family: 'Inter', sans-serif; }
     
     .header { 
@@ -510,10 +511,17 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
     .edu-degree { font-size: 14px; font-weight: 700; color: #111827 !important; }
     .edu-field { font-size: 13px; color: #4b5563 !important; }
     .edu-meta { font-size: 12px; color: #6b7280 !important; margin-top: 2px; }
+
+    .info-item svg{
+    margin-bottom: -16px;
+    
+  } 
     
     .skills-container { display: flex; flex-wrap: wrap; gap: 8px; }
     .skill-tag { 
-      padding: 4px 12px; 
+      padding-bottom: 14px;
+      padding-left:14px;
+      padding-right:14px;
       background-color: #f3f4f6 !important; 
       color: #374151 !important; 
       border-radius: 4px; 
@@ -533,6 +541,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
       margin-top: auto;
       -webkit-print-color-adjust: exact !important;
     }
+    /* === END EXECUTIVE_CV_CSS === */
   </style>
 </head>
 <body>

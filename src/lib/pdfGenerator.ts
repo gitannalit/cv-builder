@@ -318,7 +318,6 @@ function createVersionHTMLDocument(version: CVVersion, hasWatermark: boolean): s
           gap: 8px;
         }
         .skill {
-          background: #cc0000;
           color: white;
           padding: 6px 14px;
           border-radius: 20px;
@@ -370,6 +369,7 @@ function createVersionHTMLDocument(version: CVVersion, hasWatermark: boolean): s
   background:#10b981;
   color:#fff;
   padding:10px 18px;
+  padding-bottom:16px;
   height:32px;
   border-radius:16px;
   font-size:13px;

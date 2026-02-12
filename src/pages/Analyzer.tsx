@@ -51,6 +51,7 @@ const Analyzer = () => {
   const [availableNames, setAvailableNames] = useState<string[]>([]);
   const [availableEmails, setAvailableEmails] = useState<string[]>([]);
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
 
   // Form state
   const [name, setName] = useState("");
@@ -86,6 +87,14 @@ const Analyzer = () => {
         if (state.isCustomizing) setIsCustomizing(state.isCustomizing);
         if (state.selectedKeywords) setSelectedKeywords(state.selectedKeywords);
         if (state.generateSummary !== undefined) setGenerateSummary(state.generateSummary);
+        if (state.hasActivePlan !== undefined) setHasActivePlan(state.hasActivePlan);
+        if (state.currentPlan !== undefined) setCurrentPlan(state.currentPlan);
+        if (state.downloadCount !== undefined) setDownloadCount(state.downloadCount);
+
+        // If we have an email, verify status immediately
+        if (state.email && state.email.includes('@')) {
+          checkPaymentStatus(state.email);
+        }
       } catch (e) {
         console.error("Error loading state:", e);
       }
@@ -108,10 +117,14 @@ const Analyzer = () => {
       isUnlocked,
       isCustomizing,
       selectedKeywords,
-      generateSummary
+      selectedKeywords,
+      generateSummary,
+      hasActivePlan,
+      currentPlan,
+      downloadCount
     };
     localStorage.setItem('cv_analyzer_state', JSON.stringify(state));
-  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary]);
+  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary, hasActivePlan, currentPlan, downloadCount]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -372,11 +385,21 @@ const Analyzer = () => {
     setSelectedVersion(null);
     setCVText("");
     setUploadedFileName(null);
-    setIsCustomizing(false);
-    setIsUnlocked(false);
-    setSelectedKeywords([]);
     setGenerateSummary(true);
-    localStorage.removeItem('cv_analyzer_state');
+    // Note: We intentionally don't reset payment-related state here 
+    // (isUnlocked, hasActivePlan, currentPlan, downloadCount)
+    // so that the user keeps their access for the new analysis.
+
+    // Create a version of the state without the analysis data but keeping payment info
+    const stateToSave = {
+      email,
+      name,
+      isUnlocked,
+      hasActivePlan,
+      currentPlan,
+      downloadCount
+    };
+    localStorage.setItem('cv_analyzer_state', JSON.stringify(stateToSave));
   };
 
   const handleContinueToQuestions = () => {
@@ -384,6 +407,7 @@ const Analyzer = () => {
   };
 
   const checkPaymentStatus = async (userEmail: string) => {
+    setIsCheckingPayment(true);
     try {
       const { data, error } = await supabase.functions.invoke('check-payment-status', {
         body: { email: userEmail }
@@ -397,6 +421,8 @@ const Analyzer = () => {
     } catch (error) {
       console.error("Error checking payment status:", error);
       return { hasAccess: false };
+    } finally {
+      setIsCheckingPayment(false);
     }
   };
 
@@ -1056,7 +1082,12 @@ const Analyzer = () => {
                 </div>
               </motion.div>
             ) : cvVersions && selectedVersion ? (
-              !isUnlocked ? (
+              isCheckingPayment ? (
+                <div className="flex flex-col items-center justify-center py-40">
+                  <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                  <p className="text-muted-foreground">Verificando acceso...</p>
+                </div>
+              ) : !isUnlocked ? (
                 <LockedCVPreview
                   version={cvVersions[selectedVersion]}
                   type={selectedVersion}
