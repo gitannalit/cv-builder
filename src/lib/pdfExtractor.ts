@@ -112,3 +112,33 @@ async function loadPDFJS(): Promise<any> {
     document.head.appendChild(script);
   });
 }
+
+export async function checkForVerifiedMetadata(file: File): Promise<boolean> {
+  return new Promise(async (resolve) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfjsLib = await loadPDFJS();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      const metadata = await pdf.getMetadata();
+      console.log("PDF Metadata Check:", metadata);
+
+      // Check if subject or keywords contain our verification tag
+      // Also check creator/producer or custom metadata if available
+      const isVerified = metadata?.info?.Subject === 'T2W_VERIFIED_CV' ||
+        metadata?.info?.Title?.includes('T2W_VERIFIED_CV') ||
+        metadata?.metadata?.get('Subject') === 'T2W_VERIFIED_CV';
+
+      console.log("Is Verified PDF?", isVerified);
+
+      if (isVerified) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.error("Error checking PDF metadata:", error);
+      resolve(false);
+    }
+  });
+}

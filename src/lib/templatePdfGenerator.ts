@@ -438,9 +438,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       </section>
     </main>
   </div>
-  <footer class="footer">
-    CV generado con <span style="color: ${primaryColor}">T2W CV Builder</span> • training2work.com
-  </footer>
+
 </body>
 </html>`;
 }
@@ -641,9 +639,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
       </div>
     </div>
     
-    <footer class="footer">
-      CV generado con T2W CV Builder • training2work.com
-    </footer>
+
   </div>
 </body>
 </html>`;
@@ -913,6 +909,15 @@ export async function downloadTemplatePDF(
     // Add image to PDF
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
+    // Add metadata for verification
+    pdf.setProperties({
+      title: filename,
+      subject: 'T2W_VERIFIED_CV',
+      keywords: 'T2W_VERIFIED_CV',
+      creator: 'T2W CV Builder',
+      author: 'Training2Work'
+    });
+
     pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
     // Save the PDF
     pdf.save(filename);
@@ -982,6 +987,15 @@ export async function generateTemplatePDFBlob(
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+    // Add metadata for verification
+    pdf.setProperties({
+      title: version.title || 'CV',
+      subject: 'T2W_VERIFIED_CV',
+      keywords: 'T2W_VERIFIED_CV',
+      creator: 'T2W CV Builder',
+      author: 'Training2Work'
+    });
 
     pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
     document.body.removeChild(iframe);

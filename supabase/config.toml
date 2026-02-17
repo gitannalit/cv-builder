@@ -3,3 +3,12 @@ project_id = "izluhghnfiruylhsgopp"
 
 [functions.analyze-cv]
 verify_jwt = false
+
+[functions.create-checkout-session]
+verify_jwt = false
+
+[functions.check-payment-status]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = false

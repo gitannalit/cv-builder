@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `Eres un experto senior en recursos humanos y sistemas ATS (Applicant Tracking Systems) especializado en el mercado laboral español.
-Proporcionas análisis exhaustivos, profesionales y detallados de currículums vitae.
+Proporcionas análisis exhaustivos, rigurosos y detallados de currículums vitae.
 Respondes SOLO con JSON válido, sin texto adicional antes o después.
 
 PRINCIPIO FUNDAMENTAL: VERACIDAD ESTRICTA.
@@ -14,56 +14,45 @@ PRINCIPIO FUNDAMENTAL: VERACIDAD ESTRICTA.
 - Si falta información (fechas, métricas, estudios), SEÑÁLALO como problema, NO intentes rellenarlo.
 - Basa tu análisis EXCLUSIVAMENTE en el texto proporcionado.
 
-PRINCIPIO DE CONSISTENCIA Y JUSTICIA:
-- Puntúa según los MÉRITOS REALES del CV. Un CV bien estructurado, con logros cuantificables, keywords adecuados y buena redacción DEBE recibir una puntuación alta (75-95).
-- Un CV profesional y optimizado debería puntuar entre 80-95.
-- NO penalices artificialmente un CV que cumple los criterios. Sé justo.
-- Si el CV tiene buena estructura, experiencia detallada con métricas, skills relevantes y está bien redactado, reconócelo con una puntuación alta.
-
 Criterios de evaluación:
-1. PUNTUACIÓN ATS (0-100): Evalúa la compatibilidad con sistemas automáticos según la calidad REAL del CV.
+1. PUNTUACIÓN ATS (0-100): Evalúa rigurosamente la compatibilidad con sistemas automáticos.
 2. ANÁLISIS POR CATEGORÍAS: Puntúa Formato, Keywords, Experiencia, Habilidades y Logros.
-3. PROBLEMAS DETECTADOS: Clasifica por CRITICAL, WARNING e INFO. Cada problema debe tener una solución específica. Reporta SOLO problemas REALES.
+3. PROBLEMAS DETECTADOS: Clasifica por CRITICAL, WARNING e INFO. Cada problema debe tener una solución específica.
 4. PALABRAS CLAVE FALTANTES: Lista específica de keywords del sector que faltan en el CV.
-5. RECOMENDACIONES PRIORITARIAS: Acciones concretas para mejorar el CV (solo si aplica).
+5. RECOMENDACIONES PRIORITARIAS: Mínimo 5 acciones concretas para mejorar el CV.
 6. ESTIMACIÓN SALARIAL: Basada en el mercado español actual, años de experiencia y sector.
 7. CONSISTENCIA DE DATOS: Verifica si los 'Datos del candidato' proporcionados coinciden con el contenido del CV.
 
-RÚBRICA DE PUNTUACIÓN (Sigue estos baremos para asegurar consistencia):
+RÚBRICA DE PUNTUACIÓN ESTRICTA (Sigue estos baremos para asegurar consistencia):
 
 1. FORMATO (Máx 15 pts):
-   - Excelente (limpio, sin tablas complejas, estructura estándar, secciones claras): 14-15 pts
-   - Bueno (legible, buena estructura con detalles menores a mejorar): 10-13 pts
-   - Regular (legible pero con columnas complejas, iconos o diseño anticuado): 6-9 pts
-   - Malo (ilegible para ATS, desordenado o todo imagen): 0-5 pts
+   - Perfecto (limpio, sin tablas complejas, estructura estándar): 15 pts
+   - Bueno (legible pero con columnas complejas o iconos): 10 pts
+   - Regular (desordenado o diseño anticuado): 5 pts
+   - Malo (ilegible para ATS, todo imagen): 0 pts
 
 2. KEYWORDS (Máx 25 pts):
-   - Excelente (>80% palabras clave del sector presentes): 21-25 pts
-   - Bueno (50-80% palabras clave presentes): 14-20 pts
-   - Regular (25-50% palabras clave): 7-13 pts
-   - Pobre (<25% palabras clave): 0-6 pts
+   - Excelencia (>80% palabras clave del sector): 25 pts
+   - Bueno (>50% palabras clave): 15 pts
+   - Pobre (pocas palabras clave): 5 pts
 
 3. EXPERIENCIA (Máx 25 pts):
-   - Excelente (logros cuantificables con %, €, métricas claras): 21-25 pts
-   - Bueno (descripción detallada de responsabilidades con algunos logros): 14-20 pts
-   - Regular (descripción de tareas sin métricas): 7-13 pts
-   - Pobre (solo lista de puestos sin descripción): 0-6 pts
+   - Alto Impacto (con logros cuantificables %, €): 25 pts
+   - Estándar (descripción de tareas sin métricas): 15 pts
+   - Básico (solo lista de puestos): 5 pts
 
 4. HABILIDADES (Máx 15 pts):
-   - Excelente (Hard + Soft skills relevantes, bien organizadas): 13-15 pts
-   - Bueno (skills relevantes pero podrían estar mejor organizadas): 9-12 pts
-   - Regular (skills genéricas o poco relevantes): 4-8 pts
-   - Pobre (pocas o ninguna skill): 0-3 pts
+   - Completas (Hard + Soft skills relevantes y separadas): 15 pts
+   - Genéricas: 5 pts
 
 5. LOGROS (Máx 20 pts):
-   - Excelente (claramente definidos, cuantificados y destacados): 17-20 pts
-   - Bueno (logros mencionados con cierto detalle): 11-16 pts
-   - Regular (mencionados vagamente): 5-10 pts
-   - Pobre (inexistentes): 0-4 pts
+   - Claramente definidos y destacados: 20 pts
+   - Mencionados vagamente: 10 pts
+   - Inexistentes: 0 pts
 
-NOTA: Si detectas discrepancias en "Consistencia de Datos", RESTA hasta 10 PUNTOS a la nota final.
+NOTA: Si detectas discrepancias en "Consistencia de Datos", RESTA 10 PUNTOS a la nota final.
 
-Sé justo, consistente y profesional. Reconoce los méritos reales del CV y puntúa en consecuencia.`;
+Sé extremadamente crítico, rígido y profesional. No regales puntos.`;
 
 const USER_PROMPT = (cvText: string) => `Analiza el siguiente currículum vitae y proporciona un análisis detallado en formato JSON siguiendo los estándares ATS más estrictos.
 Ten en cuenta los "Datos del candidato" proporcionados al inicio (si los hay) y compáralos con el texto del CV.
@@ -99,10 +88,9 @@ Responde ÚNICAMENTE con un JSON válido con esta estructura exacta:
 }
 
 IMPORTANTE: 
-1. Reporta SOLO los problemas REALES que encuentres. Si el CV está bien optimizado y tiene pocos o ningún problema, es perfectamente válido devolver una lista vacía o con 1 solo problema. NO inventes deficiencias donde no las hay.
+1. Debes encontrar al menos 3 problemas o áreas de mejora, incluso si el CV es bueno. Sé muy riguroso.
 2. SI los "Datos del candidato" (Nombre, Email, Teléfono, Puesto Objetivo) NO coinciden con los del CV, genera obligatoriamente un problema (severity: warning/critical) avisando de la discrepancia. Ej: "El email proporcionado no coincide con el del CV".
-3. NO INVENTES NADA. Si el CV no menciona algo, no asumas que lo tiene.
-4. Si el CV tiene buena estructura, logros cuantificables, keywords relevantes y redacción profesional, la puntuación ATS DEBE reflejarlo (75+).`;
+3. NO INVENTES NADA. Si el CV no menciona algo, no asumas que lo tiene.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -110,7 +98,25 @@ serve(async (req) => {
   }
 
   try {
-    const { cvText, cvImage, action, targetJob, keyAchievements, name, email, phone, experienceYears, selectedKeywords, generateSummary } = await req.json();
+    const { cvText, cvImage, action, targetJob, keyAchievements, name, email, phone, experienceYears, selectedKeywords, generateSummary, verified } = await req.json();
+
+    // Specific logic for verified CVs (Perfect Score)
+    if (verified === true && (!action || action === 'analyze')) {
+      return new Response(JSON.stringify({
+        atsScore: 100,
+        formatScore: 100,
+        keywordsScore: 100,
+        experienceScore: 100,
+        skillsScore: 100,
+        achievementsScore: 100,
+        problems: [],
+        missingKeywords: [],
+        recommendations: ["Tu CV está perfectamente optimizado. ¡Buen trabajo!"],
+        salaryRange: null // Or keep existing estimate logic if preferred, but simpler to omit or mock
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) {
