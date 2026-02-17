@@ -174,20 +174,15 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
-  background: rgba(0, 191, 166, 0.12) !important;
   color: ${primaryColor} !important;
-  border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
   line-height: 1.3;
-  margin: 0 4px 8px 0;
-  padding-bottom: 22px;
+  margin: 0 12px 8px 0;
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
-  text-align: center;
 
   -webkit-print-color-adjust: exact !important;
   print-color-adjust: exact !important;
@@ -341,7 +336,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       <div class="sidebar-section">
         <h2 class="sidebar-title">Habilidades</h2>
         <div style="display: flex; flex-wrap: wrap;">
-          ${version.content.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+          ${version.content.skills.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
         </div>
       </div>
       
@@ -517,14 +512,11 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
     
     .skills-container { display: flex; flex-wrap: wrap; gap: 8px; }
     .skill-tag { 
-      padding-bottom: 14px;
-      padding-left:14px;
-      padding-right:14px;
-      background-color: #f3f4f6 !important; 
       color: #374151 !important; 
-      border-radius: 4px; 
       font-size: 12px; 
       font-weight: 500; 
+      margin-right: 16px;
+      margin-bottom: 4px;
       -webkit-print-color-adjust: exact !important;
     }
     
@@ -619,7 +611,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
           <section class="section">
             <h2 class="section-title">Competencias</h2>
             <div class="skills-container">
-              ${version.content.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+              ${version.content.skills.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
             </div>
           </section>
           
@@ -731,7 +723,7 @@ function generateClassicHTML(version: CVVersion, hasWatermark: boolean, watermar
     <section class="section">
       <h2 class="section-title">Competencias</h2>
       <div class="skills-list">
-        ${version.content.skills.map(skill => `<span class="skill-item">${skill}</span>`).join('')}
+        ${version.content.skills.slice(0, 5).map(skill => `<span class="skill-item">${skill}</span>`).join('')}
       </div>
     </section>
   </div>
@@ -770,7 +762,7 @@ function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermar
     .item-desc { color: #4b5563; font-size: 14px; line-height: 1.7; }
     
     .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .skill-minimal { font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6 !important; padding-bottom: 4px; }
+    .skill-minimal { font-size: 14px; color: #374151; border-bottom: 1px solid #f3f4f6 !important; }
   </style>
 </head>
 <body>
@@ -815,7 +807,7 @@ function generateMinimalHTML(version: CVVersion, hasWatermark: boolean, watermar
     <div class="section">
       <h2 class="section-title">Habilidades</h2>
       <div class="skills-grid">
-        ${version.content.skills.map(skill => `<div class="skill-minimal">${skill}</div>`).join('')}
+        ${version.content.skills.slice(0, 5).map(skill => `<div class="skill-minimal">${skill}</div>`).join('')}
       </div>
     </div>
   </div>

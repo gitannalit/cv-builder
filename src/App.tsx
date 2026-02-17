@@ -10,7 +10,11 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import Dashboard from "./pages/Dashboard";
+import Terms from "./pages/Legal/Terms";
+import Privacy from "./pages/Legal/Privacy";
+import Cookies from "./pages/Legal/Cookies";
 import { AuthProvider } from "./context/AuthContext";
+import { CookieBanner } from "./components/legal/CookieBanner";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -23,15 +27,16 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="bg-gradient-to-r from-orange-400 to-amber-400 text-white text-center py-1.5 text-xs font-bold uppercase tracking-wider sticky top-0 z-[100] shadow-sm">
-            Versión 1.2 • Estado Beta
-          </div>
+          <CookieBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/builder" element={<Builder />} />
             <Route path="/analyzer" element={<Analyzer />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/terminos" element={<Terms />} />
+            <Route path="/privacidad" element={<Privacy />} />
+            <Route path="/cookies" element={<Cookies />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

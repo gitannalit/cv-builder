@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Download, LogOut, User as UserIcon, Calendar, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { StripeEmbeddedCheckout } from "@/components/analyzer/StripeEmbeddedCheckout";
+import { UpgradeDialog } from "@/components/dashboard/UpgradeDialog";
 
 export default function Dashboard() {
     const { user, signOut } = useAuth();
@@ -22,6 +23,7 @@ export default function Dashboard() {
     });
     const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -122,6 +124,7 @@ export default function Dashboard() {
             if (error) throw error;
             if (data.clientSecret) {
                 setStripeClientSecret(data.clientSecret);
+                setIsUpgradeDialogOpen(false);
             }
         } catch (error) {
             console.error("Error creating checkout session:", error);
@@ -210,7 +213,7 @@ export default function Dashboard() {
                             </Button>
                             {stats.planType === 'free' && (
                                 <Button
-                                    onClick={() => handleUpgrade('basic')}
+                                    onClick={() => setIsUpgradeDialogOpen(true)}
                                     variant="secondary"
                                     className="flex-1"
                                     disabled={isProcessingPayment}
@@ -221,7 +224,7 @@ export default function Dashboard() {
                             )}
                             {stats.planType === 'basic' && (
                                 <Button
-                                    onClick={() => handleUpgrade('premium')}
+                                    onClick={() => setIsUpgradeDialogOpen(true)}
                                     variant="secondary"
                                     className="flex-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-white border-none hover:from-yellow-600 hover:to-amber-700"
                                     disabled={isProcessingPayment}
@@ -283,6 +286,13 @@ export default function Dashboard() {
                         }}
                     />
                 )}
+
+                <UpgradeDialog
+                    isOpen={isUpgradeDialogOpen}
+                    onClose={() => setIsUpgradeDialogOpen(false)}
+                    onUpgrade={handleUpgrade}
+                    currentPlan={stats.planType}
+                />
 
             </div>
         </div>

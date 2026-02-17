@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft, FileText } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Register() {
     const [email, setEmail] = useState("");
@@ -41,67 +42,118 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-            <div className="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900">Crear Cuenta</h1>
-                    <p className="text-gray-600 mt-2">Únete a CV Builder hoy mismo</p>
-                </div>
+        <div className="min-h-screen bg-gray-50/50 font-sans selection:bg-primary/20 selection:text-primary relative overflow-hidden flex items-center justify-center px-4 py-12">
+            {/* Minimal Background Decorative Element */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(var(--primary-rgb),0.05),transparent_50%)]" />
+            </div>
 
-                <form onSubmit={handleRegister} className="space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="fullName">Nombre Completo</Label>
-                        <Input
-                            id="fullName"
-                            type="text"
-                            placeholder="Juan Pérez"
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="tu@email.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="password">Contraseña</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            minLength={6}
-                        />
-                    </div>
-
-                    <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Registrarse
-                    </Button>
-                </form>
-
-                <div className="mt-6 text-center text-sm">
-                    <span className="text-gray-600">¿Ya tienes cuenta?</span>{" "}
-                    <Link
-                        to="/login"
-                        className="font-medium text-primary hover:underline"
-                    >
-                        Inicia sesión
+            <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="w-full max-w-[440px]"
+            >
+                <div className="mb-8 flex justify-center">
+                    <Link to="/" className="flex items-center gap-2 group">
+                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                            <FileText className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-black text-lg leading-tight tracking-tighter text-foreground uppercase">T2W</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary leading-none">CV Builder</span>
+                        </div>
                     </Link>
                 </div>
-            </div>
+
+                <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-gray-100">
+                    <div className="space-y-2 mb-10">
+                        <h1 className="text-2xl font-black text-foreground tracking-tight">Crear cuenta</h1>
+                        <p className="text-muted-foreground font-medium text-sm">Empieza a optimizar tu carrera profesional.</p>
+                    </div>
+
+                    <form onSubmit={handleRegister} className="space-y-5">
+                        <div className="space-y-2.5">
+                            <Label htmlFor="fullName" className="text-sm font-bold text-foreground">Nombre completo</Label>
+                            <Input
+                                id="fullName"
+                                type="text"
+                                placeholder="Ej: Juan Pérez"
+                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2.5">
+                            <Label htmlFor="email" className="text-sm font-bold text-foreground">Email</Label>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="ejemplo@email.com"
+                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2.5">
+                            <Label htmlFor="password" dclassName="text-sm font-bold text-foreground">Contraseña</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                placeholder="Mínimo 6 caracteres"
+                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                minLength={6}
+                            />
+                        </div>
+
+                        <div className="pt-4">
+                            <Button
+                                type="submit"
+                                className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold transition-all"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                                ) : (
+                                    "Registrarme gratis"
+                                )}
+                            </Button>
+                        </div>
+                    </form>
+
+                    <div className="mt-8 pt-6 border-t border-gray-50 text-center">
+                        <p className="text-sm font-medium text-muted-foreground">
+                            ¿Ya tienes cuenta?{" "}
+                            <Link
+                                to="/login"
+                                className="font-bold text-primary hover:underline"
+                            >
+                                Inicia sesión
+                            </Link>
+                        </p>
+                    </div>
+
+                    <div className="mt-6 text-[11px] text-center text-muted-foreground font-medium leading-relaxed">
+                        Al registrarte, aceptas nuestros <br />
+                        <Link to="/terminos" className="text-primary hover:underline">Términos</Link> y <Link to="/privacidad" className="text-primary hover:underline">Privacidad</Link>
+                    </div>
+                </div>
+
+                <Link
+                    to="/"
+                    className="mt-8 mx-auto text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest group"
+                >
+                    <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+                    Volver a la página principal
+                </Link>
+            </motion.div>
         </div>
     );
 }

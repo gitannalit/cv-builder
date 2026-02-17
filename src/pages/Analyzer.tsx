@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen } from "lucide-react";
+import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen, Plus, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 import { LockedCVPreview } from "@/components/analyzer/LockedCVPreview";
@@ -23,6 +23,7 @@ import { analyzeCVText, generateActionPlan, generateCVVersions, extractCVData } 
 import { downloadTemplatePDF } from "@/lib/templatePdfGenerator";
 import { downloadATSGuidePDF } from "@/lib/atsGuide";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 
@@ -55,6 +56,7 @@ const Analyzer = () => {
   const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [isVerifiedPDF, setIsVerifiedPDF] = useState(false);
+  const [acceptedLegal, setAcceptedLegal] = useState(false);
 
   // Form state
   const [name, setName] = useState("");
@@ -648,24 +650,42 @@ const Analyzer = () => {
   }, [extractedData]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50 no-print">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+    <div className="min-h-screen bg-white font-sans selection:bg-primary/20 selection:text-primary relative overflow-hidden flex flex-col">
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="absolute top-[-5%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]"
+        />
+        <div className="absolute bottom-[20%] right-[-10%] w-[30%] h-[30%] bg-primary/5 rounded-full blur-[100px]" />
+      </div>
+      <header className="border-b bg-white/70 backdrop-blur-md sticky top-0 z-50 no-print h-20 flex items-center">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 group transition-all">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-accent group-hover:scale-105 transition-transform duration-300">
               <FileText className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-xl">T2W CV Builder</span>
-          </a>
-          <div className="text-sm text-muted-foreground hidden sm:block">
-            {step === "form" && "Paso 1 de 5: Sube tu CV"}
-            {step === "analyzing" && "Analizando..."}
-            {step === "results" && "Paso 2 de 5: Resultados"}
-            {step === "questions" && "Paso 3 de 5: Personaliza"}
-            {step === "generating" && "Generando..."}
-            {step === "versions" && "Paso 4 de 5: Elige versión"}
-            {step === "final" && "Paso 5 de 5: Tu CV"}
-            {step === "visual" && "Vista del CV"}
+            <div className="flex flex-col">
+              <span className="font-bold text-lg leading-tight tracking-tight text-foreground">T2W</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary leading-none">CV Builder</span>
+            </div>
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {step === "form" && "Paso 1: Sube tu CV"}
+                {step === "analyzing" && "Analizando..."}
+                {step === "results" && "Paso 2: Resultados"}
+                {step === "questions" && "Paso 3: Personaliza"}
+                {step === "generating" && "Generando..."}
+                {step === "versions" && "Paso 4: Elige versión"}
+                {step === "final" && "Paso 5: Tu CV"}
+                {step === "visual" && "Previsualización"}
+              </span>
+            </div>
           </div>
         </div>
       </header>
@@ -676,209 +696,261 @@ const Analyzer = () => {
           <AnimatePresence mode="wait">
             {isAnalyzing ? (
               <motion.div
-                key="loading"
+                key="analyzing"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20"
+                className="flex flex-col items-center justify-center py-32 space-y-8"
               >
                 <div className="relative">
-                  {/* Spinner exterior */}
-                  <div className="w-24 h-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                  {/* Icono central */}
-                  <Sparkles className="w-10 h-10 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="w-32 h-32 rounded-full border-4 border-primary/10 border-t-primary shadow-glow"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Sparkles className="w-12 h-12 text-primary animate-pulse" />
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold mt-8 mb-2">Analizando tu CV...</h2>
-                <p className="text-muted-foreground text-center max-w-md">
-                  Nuestra IA está evaluando tu currículum contra los filtros ATS más comunes
-                </p>
+                <div className="text-center space-y-3">
+                  <h2 className="text-4xl font-black text-foreground tracking-tight">Escanenado tu potencial...</h2>
+                  <p className="text-muted-foreground font-medium text-lg">Nuestra IA está desglosando tu experiencia para los filtros ATS.</p>
+                </div>
+                <div className="flex gap-2">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ y: [0, -10, 0] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                      className="w-3 h-3 bg-primary rounded-full"
+                    />
+                  ))}
+                </div>
               </motion.div>
-            ) : !analysisResult ? (
+            ) : (!analysisResult || step === "form") ? (
               <motion.div
                 key="input"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ delay: 0.1 }}
-                className="max-w-3xl mx-auto space-y-8"
+                className="max-w-4xl mx-auto space-y-10"
               >
-                <div className="text-center mb-10">
-                  <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-                    Analiza tu CV con IA
+                <div className="text-center space-y-4 mb-4">
+                  <h1 className="text-5xl md:text-6xl font-black tracking-tight text-foreground">
+                    Analiza tu CV <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">con Inteligencia Artificial</span>
                   </h1>
-                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                    Obtén una puntuación ATS detallada y recomendaciones personalizadas para mejorar tu currículum
+                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
+                    Optimiza tu perfil para superar los filtros ATS y destacar ante los reclutadores en segundos.
                   </p>
                 </div>
 
-                {/* Card 1: Tus datos */}
-                <Card className="border-border shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold">Tus datos</CardTitle>
-                    <CardDescription>
-                      {user
-                        ? "Sesión iniciada. Usaremos tus datos de perfil."
-                        : "Solo necesitamos tu nombre y email para enviarte el informe"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Nombre completo *</Label>
-                        <Input
-                          id="name"
-                          placeholder="Juan Garcia"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          disabled={!!user && !!name}
+                <div className="grid lg:grid-cols-5 gap-8">
+                  <div className="lg:col-span-3 space-y-8">
+                    {/* Card 2: Tu CV actual */}
+                    <Card className="border-gray-100 shadow-strong rounded-[2.5rem] overflow-hidden glass">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-2xl font-black flex items-center gap-3">
+                          <FileText className="w-6 h-6 text-primary" />
+                          Tu CV actual
+                        </CardTitle>
+                        <CardDescription className="text-base font-medium">Sube tu CV en PDF o pega el texto directamente</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-8">
+                        <div
+                          className={`group relative border-2 border-dashed rounded-[2rem] p-12 text-center transition-all cursor-pointer bg-white/50
+                            ${isDragging ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50 hover:bg-white"}
+                            ${isExtractingPDF ? "opacity-50 pointer-events-none" : ""}`}
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onClick={() => document.getElementById("cv-upload")?.click()}
+                        >
+                          <input
+                            id="cv-upload"
+                            type="file"
+                            accept=".pdf,.txt"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleFileUpload(e.target.files[0]);
+                                e.target.value = ''; // Reset to allow re-selecting same file
+                              }
+                            }}
+                            disabled={isExtractingPDF}
+                          />
+                          {isExtractingPDF ? (
+                            <div className="flex flex-col items-center gap-4">
+                              <Loader2 className="w-16 h-16 text-primary animate-spin" />
+                              <p className="font-bold text-lg">Procesando archivo...</p>
+                            </div>
+                          ) : uploadedFileName ? (
+                            <div className="flex flex-col items-center gap-4">
+                              <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center">
+                                <CheckCircle2 className="w-10 h-10 text-green-500" />
+                              </div>
+                              <p className="font-bold text-lg">{uploadedFileName}</p>
+                              <p className="text-sm font-bold text-primary group-hover:underline">Haz clic para cambiar el archivo</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-6">
+                              <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto group-hover:bg-primary/10 transition-colors">
+                                <Upload className="w-10 h-10 text-gray-400 group-hover:text-primary transition-colors" />
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-black text-2xl tracking-tight">Eleva tu candidatura</p>
+                                <p className="text-muted-foreground font-medium">Arrastra tu archivo aquí o selecciona uno</p>
+                              </div>
+                              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest bg-gray-100 rounded-full px-4 py-1.5 inline-block">PDF, TXT (MÁX. 5MB)</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-gray-100" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-white px-6 text-muted-foreground font-black tracking-widest">O PEGA EL TEXTO</span>
+                          </div>
+                        </div>
+
+                        <Textarea
+                          placeholder="Pega aquí el contenido de tu CV para un análisis rápido..."
+                          className="min-h-[250px] resize-none border-gray-100 rounded-2xl focus:ring-primary/20 transition-all font-medium text-base p-6 bg-white/50"
+                          value={cvText}
+                          onChange={(e) => setCVText(e.target.value)}
+                        />
+
+                        <div className="text-center p-4 bg-primary/5 rounded-2xl flex items-center justify-center gap-3">
+                          <Zap className="w-5 h-5 text-primary" />
+                          <p className="text-sm font-bold text-primary">
+                            Escaneo Inteligente con IA para máxima precisión
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="lg:col-span-2 space-y-8">
+                    {/* Card 1: Tus datos */}
+                    <Card className="border-gray-100 shadow-strong rounded-[2.5rem] overflow-hidden glass">
+                      <CardHeader>
+                        <CardTitle className="text-xl font-black">Información Personal</CardTitle>
+                        <CardDescription className="font-medium">
+                          {user ? "Datos vinculados a tu perfil" : "Necesarios para tu reporte"}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-5">
+                          <div className="space-y-2">
+                            <Label htmlFor="name" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Nombre completo</Label>
+                            <Input
+                              id="name"
+                              placeholder="Ej: Juan Garcia"
+                              className="h-14 rounded-xl border-gray-100 font-bold px-5 bg-white/50"
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              disabled={!!user && !!name}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="email" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Email de contacto</Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              placeholder="juan@ejemplo.com"
+                              className="h-14 rounded-xl border-gray-100 font-bold px-5 bg-white/50"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              disabled={!!user}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Card 3: Información adicional */}
+                    <Card className="border-gray-100 shadow-strong rounded-[2.5rem] overflow-hidden glass">
+                      <CardHeader>
+                        <CardTitle className="text-xl font-black">Tu Meta</CardTitle>
+                        <CardDescription className="font-medium">Para afinar el análisis</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-5">
+                          <div className="space-y-2">
+                            <Label htmlFor="targetJob" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Puesto objetivo</Label>
+                            <Input
+                              id="targetJob"
+                              placeholder="Ej: Senior Web Dev"
+                              className="h-14 rounded-xl border-gray-100 font-bold px-5 bg-white/50"
+                              value={targetJob}
+                              onChange={(e) => setTargetJob(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="experience" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Experiencia</Label>
+                            <Select value={experienceYears} onValueChange={setExperienceYears}>
+                              <SelectTrigger
+                                id="experience"
+                                className="h-14 rounded-xl border-gray-100 font-bold px-5 bg-white/50 focus:ring-0"
+                              >
+                                <SelectValue placeholder="Selecciona" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-xl border-gray-100 font-bold">
+                                <SelectItem value="0-1">0-1 años</SelectItem>
+                                <SelectItem value="1-3">1-3 años</SelectItem>
+                                <SelectItem value="3-5">3-5 años</SelectItem>
+                                <SelectItem value="5-10">5-10 años</SelectItem>
+                                <SelectItem value="10+">+10 años</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                      <div className="flex items-center h-5">
+                        <input
+                          id="acceptedLegal"
+                          name="acceptedLegal"
+                          type="checkbox"
+                          className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary/20 accent-primary cursor-pointer"
+                          checked={acceptedLegal}
+                          onChange={(e) => setAcceptedLegal(e.target.checked)}
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="juan@ejemplo.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          disabled={!!user}
-                        />
+                      <div className="text-sm">
+                        <label htmlFor="acceptedLegal" className="font-medium text-gray-700 cursor-pointer">
+                          Acepto los <Link to="/terminos" className="text-primary hover:underline" target="_blank">Términos de Servicio</Link> y la <Link to="/privacidad" className="text-primary hover:underline" target="_blank">Política de Privacidad</Link>.
+                        </label>
+                        <p className="text-xs text-muted-foreground mt-1">Requerido para procesar tus datos de forma segura.</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
 
-                {/* Card 2: Tu CV actual */}
-                <Card className="border-border shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold">Tu CV actual</CardTitle>
-                    <CardDescription>Sube tu CV en PDF o pega el texto directamente</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div
-                      className={`border-2 border-dashed rounded-xl p-12 text-center transition-all cursor-pointer
-                        ${isDragging ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50"}
-                        ${isExtractingPDF ? "opacity-50 pointer-events-none" : ""}`}
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onClick={() => document.getElementById("cv-upload")?.click()}
+                    <Button
+                      variant="hero"
+                      size="xl"
+                      className="w-full gap-4 h-24 text-xl font-black rounded-3xl shadow-accent hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100"
+                      onClick={handleAnalyze}
+                      disabled={!cvText.trim() || isAnalyzing || isExtractingPDF || !name || !email || !acceptedLegal}
                     >
-                      <input
-                        id="cv-upload"
-                        type="file"
-                        accept=".pdf,.txt"
-                        className="hidden"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) {
-                            handleFileUpload(e.target.files[0]);
-                            e.target.value = ''; // Reset to allow re-selecting same file
-                          }
-                        }}
-                        disabled={isExtractingPDF}
-                      />
-                      {isExtractingPDF ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                          <p className="font-medium">Procesando archivo...</p>
-                        </div>
-                      ) : uploadedFileName ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <CheckCircle2 className="w-12 h-12 text-green-500" />
-                          <p className="font-medium">{uploadedFileName}</p>
-                          <p className="text-sm text-muted-foreground">Haz clic para cambiar el archivo</p>
-                        </div>
+                      {isAnalyzing ? (
+                        <>
+                          <Loader2 className="w-7 h-7 animate-spin" />
+                          Procesando...
+                        </>
                       ) : (
-                        <div className="space-y-4">
-                          <Upload className="w-12 h-12 mx-auto text-gray-400" />
-                          <p className="font-medium text-lg">Arrastra tu CV aquí o haz clic para seleccionar</p>
-                          <p className="text-sm text-muted-foreground">PDF, TXT (máx. 5MB)</p>
-                        </div>
+                        <>
+                          Analizar mi CV
+                          <ArrowRight className="w-7 h-7" />
+                        </>
                       )}
-                    </div>
-
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-4 text-muted-foreground font-medium">O pega el texto</span>
-                      </div>
-                    </div>
-
-                    <Textarea
-                      placeholder="Pega aquí el contenido de tu CV..."
-                      className="min-h-[200px] resize-none border-gray-200"
-                      value={cvText}
-                      onChange={(e) => setCVText(e.target.value)}
-                    />
-
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
-                        <Zap className="w-3 h-3 text-yellow-500" />
-                        Usamos Escaneo Inteligente con IA para la máxima precisión
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Card 3: Información adicional */}
-                <Card className="border-border shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold">Información adicional (opcional)</CardTitle>
-                    <CardDescription>Nos ayuda a darte mejores recomendaciones</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="targetJob">¿Qué puesto buscas?</Label>
-                        <Input
-                          id="targetJob"
-                          placeholder="Ej: Desarrollador Full Stack"
-                          value={targetJob}
-                          onChange={(e) => setTargetJob(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="experience">Años de experiencia</Label>
-                        <Select value={experienceYears} onValueChange={setExperienceYears}>
-                          <SelectTrigger
-                            id="experience"
-                            className="w-35  focus:ring-0 focus:ring-offset-0 focus:border-input"
-                          >
-                            <SelectValue placeholder="Selecciona" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0-1" className="focus:bg-[#ffc200] focus:text-black">0-1 años</SelectItem>
-                            <SelectItem value="1-3" className="focus:bg-[#ffc200] focus:text-black">1-3 años</SelectItem>
-                            <SelectItem value="3-5" className="focus:bg-[#ffc200] focus:text-black">3-5 años</SelectItem>
-                            <SelectItem value="5-10" className="focus:bg-[#ffc200] focus:text-black">5-10 años</SelectItem>
-                            <SelectItem value="10+" className="focus:bg-[#ffc200] focus:text-black">+10 años</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Button
-                  variant="hero"
-                  className="w-full gap-3 text-base py-6 bg-[#00D1A0] hover:bg-[#00B88D] text-white shadow-none rounded-xl transition-all"
-                  onClick={handleAnalyze}
-                  disabled={!cvText.trim() || isAnalyzing || isExtractingPDF || !name || !email}
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                      Analizando tu CV...
-                    </>
-                  ) : (
-                    <>
-                      Analizar mi CV gratis
-                      <ArrowRight className="w-6 h-6" />
-                    </>
-                  )}
-                </Button>
+                    </Button>
+                  </div>
+                </div>
               </motion.div>
             ) : isCustomizing ? (
               <motion.div
@@ -886,56 +958,80 @@ const Analyzer = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="max-w-3xl mx-auto space-y-8"
+                className="max-w-4xl mx-auto space-y-10"
               >
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold mb-2">Personaliza tu CV</h1>
-                  <p className="text-muted-foreground">
-                    Responde estas preguntas rápidas para generar tu CV optimizado
+                <div className="text-center space-y-4">
+                  <h1 className="text-4xl font-black text-foreground tracking-tight">Personaliza tu Nueva Versión</h1>
+                  <p className="text-lg text-muted-foreground font-medium">
+                    Ajusta los últimos detalles para que el generador cree el CV perfecto para ti.
                   </p>
                 </div>
 
-                <Card className="border-gray-200 shadow-sm rounded-2xl">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold">¿Para qué puesto quieres optimizarlo?</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Input
-                      placeholder="Ej: Desarrollador Full Stack"
-                      value={targetJob}
-                      onChange={(e) => setTargetJob(e.target.value)}
-                      className="py-6"
-                    />
-                  </CardContent>
-                </Card>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <Card className="rounded-[2.5rem] border-gray-100 shadow-strong glass overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xl font-black">Puesto Objetivo</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Input
+                        placeholder="Ej: Senior Product Manager"
+                        value={targetJob}
+                        onChange={(e) => setTargetJob(e.target.value)}
+                        className="h-16 rounded-2xl border-gray-100 font-bold px-6 bg-white/50 text-lg"
+                      />
+                    </CardContent>
+                  </Card>
 
-                <Card className="border-gray-200 shadow-sm rounded-2xl">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold">¿Qué logros quieres destacar?</CardTitle>
-                    <CardDescription>
-                      Escribe uno por línea. Estos aparecerán destacados en tu CV.
+                  <Card className="rounded-[2.5rem] border-gray-100 shadow-strong glass overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xl font-black">Resumen Profesional</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <label className="flex items-start gap-4 cursor-pointer p-4 bg-primary/5 rounded-2xl border border-primary/10 hover:bg-primary/10 transition-all">
+                        <input
+                          type="checkbox"
+                          checked={generateSummary}
+                          onChange={(e) => setGenerateSummary(e.target.checked)}
+                          className="mt-1 w-6 h-6 rounded-lg border-primary/20 text-primary focus:ring-primary shadow-sm"
+                        />
+                        <div>
+                          <span className="font-bold text-gray-900">Generar con IA</span>
+                          <p className="text-xs text-muted-foreground font-medium mt-1">
+                            Crearemos un perfil profesional impactante basado en tus logros.
+                          </p>
+                        </div>
+                      </label>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card className="rounded-[2.5rem] border-gray-100 shadow-strong glass overflow-hidden">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-xl font-black">Logros a Destacar</CardTitle>
+                    <CardDescription className="font-medium">
+                      Introduce un máximo de 3 hitos que quieras que resalten especialmente.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Textarea
-                      placeholder="Ej: Aumenté las ventas un 30% en 6 meses&#10;Lideré un equipo de 5 personas&#10;Implementé un nuevo sistema que redujo costes un 20%"
+                      placeholder="Ej: Lideré la migración a AWS reduciendo costes un 40%..."
                       value={keyAchievements}
                       onChange={(e) => setKeyAchievements(e.target.value)}
-                      className="min-h-[150px] resize-none"
+                      className="min-h-[150px] resize-none border-gray-100 rounded-2xl p-6 font-medium text-lg bg-white/50"
                     />
                   </CardContent>
                 </Card>
 
                 {analysisResult && analysisResult.missingKeywords && analysisResult.missingKeywords.length > 0 && (
-                  <Card className="border-gray-200 shadow-sm rounded-2xl">
-                    <CardHeader>
-                      <CardTitle className="text-lg font-bold">Aptitudes sugeridas</CardTitle>
-                      <CardDescription>
-                        Selecciona las aptitudes que realmente posees para añadirlas a tu CV. No marques las que no sepas usar.
+                  <Card className="rounded-[2.5rem] border-gray-100 shadow-strong glass overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-xl font-black">Potencia tus Aptitudes</CardTitle>
+                      <CardDescription className="font-medium">
+                        Selecciona las que poseas para integrarlas de forma natural en el diseño.
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3">
                         {analysisResult.missingKeywords.map((keyword, i) => (
                           <button
                             key={i}
@@ -946,12 +1042,12 @@ const Analyzer = () => {
                                   : [...prev, keyword]
                               );
                             }}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border ${selectedKeywords.includes(keyword)
-                              ? "bg-primary text-white border-primary shadow-md"
-                              : "bg-white text-gray-600 border-gray-200 hover:border-primary/50"
+                            className={`px-6 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-3 border ${selectedKeywords.includes(keyword)
+                              ? "bg-primary text-white border-primary shadow-accent scale-105"
+                              : "bg-white text-gray-600 border-gray-100 hover:border-primary/30 hover:bg-gray-50"
                               }`}
                           >
-                            {selectedKeywords.includes(keyword) && <Check className="w-4 h-4" />}
+                            {selectedKeywords.includes(keyword) ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5 text-gray-300" />}
                             {keyword}
                           </button>
                         ))}
@@ -960,42 +1056,23 @@ const Analyzer = () => {
                   </Card>
                 )}
 
-                {/* Summary generation option */}
-                <Card className="border-gray-200 shadow-sm rounded-2xl">
-                  <CardContent className="pt-6">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={generateSummary}
-                        onChange={(e) => setGenerateSummary(e.target.checked)}
-                        className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <div>
-                        <span className="font-medium text-gray-900">Generar resumen profesional</span>
-                        <p className="text-sm text-gray-500 mt-0.5">
-                          Si tu CV original no tiene resumen, la IA creará uno basado en tu experiencia.
-                          Desmarca si prefieres no incluir resumen.
-                        </p>
-                      </div>
-                    </label>
-                  </CardContent>
-                </Card>
-
-                <Button
-                  variant="hero"
-                  size="xl"
-                  className="w-full gap-3 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-xl py-8 text-lg font-bold"
-                  onClick={handleGenerateVersions}
-                  disabled={!targetJob.trim()}
-                >
-                  Generar 2 versiones de mi CV
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-
-                <div className="flex justify-center">
-                  <Button variant="ghost" onClick={() => setIsCustomizing(false)} className="text-gray-400 hover:text-gray-600">
-                    Volver a los resultados
+                <div className="space-y-6">
+                  <Button
+                    variant="hero"
+                    size="xl"
+                    className="w-full h-24 gap-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-[2rem] text-2xl font-black shadow-accent hover:scale-[1.02] transition-all"
+                    onClick={handleGenerateVersions}
+                    disabled={!targetJob.trim()}
+                  >
+                    Generar Mis Nuevos CVs
+                    <ArrowRight className="w-8 h-8" />
                   </Button>
+
+                  <div className="flex justify-center">
+                    <Button variant="ghost" onClick={() => setIsCustomizing(false)} className="text-muted-foreground font-bold hover:text-primary">
+                      ← Volver al reporte
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             ) : isGeneratingVersions ? (
@@ -1004,16 +1081,30 @@ const Analyzer = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20"
+                className="flex flex-col items-center justify-center py-32 space-y-10"
               >
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-                  <Sparkles className="w-10 h-10 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      rotate: 360
+                    }}
+                    transition={{
+                      scale: { duration: 2, repeat: Infinity },
+                      rotate: { duration: 3, repeat: Infinity, ease: "linear" }
+                    }}
+                    className="w-40 h-40 rounded-full border-4 border-primary/20 border-t-primary shadow-glow shadow-primary/20"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Sparkles className="w-16 h-16 text-primary animate-pulse" />
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold mt-8 mb-2">Generando tus CVs...</h2>
-                <p className="text-muted-foreground text-center max-w-md">
-                  Estamos creando 2 versiones optimizadas de tu currículum con diseño profesional
-                </p>
+                <div className="text-center space-y-4">
+                  <h2 className="text-5xl font-black text-foreground tracking-tight">Esculpiendo tu Nuevo Perfil</h2>
+                  <p className="text-xl text-muted-foreground font-medium max-w-md mx-auto">
+                    Nuestra IA está diseñando 2 versiones de alto impacto optimizadas para resultados inmediatos.
+                  </p>
+                </div>
               </motion.div>
             ) : cvVersions && !selectedVersion ? (
               <motion.div
@@ -1021,33 +1112,33 @@ const Analyzer = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="space-y-10"
+                className="space-y-12 max-w-6xl mx-auto"
               >
-                <div className="text-center">
-                  <h1 className="text-4xl font-bold mb-3">Elige tu diseño</h1>
-                  <p className="text-gray-500 text-lg">
-                    Hemos generado 2 versiones de tu CV. Haz clic en la que más te guste para verla en detalle.
+                <div className="text-center space-y-4">
+                  <h1 className="text-5xl font-black text-foreground tracking-tight">Elige tu Identidad Visual</h1>
+                  <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+                    Hemos creado dos estrategias visuales diferentes. Selecciona la que mejor resuene con tu industria.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   {/* Versión Ejecutiva */}
-                  <div className="space-y-4">
+                  <div className="group space-y-6">
                     <div
-                      className={`relative bg-white rounded-3xl p-8 border-4 transition-all cursor-pointer hover:shadow-xl ${selectedVersion === 'formal' ? 'border-[#00D1A0]' : 'border-transparent shadow-sm'
+                      className={`relative bg-white rounded-[3rem] p-10 border-4 transition-all cursor-pointer shadow-strong hover:shadow-glow/20 ${selectedVersion === 'formal' ? 'border-[#00D1A0] scale-[1.02]' : 'border-transparent'
                         }`}
                       onClick={() => setSelectedVersion('formal')}
                     >
-                      <div className="text-center mb-6">
-                        <h3 className="text-2xl font-bold flex items-center justify-center gap-2">
-                          <Briefcase className="w-6 h-6" />
-                          Versión Ejecutiva
-                        </h3>
-                        <p className="text-gray-500 mt-1">Ideal para banca, consultoría, empresas tradicionales</p>
+                      <div className="text-center mb-8">
+                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/10 transition-colors">
+                          <Briefcase className="w-7 h-7 text-gray-400 group-hover:text-primary" />
+                        </div>
+                        <h3 className="text-2xl font-black">Línea Ejecutiva</h3>
+                        <p className="text-muted-foreground font-medium mt-1">Estructura sobria para entornos corporativos</p>
                       </div>
 
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50">
-                        <div className="absolute inset-0 scale-[0.35] origin-top-left w-[285%] h-[285%] pointer-events-none blur-[2px]">
+                      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50/50 group-hover:bg-white transition-colors">
+                        <div className="absolute inset-0 scale-[0.38] origin-top-left w-[265%] h-[265%] pointer-events-none blur-[1px] opacity-80 group-hover:opacity-100 transition-opacity">
                           {(cvVersions || mockVersions) && (
                             <CVVersionsCard
                               versions={cvVersions || mockVersions!}
@@ -1059,33 +1150,33 @@ const Analyzer = () => {
                       </div>
                     </div>
                     <Button
-                      className={`w-full py-8 rounded-xl text-lg font-bold transition-all ${selectedVersion === 'formal'
-                        ? 'bg-[#00D1A0] hover:bg-[#00B88D] text-white'
-                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                      className={`w-full h-20 rounded-2xl text-xl font-black transition-all shadow-soft ${selectedVersion === 'formal'
+                        ? 'bg-[#00D1A0] hover:bg-[#00B88D] text-white shadow-accent'
+                        : 'bg-white border-none text-gray-700 hover:bg-gray-50'
                         }`}
                       onClick={() => setSelectedVersion('formal')}
                     >
-                      Elegir Ejecutiva
+                      Seleccionar Ejecutiva
                     </Button>
                   </div>
 
                   {/* Versión Moderna */}
-                  <div className="space-y-4">
+                  <div className="group space-y-6">
                     <div
-                      className={`relative bg-white rounded-3xl p-8 border-4 transition-all cursor-pointer hover:shadow-xl ${selectedVersion === 'creative' ? 'border-[#00D1A0]' : 'border-transparent shadow-sm'
+                      className={`relative bg-white rounded-[3rem] p-10 border-4 transition-all cursor-pointer shadow-strong hover:shadow-glow/20 ${selectedVersion === 'creative' ? 'border-[#00D1A0] scale-[1.02]' : 'border-transparent'
                         }`}
                       onClick={() => setSelectedVersion('creative')}
                     >
-                      <div className="text-center mb-6">
-                        <h3 className="text-2xl font-bold flex items-center justify-center gap-2">
-                          <Sparkles className="w-6 h-6" />
-                          Versión Moderna
-                        </h3>
-                        <p className="text-gray-500 mt-1">Ideal para startups, tecnología, marketing, diseño</p>
+                      <div className="text-center mb-8">
+                        <div className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/10 transition-colors">
+                          <Sparkles className="w-7 h-7 text-gray-400 group-hover:text-primary" />
+                        </div>
+                        <h3 className="text-2xl font-black">Influencia Moderna</h3>
+                        <p className="text-muted-foreground font-medium mt-1">Dinámico e ideal para startups y tecnología</p>
                       </div>
 
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50">
-                        <div className="absolute inset-0 scale-[0.35] origin-top-left w-[285%] h-[285%] pointer-events-none blur-[2px]">
+                      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50/50 group-hover:bg-white transition-colors">
+                        <div className="absolute inset-0 scale-[0.38] origin-top-left w-[265%] h-[265%] pointer-events-none blur-[1px] opacity-80 group-hover:opacity-100 transition-opacity">
                           {(cvVersions || mockVersions) && (
                             <CVVersionsCard
                               versions={cvVersions || mockVersions!}
@@ -1094,36 +1185,35 @@ const Analyzer = () => {
                             />
                           )}
                         </div>
-                        {selectedVersion === 'creative' && (
-                          <div className="absolute top-4 right-4 w-10 h-10 bg-[#00D1A0] rounded-full flex items-center justify-center shadow-lg z-10">
-                            <Check className="w-6 h-6 text-white" />
-                          </div>
-                        )}
+
                       </div>
                     </div>
                     <Button
-                      className={`w-full py-8 rounded-xl text-lg font-bold transition-all ${selectedVersion === 'creative'
-                        ? 'bg-[#00D1A0] hover:bg-[#00B88D] text-white'
-                        : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                      className={`w-full h-20 rounded-2xl text-xl font-black transition-all shadow-soft ${selectedVersion === 'creative'
+                        ? 'bg-[#00D1A0] hover:bg-[#00B88D] text-white shadow-accent'
+                        : 'bg-white border-none text-gray-700 hover:bg-gray-50'
                         }`}
                       onClick={() => setSelectedVersion('creative')}
                     >
-                      Elegir Moderna
+                      Seleccionar Moderna
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex justify-center">
-                  <Button variant="ghost" onClick={() => setIsCustomizing(true)} className="text-gray-400 hover:text-gray-600">
-                    Cambiar personalización
+                <div className="flex justify-center pt-8">
+                  <Button variant="ghost" onClick={() => setIsCustomizing(true)} className="text-muted-foreground font-bold hover:text-primary">
+                    ← Refinar personalización
                   </Button>
                 </div>
               </motion.div>
             ) : cvVersions && selectedVersion ? (
               isCheckingPayment ? (
-                <div className="flex flex-col items-center justify-center py-40">
-                  <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-                  <p className="text-muted-foreground">Verificando acceso...</p>
+                <div className="flex flex-col items-center justify-center py-40 space-y-6">
+                  <div className="relative">
+                    <Loader2 className="w-16 h-16 text-primary animate-spin" />
+                    <Sparkles className="w-6 h-6 text-primary absolute top-0 right-0 animate-pulse" />
+                  </div>
+                  <p className="text-xl font-bold text-muted-foreground animate-pulse">Verificando acceso exclusivo...</p>
                 </div>
               ) : !isUnlocked ? (
                 <LockedCVPreview
@@ -1134,67 +1224,74 @@ const Analyzer = () => {
                   onUnlockBasic={handleUnlockBasic}
                   onUnlockPremium={handleUnlockPremium}
                   isProcessing={isProcessingPayment}
-                  userData={{
-                    name,
-                    email,
-                    targetJob
-                  }}
+                  userData={{ name, email, targetJob }}
                 />
               ) : (
                 <motion.div
-                  key="versions"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-8"
+                  key="final-cv"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="max-w-5xl mx-auto space-y-12"
                 >
-                  <div className="text-center">
-                    <h1 className="text-3xl font-bold mb-2">Tu CV optimizado</h1>
-                    <p className="text-muted-foreground">
-                      Aquí tienes la versión {selectedVersion === 'formal' ? 'Ejecutiva' : 'Moderna'} de tu perfil
-                    </p>
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-xl p-8 rounded-[2.5rem] border border-gray-100 shadow-strong no-print">
+                    <div className="space-y-1 text-center md:text-left">
+                      <h2 className="text-3xl font-black text-foreground">Tu CV Maestro</h2>
+                      <p className="text-muted-foreground font-medium">Optimizado, pulido y listo para el mercado.</p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="xl"
+                        onClick={() => window.print()}
+                        className="h-16 px-8 rounded-2xl font-bold border-gray-200 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
+                      >
+                        <Printer className="w-5 h-5" />
+                        Imprimir
+                      </Button>
+                      <Button
+                        variant="hero"
+                        size="xl"
+                        onClick={handleDownload}
+                        className="h-16 px-10 rounded-2xl font-black bg-[#00D1A0] hover:bg-[#00B88D] text-white shadow-accent flex items-center gap-3"
+                      >
+                        <Download className="w-6 h-6" />
+                        Descargar PDF
+                      </Button>
+                    </div>
                   </div>
 
-                  <CVVersionsCard
-                    versions={cvVersions}
-                    selectedOnly={selectedVersion}
-                    userData={{
-                      name,
-                      email,
-                      targetJob
-                    }}
-                  />
+                  <div className="bg-white rounded-[3rem] shadow-strong border border-gray-100 p-4 md:p-12 min-h-[1000px]">
+                    <CVVersionsCard
+                      versions={cvVersions}
+                      selectedOnly={selectedVersion}
+                      userData={{ name, email, targetJob }}
+                    />
+                  </div>
 
-                  <div className="flex flex-wrap justify-center gap-4 pb-8 no-print">
-                    <Button
-                      variant="hero"
-                      onClick={handleDownload}
-                      className="gap-2 bg-[#00D1A0] hover:bg-[#00B88D] text-white"
-                    >
-                      <Download className="w-5 h-5" />
-                      Descargar PDF
-                    </Button>
+                  <div className="flex flex-wrap justify-center gap-6 pb-20 no-print">
                     <Button
                       variant="outline"
-                      onClick={handleDownloadGuide}
-                      className={`gap-2 ${currentPlan === 'premium' ? 'border-primary text-primary hover:bg-primary/10' : 'border-gray-300 text-gray-400 opacity-70'}`}
-                    >
-                      <BookOpen className="w-5 h-5" />
-                      Guía ATS {currentPlan !== 'premium' && <Zap className="w-3 h-3 ml-1 fill-yellow-500 text-yellow-500" />}
-                    </Button>
-                    <Button
-                      variant="secondary"
                       onClick={handleSendEmail}
-                      className="gap-2"
+                      className="h-16 px-8 rounded-2xl font-bold border-gray-200 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
                     >
                       <Mail className="w-5 h-5" />
-                      Enviar por email
+                      Enviar por Email
                     </Button>
-                    <Button variant="outline" onClick={() => setSelectedVersion(null)} className="text-gray-600">
-                      Cambiar diseño
-                    </Button>
-                    <Button variant="ghost" onClick={handleNewAnalysis} className="text-gray-400 hover:text-gray-600">
-                      Volver al inicio
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        // Reset all state to restart
+                        setAnalysisResult(null);
+                        setCVVersions(null);
+                        setSelectedVersion(null);
+                        setCVText("");
+                        // Scroll to top or just let the render handle it
+                      }}
+                      className="text-muted-foreground font-bold hover:text-primary gap-2"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                      Comenzar Nuevo Análisis
                     </Button>
                   </div>
                 </motion.div>
@@ -1202,297 +1299,231 @@ const Analyzer = () => {
             ) : (
               <motion.div
                 key="results"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-8"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                className="max-w-5xl mx-auto space-y-12"
               >
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold mb-2">Resultados del análisis</h1>
-                  <p className="text-muted-foreground">
-                    Hemos analizado tu CV en profundidad. Aquí tienes tu puntuación y recomendaciones detalladas.
+                <div className="text-center space-y-4">
+                  <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">Análisis de Impacto Final</h1>
+                  <p className="text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
+                    Hemos procesado tu trayectoria con nuestros algoritmos ATS. Aquí tienes el diagnóstico completo de tu competitividad.
                   </p>
                 </div>
 
-                {/* Main Score */}
-                <Card className="overflow-hidden">
-                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-1">Puntuación ATS</p>
-                        <p className={`text-6xl font-bold ${getScoreColor(analysisResult.atsScore)}`}>
-                          {analysisResult.atsScore}<span className="text-2xl">/100</span>
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {analysisResult.atsScore >= 80 ? "¡Excelente! Tu CV está bien optimizado" :
-                            analysisResult.atsScore >= 60 ? "Bien, pero hay margen de mejora" :
-                              "Necesita mejoras significativas"}
-                        </p>
-                      </div>
-                      <div className="w-32 h-32 relative">
-                        <svg className="w-full h-full -rotate-90">
-                          <circle
-                            cx="64" cy="64" r="56"
-                            fill="none"
-                            stroke="#e5e7eb"
-                            strokeWidth="12"
-                          />
-                          <circle
-                            cx="64" cy="64" r="56"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="12"
-                            strokeDasharray={`${(analysisResult.atsScore || 0) * 3.52} 352`}
-                            className={getScoreColor(analysisResult.atsScore || 0)}
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                {/* Main Score - Premium Visualization */}
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-[3rem] blur-2xl group-hover:opacity-100 transition-opacity opacity-70 -z-10" />
+                  <Card className="rounded-[3rem] overflow-hidden border-gray-100 shadow-strong glass">
+                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 md:p-16 text-white relative">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
 
-                    <div className="mt-6 pt-6 border-t border-primary/10 flex justify-center">
-                      <div className="text-center">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Rango Salarial Estimado</p>
-                        <p className="text-2xl font-bold text-primary">
-                          {analysisResult.salaryRange ? (
-                            `${analysisResult.salaryRange.min.toLocaleString()}€ - ${analysisResult.salaryRange.max.toLocaleString()}€`
-                          ) : (
-                            "No disponible para este perfil"
-                          )}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground mt-1">Basado en mercado español actual</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      {[
-                        { label: "Formato", score: (analysisResult as any).formatScore || (analysisResult as any).format_score || 0, desc: "Estructura y legibilidad" },
-                        { label: "Keywords", score: (analysisResult as any).keywordsScore || (analysisResult as any).keywords_score || 0, desc: "Palabras clave del sector" },
-                        { label: "Experiencia", score: (analysisResult as any).experienceScore || (analysisResult as any).experience_score || 0, desc: "Presentación de logros" },
-                        { label: "Habilidades", score: (analysisResult as any).skillsScore || (analysisResult as any).skills_score || 0, desc: "Competencias técnicas" },
-                        { label: "Logros", score: (analysisResult as any).achievementsScore || (analysisResult as any).achievements_score || 0, desc: "Resultados cuantificables" },
-                      ].map((item) => (
-                        <div key={item.label} className="text-center">
-                          <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
-                          <p className={`text-xl font-bold ${getScoreColor(item.score)}`}>{item.score}</p>
-                          <div className="w-full h-2 bg-gray-100 rounded-full mt-1">
-                            <div
-                              className={`h-full rounded-full ${getScoreBgColor(item.score)}`}
-                              style={{ width: `${item.score}%` }}
+                      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                        <div className="space-y-6 text-center md:text-left">
+                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/10 text-xs font-bold uppercase tracking-widest text-primary">
+                            <Target className="w-4 h-4" />
+                            Puntuación Global ATS
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-8xl font-black tracking-tighter text-white">
+                              {analysisResult.atsScore}
+                              <span className="text-3xl text-white/40 ml-2">/100</span>
+                            </p>
+                            <p className="text-xl font-bold text-gray-300">
+                              {analysisResult.atsScore >= 80 ? "Tu perfil está en el Top 5% de candidatos" :
+                                analysisResult.atsScore >= 60 ? "Potencial alto con ajustes específicos" :
+                                  "Mejoras críticas necesarias para destacar"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="relative w-48 h-48 md:w-64 md:h-64">
+                          <svg className="w-full h-full -rotate-90">
+                            <circle
+                              cx="50%" cy="50%" r="45%"
+                              fill="none"
+                              stroke="rgba(255,255,255,0.05)"
+                              strokeWidth="15"
                             />
+                            <motion.circle
+                              initial={{ strokeDashoffset: 565 }}
+                              animate={{ strokeDashoffset: 565 - (565 * (analysisResult.atsScore || 0) / 100) }}
+                              transition={{ duration: 2, ease: "easeOut", delay: 0.5 }}
+                              cx="50%" cy="50%" r="45%"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="15"
+                              strokeDasharray="565"
+                              strokeLinecap="round"
+                              className="text-primary shadow-glow"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Sparkles className="w-12 h-12 text-primary opacity-50" />
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
                         </div>
-                      ))}
+                      </div>
+
+                      <div className="mt-12 pt-10 border-t border-white/5 flex flex-wrap justify-center md:justify-start gap-12">
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rango Salarial Estimado</p>
+                          <p className="text-2xl font-black text-white">
+                            {analysisResult.salaryRange ? (
+                              `${analysisResult.salaryRange.min.toLocaleString()}€ - ${analysisResult.salaryRange.max.toLocaleString()}€`
+                            ) : (
+                              "Mercado Variable"
+                            )}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Versiones Generadas</p>
+                          <p className="text-2xl font-black text-white">2 <span className="text-sm font-medium text-gray-500">Diseños</span></p>
+                        </div>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
 
-                {/* Problems */}
-                {analysisResult && Array.isArray(analysisResult.problems) && analysisResult.problems.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                        Problemas detectados ({analysisResult.problems.length})
-                      </CardTitle>
-                      <CardDescription>
-                        Estos son los puntos que debes mejorar para aumentar tu puntuación ATS
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {analysisResult.problems.map((problem: any, i) => (
-                          <div key={i} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                            {getSeverityIcon(problem.severity || 'info')}
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-200">
-                                  {problem.category || 'General'}
-                                </span>
-                                <span className={`text-xs font-medium px-2 py-0.5 rounded ${(problem.severity || '').toLowerCase() === "critical" ? "bg-red-100 text-red-700" :
-                                  (problem.severity || '').toLowerCase() === "warning" ? "bg-yellow-100 text-yellow-700" :
-                                    "bg-blue-100 text-blue-700"
-                                  }`}>
-                                  {(problem.severity || '').toLowerCase() === "critical" ? "Crítico" :
-                                    (problem.severity || '').toLowerCase() === "warning" ? "Importante" : "Sugerencia"}
-                                </span>
+                    <CardContent className="p-10 bg-white">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+                        {[
+                          { label: "Formato", score: (analysisResult as any).formatScore || (analysisResult as any).format_score || 0, icon: FileText },
+                          { label: "Keywords", score: (analysisResult as any).keywordsScore || (analysisResult as any).keywords_score || 0, icon: Target },
+                          { label: "Experiencia", score: (analysisResult as any).experienceScore || (analysisResult as any).experience_score || 0, icon: Briefcase },
+                          { label: "Habilidades", score: (analysisResult as any).skillsScore || (analysisResult as any).skills_score || 0, icon: Zap },
+                          { label: "Logros", score: (analysisResult as any).achievementsScore || (analysisResult as any).achievements_score || 0, icon: TrendingUp },
+                        ].map((item) => (
+                          <div key={item.label} className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <item.icon className="w-4 h-4 text-muted-foreground" />
+                              <span className={`text-sm font-black ${getScoreColor(item.score)}`}>{item.score}%</span>
+                            </div>
+                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${item.score}%` }}
+                                transition={{ duration: 1, delay: 1 }}
+                                className={`h-full rounded-full ${getScoreBgColor(item.score)}`}
+                              />
+                            </div>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">{item.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-10">
+                  {/* Problems */}
+                  {analysisResult && Array.isArray(analysisResult.problems) && analysisResult.problems.length > 0 && (
+                    <Card className="rounded-[2rem] border-gray-100 shadow-soft glass overflow-hidden">
+                      <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-6 px-8">
+                        <CardTitle className="flex items-center gap-3 text-xl font-black">
+                          <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                          Mejoras Críticas ({analysisResult.problems.length})
+                        </CardTitle>
+                        <CardDescription className="font-medium">
+                          Puntos de fricción que impiden tu paso a la entrevista.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="p-8">
+                        <div className="space-y-4">
+                          {analysisResult.problems.map((problem: any, i) => (
+                            <div key={i} className="flex gap-4 p-5 rounded-2xl bg-white border border-gray-50 shadow-sm hover:border-primary/20 transition-all">
+                              <div className="flex-shrink-0 mt-1">
+                                {getSeverityIcon(problem.severity || 'info')}
                               </div>
-                              <p className="font-medium text-gray-900">{problem.message || problem.problem || problem.issue || problem.descripcion}</p>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                <strong>Solución:</strong> {problem.suggestion || problem.solution || problem.solucion || problem.recomendacion || "No se proporcionó una solución específica."}
-                              </p>
+                              <div className="space-y-2">
+                                <p className="font-bold text-gray-900 leading-tight">{problem.message || problem.problem || problem.issue || problem.descripcion}</p>
+                                <p className="text-sm text-muted-foreground font-medium bg-gray-50 p-3 rounded-xl border border-gray-100 italic">
+                                  {problem.suggestion || problem.solution || problem.solucion || problem.recomendacion}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Missing Keywords */}
-                {analysisResult.missingKeywords.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Target className="w-5 h-5 text-primary" />
-                        Palabras clave que faltan
-                      </CardTitle>
-                      <CardDescription>
-                        Añade estas palabras clave para mejorar tu visibilidad en los filtros ATS
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {(analysisResult.missingKeywords || []).map((keyword, i) => (
-                          <span
-                            key={i}
-                            className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium"
-                          >
-                            + {keyword}
-                          </span>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Action Plan */}
-                {actionPlan && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-primary" />
-                        Tu plan de acción personalizado
-                      </CardTitle>
-                      <CardDescription>
-                        Sigue estos pasos para maximizar tus posibilidades de conseguir entrevistas
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold text-red-600 mb-2 flex items-center gap-2">
-                              <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-xs">1</span>
-                              Acciones inmediatas
-                            </h4>
-                            <ul className="space-y-2 ml-8">
-                              {(actionPlan.immediate || []).map((item: any, i) => (
-                                <li key={i} className="text-sm flex items-start gap-2">
-                                  <CheckCircle2 className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                                  <div>
-                                    <span className="font-medium">{item.action || item.title || item.accion}</span>
-                                    {(item.howTo || item.how_to || item.description || item.descripcion) && (
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        {item.howTo || item.how_to || item.description || item.descripcion}
-                                      </p>
-                                    )}
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-yellow-600 mb-2 flex items-center gap-2">
-                              <span className="w-6 h-6 rounded-full bg-yellow-100 flex items-center justify-center text-xs">2</span>
-                              Esta semana
-                            </h4>
-                            <ul className="space-y-2 ml-8">
-                              {(actionPlan.shortTerm || []).map((item: any, i) => (
-                                <li key={i} className="text-sm flex items-start gap-2">
-                                  <CheckCircle2 className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
-                                  <div>
-                                    <span className="font-medium">{item.action || item.title || item.accion}</span>
-                                    {(item.howTo || item.how_to || item.description || item.descripcion) && (
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        {item.howTo || item.how_to || item.description || item.descripcion}
-                                      </p>
-                                    )}
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                          ))}
                         </div>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
-                              <span className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-xs">3</span>
-                              Este mes
-                            </h4>
-                            <ul className="space-y-2 ml-8">
-                              {(actionPlan.longTerm || []).map((item: any, i) => (
-                                <li key={i} className="text-sm flex items-start gap-2">
-                                  <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                                  <div>
-                                    <span className="font-medium">{item.action || item.title || item.accion}</span>
-                                    {(item.howTo || item.how_to || item.description || item.descripcion) && (
-                                      <p className="text-xs text-muted-foreground mt-0.5">
-                                        {item.howTo || item.how_to || item.description || item.descripcion}
-                                      </p>
-                                    )}
-                                  </div>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          {actionPlan.trainingRecommendations.length > 0 && (
-                            <div>
-                              <h4 className="font-semibold text-primary mb-2 flex items-center gap-2">
-                                <GraduationCap className="w-5 h-5" />
-                                Formación recomendada
-                              </h4>
-                              <ul className="space-y-2 ml-8">
-                                {(actionPlan.trainingRecommendations || []).map((item: any, i) => {
-                                  const course = typeof item === 'string' ? item : (item.course || item.course_name || item.curso);
-                                  const provider = typeof item === 'string' ? null : (item.provider || item.provider_name || item.proveedor);
-                                  const reason = typeof item === 'string' ? null : (item.reason || item.why || item.motivo);
-                                  return (
-                                    <li key={i} className="text-sm flex items-start gap-2">
-                                      <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                                      <div>
-                                        <span className="font-medium">{course}</span>
-                                        {provider && <span className="text-muted-foreground"> - {provider}</span>}
-                                        {reason && <p className="text-xs text-muted-foreground mt-0.5">{reason}</p>}
-                                      </div>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                      </CardContent>
+                    </Card>
+                  )}
 
-                {/* Botones de acción finales */}
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                  {/* Missing Keywords */}
+                  <div className="space-y-10">
+                    {analysisResult.missingKeywords.length > 0 && (
+                      <Card className="rounded-[2rem] border-gray-100 shadow-soft glass overflow-hidden">
+                        <CardHeader className="px-8 pt-8">
+                          <CardTitle className="flex items-center gap-3 text-xl font-black">
+                            <Target className="w-6 h-6 text-primary" />
+                            Keywords Ausentes
+                          </CardTitle>
+                          <CardDescription className="font-medium">
+                            Añádelas para ser indexado por los reclutadores.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-8">
+                          <div className="flex flex-wrap gap-2">
+                            {(analysisResult.missingKeywords || []).map((keyword, i) => (
+                              <span
+                                key={i}
+                                className="px-5 py-2.5 bg-white border border-gray-100 text-foreground rounded-2xl text-sm font-bold shadow-sm hover:border-primary/50 hover:bg-primary/5 transition-all cursor-default"
+                              >
+                                {keyword}
+                              </span>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Action Plan Summary */}
+                    {actionPlan && (
+                      <Card className="rounded-[2rem] border-gray-100 bg-gray-900 text-white shadow-strong overflow-hidden relative">
+                        <CardHeader className="px-8 pt-8">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[60px] rounded-full" />
+                          <CardTitle className="flex items-center gap-3 text-xl font-black text-white relative z-10">
+                            <Zap className="w-6 h-6 text-primary" />
+                            Plan de Optimización
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-8 relative z-10 space-y-6">
+                          <div className="space-y-4">
+                            {(actionPlan.immediate || []).slice(0, 3).map((item: any, i) => (
+                              <div key={i} className="flex items-center gap-4 text-sm font-bold bg-white/5 p-4 rounded-2xl border border-white/5">
+                                <div className="w-2 h-2 rounded-full bg-primary" />
+                                {item.action || item.title || item.accion}
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-500 font-bold uppercase tracking-widest text-center">IA Generando pasos finales...</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                </div>
+
+                {/* Final Action CTA */}
+                <div className="flex flex-col md:flex-row gap-6 items-center justify-center py-10">
                   <Button
                     size="xl"
-                    className="flex-1 gap-3 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-xl py-7 text-lg font-bold shadow-lg shadow-[#00D1A0]/20"
+                    className="w-full md:w-[400px] h-24 gap-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-3xl text-2xl font-black shadow-accent hover:scale-[1.02] transition-all"
                     onClick={handleContinueToQuestions}
                   >
-                    <Sparkles className="w-5 h-5" />
-                    Generar CV optimizado
-                    <ArrowRight className="w-5 h-5" />
+                    <Sparkles className="w-8 h-8" />
+                    Generar Nuevo CV
+                    <ArrowRight className="w-8 h-8" />
                   </Button>
                   <Button
                     variant="outline"
                     size="xl"
-                    className="flex-1 gap-3 border-gray-200 text-gray-700 rounded-xl py-7 text-lg font-bold hover:bg-gray-50"
+                    className="w-full md:w-auto px-10 h-24 gap-3 bg-white border-none shadow-strong rounded-3xl text-lg font-black hover:bg-gray-50 transition-all"
                     onClick={() => window.print()}
                   >
-                    <Printer className="w-5 h-5" />
-                    Imprimir informe
+                    <Printer className="w-6 h-6 text-muted-foreground font-medium" />
+                    Reporte PDF
                   </Button>
                 </div>
 
-                <div className="flex justify-center pb-8">
-                  <Button variant="ghost" onClick={handleNewAnalysis} className="text-gray-400 hover:text-gray-600">
-                    Realizar otro análisis
+                <div className="flex justify-center pb-12">
+                  <Button variant="ghost" onClick={handleNewAnalysis} className="text-muted-foreground font-bold hover:text-primary tracking-tight">
+                    ← Analizar otro documento
                   </Button>
                 </div>
               </motion.div>

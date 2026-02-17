@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -41,11 +41,15 @@
     --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(166 30% 97%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(166 20% 98%) 100%);
 
-    --shadow-soft: 0 4px 20px -4px hsl(166 30% 30% / 0.1);
-    --shadow-medium: 0 8px 30px -6px hsl(166 30% 30% / 0.15);
-    --shadow-strong: 0 20px 50px -12px hsl(166 30% 30% / 0.2);
-    --shadow-glow: 0 0 40px hsl(166 100% 40% / 0.2);
-    --shadow-accent: 0 8px 30px -6px hsl(166 100% 40% / 0.35);
+    --shadow-soft: 0 4px 20px -4px hsl(210 20% 15% / 0.05);
+    --shadow-medium: 0 8px 30px -6px hsl(210 20% 15% / 0.08);
+    --shadow-strong: 0 20px 50px -12px hsl(210 20% 15% / 0.12);
+    --shadow-glow: 0 0 40px hsl(166 100% 40% / 0.15);
+    --shadow-accent: 0 8px 30px -6px hsl(166 100% 40% / 0.25);
+
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 210 10% 30%;
@@ -116,8 +120,11 @@
 
   h1,
   h2,
-  h3 {
-    font-family: 'Playfair Display', serif;
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight font-semibold;
   }
 }
 
@@ -155,10 +162,26 @@
   }
 
   .text-gradient {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, hsl(166 100% 40%) 0%, hsl(166 70% 30%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-dark {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
 }
 
