@@ -136,7 +136,7 @@ export default function Index() {
                 <div className="absolute -top-6 -right-6 glass p-4 rounded-2xl shadow-xl animate-bounce-slow">
                   <Zap className="w-6 h-6 text-primary" />
                 </div>
-                <div className="absolute -bottom-6 -left-6 bg-primary text-white p-5 rounded-3xl shadow-accent font-bold text-sm">
+                <div className="absolute -bottom-6 -left-6 bg-primary text-white p-5 rounded-3xl shadow-accent font-bold text-sm ml-[15px]">
                   +15% Entrevistas
                 </div>
               </div>
