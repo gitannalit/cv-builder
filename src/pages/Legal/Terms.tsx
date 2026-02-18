@@ -38,7 +38,7 @@ export default function Terms() {
                         <section className="space-y-4">
                             <h2 className="text-2xl font-bold text-foreground">3. Propiedad Intelectual</h2>
                             <p>
-                                Todo el contenido, diseño, logotipos y tecnología asociados con T2W CV Builder son propiedad exclusiva de Training to Work. El usuario conserva la propiedad de los datos personales proporcionados en sus currículums.
+                                Todo el contenido, diseño, logotipos y tecnología asociados con T2W CV Builder son propiedad exclusiva de Training2Work. El usuario conserva la propiedad de los datos personales proporcionados en sus currículums.
                             </p>
                         </section>
 

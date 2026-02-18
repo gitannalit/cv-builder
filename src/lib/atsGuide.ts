@@ -1,120 +1,120 @@
 import { toast } from "sonner";
 
 export const ATS_GUIDE = {
-    title: "Guía Práctica: Cómo Superar los Filtros ATS",
-    subtitle: "Checklist completo para optimizar tu CV y conseguir más entrevistas",
+  title: "Guía Práctica: Cómo Superar los Filtros ATS",
+  subtitle: "Checklist completo para optimizar tu CV y conseguir más entrevistas",
 
-    sections: [
-        {
-            title: "¿Qué es un ATS?",
-            content: `Un ATS (Applicant Tracking System) es un software que utilizan las empresas para filtrar currículums automáticamente. Más del 75% de las empresas medianas y grandes usan estos sistemas.
+  sections: [
+    {
+      title: "¿Qué es un ATS?",
+      content: `Un ATS (Applicant Tracking System) es un software que utilizan las empresas para filtrar currículums automáticamente. Más del 75% de las empresas medianas y grandes usan estos sistemas.
 
 **Dato importante:** El 70% de los CVs son rechazados por el ATS antes de que un humano los vea.`,
-            checklist: null
-        },
-        {
-            title: "Formato del CV",
-            content: null,
-            checklist: [
-                { item: "Usa formato PDF o DOCX (evita imágenes escaneadas)", critical: true },
-                { item: "Fuente legible: Arial, Calibri, Times New Roman (10-12pt)", critical: true },
-                { item: "Márgenes de 2.5cm mínimo", critical: false },
-                { item: "Sin tablas complejas ni columnas múltiples", critical: true },
-                { item: "Sin encabezados ni pies de página con información importante", critical: true },
-                { item: "Sin gráficos, iconos o imágenes decorativas", critical: false },
-                { item: "Títulos de sección claros y estándar", critical: true }
-            ]
-        },
-        {
-            title: "Palabras Clave",
-            content: null,
-            checklist: [
-                { item: "Incluye palabras clave exactas de la oferta de empleo", critical: true },
-                { item: "Usa tanto siglas como términos completos (ej: SEO y Search Engine Optimization)", critical: false },
-                { item: "Menciona herramientas y tecnologías específicas", critical: true },
-                { item: "Incluye certificaciones relevantes con nombre completo", critical: false },
-                { item: "Usa verbos de acción: lideré, implementé, desarrollé, optimicé", critical: false }
-            ]
-        },
-        {
-            title: "Secciones Obligatorias",
-            content: null,
-            checklist: [
-                { item: "Datos de contacto: nombre, email, teléfono, LinkedIn", critical: true },
-                { item: "Resumen profesional (3-4 líneas con palabras clave)", critical: true },
-                { item: "Experiencia laboral con fechas (MM/AAAA)", critical: true },
-                { item: "Formación académica con fechas", critical: true },
-                { item: "Habilidades técnicas y blandas", critical: true },
-                { item: "Idiomas con nivel", critical: false }
-            ]
-        },
-        {
-            title: "Experiencia Laboral",
-            content: null,
-            checklist: [
-                { item: "Formato: Puesto | Empresa | Fechas", critical: true },
-                { item: "Logros cuantificados (%, €, números)", critical: true },
-                { item: "Usa el método STAR: Situación, Tarea, Acción, Resultado", critical: false },
-                { item: "Máximo 5-6 bullets por puesto", critical: false },
-                { item: "Orden cronológico inverso (más reciente primero)", critical: true }
-            ]
-        },
-        {
-            title: "Errores Fatales a Evitar",
-            content: null,
-            checklist: [
-                { item: "NO uses 'Currículum Vitae' como título", critical: true },
-                { item: "NO incluyas foto (en España es opcional, en otros países puede ser discriminatorio)", critical: false },
-                { item: "NO uses caracteres especiales: ★, ●, →", critical: true },
-                { item: "NO escribas en primera persona", critical: false },
-                { item: "NO incluyas información personal: edad, estado civil, DNI", critical: true },
-                { item: "NO uses abreviaturas no estándar", critical: false }
-            ]
-        }
-    ],
+      checklist: null
+    },
+    {
+      title: "Formato del CV",
+      content: null,
+      checklist: [
+        { item: "Usa formato PDF o DOCX (evita imágenes escaneadas)", critical: true },
+        { item: "Fuente legible: Arial, Calibri, Times New Roman (10-12pt)", critical: true },
+        { item: "Márgenes de 2.5cm mínimo", critical: false },
+        { item: "Sin tablas complejas ni columnas múltiples", critical: true },
+        { item: "Sin encabezados ni pies de página con información importante", critical: true },
+        { item: "Sin gráficos, iconos o imágenes decorativas", critical: false },
+        { item: "Títulos de sección claros y estándar", critical: true }
+      ]
+    },
+    {
+      title: "Palabras Clave",
+      content: null,
+      checklist: [
+        { item: "Incluye palabras clave exactas de la oferta de empleo", critical: true },
+        { item: "Usa tanto siglas como términos completos (ej: SEO y Search Engine Optimization)", critical: false },
+        { item: "Menciona herramientas y tecnologías específicas", critical: true },
+        { item: "Incluye certificaciones relevantes con nombre completo", critical: false },
+        { item: "Usa verbos de acción: lideré, implementé, desarrollé, optimicé", critical: false }
+      ]
+    },
+    {
+      title: "Secciones Obligatorias",
+      content: null,
+      checklist: [
+        { item: "Datos de contacto: nombre, email, teléfono, LinkedIn", critical: true },
+        { item: "Resumen profesional (3-4 líneas con palabras clave)", critical: true },
+        { item: "Experiencia laboral con fechas (MM/AAAA)", critical: true },
+        { item: "Formación académica con fechas", critical: true },
+        { item: "Habilidades técnicas y blandas", critical: true },
+        { item: "Idiomas con nivel", critical: false }
+      ]
+    },
+    {
+      title: "Experiencia Laboral",
+      content: null,
+      checklist: [
+        { item: "Formato: Puesto | Empresa | Fechas", critical: true },
+        { item: "Logros cuantificados (%, €, números)", critical: true },
+        { item: "Usa el método STAR: Situación, Tarea, Acción, Resultado", critical: false },
+        { item: "Máximo 5-6 bullets por puesto", critical: false },
+        { item: "Orden cronológico inverso (más reciente primero)", critical: true }
+      ]
+    },
+    {
+      title: "Errores Fatales a Evitar",
+      content: null,
+      checklist: [
+        { item: "NO uses 'Currículum Vitae' como título", critical: true },
+        { item: "NO incluyas foto (en España es opcional, en otros países puede ser discriminatorio)", critical: false },
+        { item: "NO uses caracteres especiales: ★, ●, →", critical: true },
+        { item: "NO escribas en primera persona", critical: false },
+        { item: "NO incluyas información personal: edad, estado civil, DNI", critical: true },
+        { item: "NO uses abreviaturas no estándar", critical: false }
+      ]
+    }
+  ],
 
-    quickTips: [
-        "Personaliza tu CV para cada oferta (mínimo el 60% del contenido)",
-        "El nombre del archivo debe ser: Nombre_Apellido_Puesto.pdf",
-        "Mantén tu CV en 1-2 páginas máximo",
-        "Revisa la ortografía (los ATS detectan errores)",
-        "Actualiza tu LinkedIn para que coincida con tu CV"
-    ],
+  quickTips: [
+    "Personaliza tu CV para cada oferta (mínimo el 60% del contenido)",
+    "El nombre del archivo debe ser: Nombre_Apellido_Puesto.pdf",
+    "Mantén tu CV en 1-2 páginas máximo",
+    "Revisa la ortografía (los ATS detectan errores)",
+    "Actualiza tu LinkedIn para que coincida con tu CV"
+  ],
 
-    resources: [
-        { name: "Jobscan", url: "https://www.jobscan.co", description: "Analiza tu CV contra ofertas de empleo" },
-        { name: "Resume Worded", url: "https://resumeworded.com", description: "Feedback instantáneo de tu CV" },
-        { name: "LinkedIn Learning", url: "https://www.linkedin.com/learning", description: "Cursos de desarrollo profesional" }
-    ]
+  resources: [
+    { name: "Jobscan", url: "https://www.jobscan.co", description: "Analiza tu CV contra ofertas de empleo" },
+    { name: "Resume Worded", url: "https://resumeworded.com", description: "Feedback instantáneo de tu CV" },
+    { name: "LinkedIn Learning", url: "https://www.linkedin.com/learning", description: "Cursos de desarrollo profesional" }
+  ]
 };
 
 export const generateATSGuideHTML = (userName: string): string => {
-    const { title, subtitle, sections, quickTips, resources } = ATS_GUIDE;
+  const { title, subtitle, sections, quickTips, resources } = ATS_GUIDE;
 
-    const sectionsHTML = sections.map(section => {
-        let html = `<h2>${section.title}</h2>`;
-        if (section.content) {
-            // Parse basic markdown-like bold syntax
-            const content = section.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            html += `<div class="content">${content}</div>`;
-        }
-        if (section.checklist) {
-            html += '<ul class="checklist">';
-            section.checklist.forEach(item => {
-                html += `<li class="${item.critical ? 'critical' : ''}">${item.item}</li>`;
-            });
-            html += '</ul>';
-        }
-        return html;
-    }).join('');
+  const sectionsHTML = sections.map(section => {
+    let html = `<h2>${section.title}</h2>`;
+    if (section.content) {
+      // Parse basic markdown-like bold syntax
+      const content = section.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      html += `<div class="content">${content}</div>`;
+    }
+    if (section.checklist) {
+      html += '<ul class="checklist">';
+      section.checklist.forEach(item => {
+        html += `<li class="${item.critical ? 'critical' : ''}">${item.item}</li>`;
+      });
+      html += '</ul>';
+    }
+    return html;
+  }).join('');
 
-    const tipsHTML = quickTips.map(tip => `<li>${tip}</li>`).join('');
+  const tipsHTML = quickTips.map(tip => `<li>${tip}</li>`).join('');
 
-    const resourcesHTML = resources.map(r =>
-        `<div class="resource-item"><a href="${r.url}" target="_blank">${r.name}</a> - ${r.description}</div>`
-    ).join('');
+  const resourcesHTML = resources.map(r =>
+    `<div class="resource-item"><a href="${r.url}" target="_blank">${r.name}</a> - ${r.description}</div>`
+  ).join('');
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -266,7 +266,7 @@ export const generateATSGuideHTML = (userName: string): string => {
   </div>
   
   <div class="footer">
-    <p>Generado por <strong>T2W CV Builder</strong> - Training to Work</p>
+    <p>Generado por <strong>T2W CV Builder</strong> - Training2Work</p>
     <p>© ${new Date().getFullYear()} training2work.com</p>
   </div>
 </body>
@@ -274,21 +274,21 @@ export const generateATSGuideHTML = (userName: string): string => {
 };
 
 export async function downloadATSGuidePDF(userName: string): Promise<void> {
-    const html = generateATSGuideHTML(userName);
-    const filename = `Guia_ATS_T2W_${userName.replace(/\s+/g, '_')}.pdf`;
+  const html = generateATSGuideHTML(userName);
+  const filename = `Guia_ATS_T2W_${userName.replace(/\s+/g, '_')}.pdf`;
 
-    // Dynamically import libraries (same as template generator)
-    try {
-        const [html2canvasModule, jsPDFModule] = await Promise.all([
-            import('html2canvas'),
-            import('jspdf')
-        ]);
-        const html2canvas = html2canvasModule.default;
-        const { jsPDF } = jsPDFModule;
+  // Dynamically import libraries (same as template generator)
+  try {
+    const [html2canvasModule, jsPDFModule] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf')
+    ]);
+    const html2canvas = html2canvasModule.default;
+    const { jsPDF } = jsPDFModule;
 
-        // Create a hidden container to render the HTML
-        const container = document.createElement('div');
-        container.style.cssText = `
+    // Create a hidden container to render the HTML
+    const container = document.createElement('div');
+    container.style.cssText = `
       position: absolute;
       left: -9999px;
       top: 0;
@@ -296,9 +296,9 @@ export async function downloadATSGuidePDF(userName: string): Promise<void> {
       background: white;
     `;
 
-        // Create iframe to isolate styles
-        const iframe = document.createElement('iframe');
-        iframe.style.cssText = `
+    // Create iframe to isolate styles
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = `
       position: absolute;
       left: -9999px;
       top: 0;
@@ -306,61 +306,61 @@ export async function downloadATSGuidePDF(userName: string): Promise<void> {
       height: 1123px; /* A4 height @ 96 DPI */
       border: none;
     `;
-        document.body.appendChild(iframe);
+    document.body.appendChild(iframe);
 
-        await new Promise<void>((resolve) => {
-            iframe.onload = () => resolve();
-            iframe.src = 'about:blank';
-        });
+    await new Promise<void>((resolve) => {
+      iframe.onload = () => resolve();
+      iframe.src = 'about:blank';
+    });
 
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        if (!iframeDoc) throw new Error('Could not access iframe document');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) throw new Error('Could not access iframe document');
 
-        iframeDoc.open();
-        iframeDoc.write(html);
-        iframeDoc.close();
+    iframeDoc.open();
+    iframeDoc.write(html);
+    iframeDoc.close();
 
-        // Wait for content render
-        await new Promise(resolve => setTimeout(resolve, 500));
+    // Wait for content render
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-        const contentElement = iframeDoc.body; // Render full body
+    const contentElement = iframeDoc.body; // Render full body
 
-        const canvas = await html2canvas(contentElement, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            width: 794,
-            windowWidth: 794
-        });
+    const canvas = await html2canvas(contentElement, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      width: 794,
+      windowWidth: 794
+    });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
 
-        const imgWidth = 210;
-        const pageHeight = 297;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+    const imgWidth = 210;
+    const pageHeight = 297;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
 
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
-        pdf.save(filename);
-        document.body.removeChild(iframe);
-
-    } catch (error) {
-        console.error("Error generating ATS Guide PDF:", error);
-        toast.error("Error al generar la guía PDF");
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
     }
+
+    pdf.save(filename);
+    document.body.removeChild(iframe);
+
+  } catch (error) {
+    console.error("Error generating ATS Guide PDF:", error);
+    toast.error("Error al generar la guía PDF");
+  }
 }

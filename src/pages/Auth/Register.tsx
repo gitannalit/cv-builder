@@ -13,6 +13,7 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleRegister = async (e: React.FormEvent) => {
@@ -20,22 +21,26 @@ export default function Register() {
         setLoading(true);
 
         try {
-            const { error } = await supabase.auth.signUp({
+            setError(null);
+            const { error: supabaseError } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
                     data: {
                         full_name: fullName,
                     },
+                    emailRedirectTo: `${window.location.origin}/dashboard`,
                 },
             });
 
-            if (error) throw error;
+            if (supabaseError) throw supabaseError;
 
             toast.success("Cuenta creada exitosamente. ¡Bienvenido!");
             navigate("/dashboard");
         } catch (error: any) {
-            toast.error(error.message || "Error al registrarse");
+            const message = error.message || "Error al registrarse";
+            setError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -92,26 +97,45 @@ export default function Register() {
                                 id="email"
                                 type="email"
                                 placeholder="ejemplo@email.com"
-                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                className={`h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium ${error ? "border-red-500 ring-1 ring-red-500 bg-red-50/30" : ""}`}
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (error) setError(null);
+                                }}
                                 required
                             />
                         </div>
 
                         <div className="space-y-2.5">
-                            <Label htmlFor="password" dclassName="text-sm font-bold text-foreground">Contraseña</Label>
+                            <Label htmlFor="password" className="text-sm font-bold text-foreground">Contraseña</Label>
                             <Input
                                 id="password"
                                 type="password"
                                 placeholder="Mínimo 6 caracteres"
-                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                className={`h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium ${error ? "border-red-500 ring-1 ring-red-500 bg-red-50/30" : ""}`}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (error) setError(null);
+                                }}
                                 required
                                 minLength={6}
                             />
                         </div>
+
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-3.5 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3"
+                            >
+                                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <span className="text-[10px] font-bold text-white leading-none">!</span>
+                                </div>
+                                <p className="text-xs font-bold text-red-600 leading-relaxed">{error}</p>
+                            </motion.div>
+                        )}
 
                         <div className="pt-4">
                             <Button

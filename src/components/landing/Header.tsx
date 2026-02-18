@@ -30,7 +30,7 @@ export function Header() {
             Cómo funciona
           </a>
           <a href="https://training2work.com" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
-            Training to Work
+            Training2Work
           </a>
           <a href="https://cursos.training2work.com" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors">
             Cursos

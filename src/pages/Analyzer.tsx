@@ -450,7 +450,7 @@ const Analyzer = () => {
       setHasActivePlan(data.hasAccess);
       setCurrentPlan(data.planType || null);
       setDownloadCount(data.count || 0);
-      if (data.hasAccess) setIsUnlocked(true);
+      setIsUnlocked(data.hasAccess); // Sync isUnlocked with real plan status
       return data;
     } catch (error) {
       console.error("Error checking payment status:", error);
@@ -605,7 +605,7 @@ const Analyzer = () => {
 
   const handleDownloadGuide = async () => {
     if (currentPlan !== 'premium') {
-      toast.error("La Guía ATS solo está disponible para usuarios con plan Premium.");
+      toast.error("La Guía ATS solo está disponible para usuarios con el Pack Profesional.");
       return;
     }
 
@@ -615,9 +615,9 @@ const Analyzer = () => {
       toast.dismiss();
       toast.success("Guía descargada correctamente");
     } catch (error) {
-      console.error("Error downloading guide:", error);
+      console.error("Error downloading ATS guide:", error);
       toast.dismiss();
-      toast.error("Error al descargar la guía");
+      toast.error("Error al generar la guía");
     }
   };
 
@@ -757,7 +757,7 @@ const Analyzer = () => {
                         </CardTitle>
                         <CardDescription className="text-base font-medium">Sube tu CV en PDF o pega el texto directamente</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-8">
+                      <CardContent className="p-6 md:p-8 space-y-8">
                         <div
                           className={`group relative border-2 border-dashed rounded-[2rem] p-12 text-center transition-all cursor-pointer bg-white/50
                             ${isDragging ? "border-primary bg-primary/5" : "border-gray-200 hover:border-primary/50 hover:bg-white"}
@@ -1313,23 +1313,23 @@ const Analyzer = () => {
 
                 {/* Main Score - Premium Visualization */}
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-[3rem] blur-2xl group-hover:opacity-100 transition-opacity opacity-70 -z-10" />
-                  <Card className="rounded-[3rem] overflow-hidden border-gray-100 shadow-strong glass">
-                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-10 md:p-16 text-white relative">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-[2rem] md:rounded-[3rem] blur-2xl group-hover:opacity-100 transition-opacity opacity-70 -z-10" />
+                  <Card className="rounded-[2rem] md:rounded-[3rem] overflow-hidden border-gray-100 shadow-strong glass">
+                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-6 md:p-16 text-white relative">
                       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
 
-                      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-                        <div className="space-y-6 text-center md:text-left">
-                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/10 text-xs font-bold uppercase tracking-widest text-primary">
-                            <Target className="w-4 h-4" />
+                      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+                        <div className="space-y-4 md:space-y-6 text-center md:text-left">
+                          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/10 text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary">
+                            <Target className="w-3 h-3 md:w-4 md:h-4" />
                             Puntuación Global ATS
                           </div>
                           <div className="space-y-2">
-                            <p className="text-8xl font-black tracking-tighter text-white">
+                            <p className="text-6xl md:text-8xl font-black tracking-tighter text-white">
                               {analysisResult.atsScore}
-                              <span className="text-3xl text-white/40 ml-2">/100</span>
+                              <span className="text-2xl md:text-3xl text-white/40 ml-2">/100</span>
                             </p>
-                            <p className="text-xl font-bold text-gray-300">
+                            <p className="text-lg md:text-xl font-bold text-gray-300">
                               {analysisResult.atsScore >= 80 ? "Tu perfil está en el Top 5% de candidatos" :
                                 analysisResult.atsScore >= 60 ? "Potencial alto con ajustes específicos" :
                                   "Mejoras críticas necesarias para destacar"}
@@ -1364,10 +1364,10 @@ const Analyzer = () => {
                         </div>
                       </div>
 
-                      <div className="mt-12 pt-10 border-t border-white/5 flex flex-wrap justify-center md:justify-start gap-12">
+                      <div className="mt-8 md:mt-12 pt-8 md:pt-10 border-t border-white/5 flex flex-wrap justify-center md:justify-start gap-8 md:gap-12">
                         <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rango Salarial Estimado</p>
-                          <p className="text-2xl font-black text-white">
+                          <p className="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rango Salarial Estimado</p>
+                          <p className="text-xl md:text-2xl font-black text-white">
                             {analysisResult.salaryRange ? (
                               `${analysisResult.salaryRange.min.toLocaleString()}€ - ${analysisResult.salaryRange.max.toLocaleString()}€`
                             ) : (
@@ -1376,14 +1376,14 @@ const Analyzer = () => {
                           </p>
                         </div>
                         <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Versiones Generadas</p>
-                          <p className="text-2xl font-black text-white">2 <span className="text-sm font-medium text-gray-500">Diseños</span></p>
+                          <p className="text-[9px] md:text-[10px] font-bold text-gray-500 uppercase tracking-widest">Versiones Generadas</p>
+                          <p className="text-xl md:text-2xl font-black text-white">2 <span className="text-xs md:text-sm font-medium text-gray-500">Diseños</span></p>
                         </div>
                       </div>
                     </div>
 
-                    <CardContent className="p-10 bg-white">
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+                    <CardContent className="p-6 md:p-10 bg-white">
+                      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-8">
                         {[
                           { label: "Formato", score: (analysisResult as any).formatScore || (analysisResult as any).format_score || 0, icon: FileText },
                           { label: "Keywords", score: (analysisResult as any).keywordsScore || (analysisResult as any).keywords_score || 0, icon: Target },
@@ -1412,23 +1412,23 @@ const Analyzer = () => {
                   </Card>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-10">
+                <div className="grid md:grid-cols-2 gap-6 md:gap-10">
                   {/* Problems */}
                   {analysisResult && Array.isArray(analysisResult.problems) && analysisResult.problems.length > 0 && (
                     <Card className="rounded-[2rem] border-gray-100 shadow-soft glass overflow-hidden">
-                      <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-6 px-8">
-                        <CardTitle className="flex items-center gap-3 text-xl font-black">
-                          <AlertTriangle className="w-6 h-6 text-yellow-500" />
+                      <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4 md:pb-6 px-6 md:px-8">
+                        <CardTitle className="flex items-center gap-2 md:gap-3 text-lg md:text-xl font-black">
+                          <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-yellow-500" />
                           Mejoras Críticas ({analysisResult.problems.length})
                         </CardTitle>
-                        <CardDescription className="font-medium">
+                        <CardDescription className="text-sm md:text-base font-medium">
                           Puntos de fricción que impiden tu paso a la entrevista.
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="p-8">
+                      <CardContent className="p-5 md:p-8">
                         <div className="space-y-4">
                           {analysisResult.problems.map((problem: any, i) => (
-                            <div key={i} className="flex gap-4 p-5 rounded-2xl bg-white border border-gray-50 shadow-sm hover:border-primary/20 transition-all">
+                            <div key={i} className="flex gap-3 md:gap-4 p-4 md:p-5 rounded-2xl bg-white border border-gray-50 shadow-sm hover:border-primary/20 transition-all">
                               <div className="flex-shrink-0 mt-1">
                                 {getSeverityIcon(problem.severity || 'info')}
                               </div>
@@ -1449,16 +1449,16 @@ const Analyzer = () => {
                   <div className="space-y-10">
                     {analysisResult.missingKeywords.length > 0 && (
                       <Card className="rounded-[2rem] border-gray-100 shadow-soft glass overflow-hidden">
-                        <CardHeader className="px-8 pt-8">
-                          <CardTitle className="flex items-center gap-3 text-xl font-black">
-                            <Target className="w-6 h-6 text-primary" />
+                        <CardHeader className="px-6 md:px-8 pt-6 md:pt-8">
+                          <CardTitle className="flex items-center gap-2 md:gap-3 text-lg md:text-xl font-black">
+                            <Target className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                             Keywords Ausentes
                           </CardTitle>
-                          <CardDescription className="font-medium">
+                          <CardDescription className="text-sm md:text-base font-medium">
                             Añádelas para ser indexado por los reclutadores.
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="p-8">
+                        <CardContent className="p-6 md:p-8">
                           <div className="flex flex-wrap gap-2">
                             {(analysisResult.missingKeywords || []).map((keyword, i) => (
                               <span
@@ -1476,47 +1476,168 @@ const Analyzer = () => {
                     {/* Action Plan Summary */}
                     {actionPlan && (
                       <Card className="rounded-[2rem] border-gray-100 bg-gray-900 text-white shadow-strong overflow-hidden relative">
-                        <CardHeader className="px-8 pt-8">
+                        <CardHeader className="px-6 md:px-8 pt-6 md:pt-8">
                           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[60px] rounded-full" />
-                          <CardTitle className="flex items-center gap-3 text-xl font-black text-white relative z-10">
+                          <CardTitle className="flex items-center gap-2 md:gap-3 text-lg md:text-xl font-black text-white relative z-10">
                             <Zap className="w-6 h-6 text-primary" />
-                            Plan de Optimización
+                            Plan de Optimización {!isUnlocked && "(Muestra)"}
                           </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-8 relative z-10 space-y-6">
-                          <div className="space-y-4">
-                            {(actionPlan.immediate || []).slice(0, 3).map((item: any, i) => (
-                              <div key={i} className="flex items-center gap-4 text-sm font-bold bg-white/5 p-4 rounded-2xl border border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-primary" />
-                                {item.action || item.title || item.accion}
+                        <CardContent className="p-6 md:p-8 relative z-10 space-y-6">
+                          <div className="space-y-6">
+                            {/* Immediate actions */}
+                            <div className="space-y-3">
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Acciones Inmediatas</p>
+                              <div className="space-y-2">
+                                {(actionPlan.immediate || []).slice(0, isUnlocked ? undefined : 3).map((item: any, i) => (
+                                  <div key={i} className="flex items-center gap-3 md:gap-4 text-sm font-bold bg-white/5 p-3.5 md:p-4 rounded-2xl border border-white/5">
+                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                    {item.action || item.title || item.accion}
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            </div>
+
+                            {isUnlocked && (
+                              <>
+                                {/* Short/Long term */}
+                                {actionPlan.shortTerm && actionPlan.shortTerm.length > 0 && (
+                                  <div className="space-y-3">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Medio Plazo</p>
+                                    <div className="space-y-2">
+                                      {actionPlan.shortTerm.map((item: any, i) => (
+                                        <div key={i} className="flex items-center gap-3 md:gap-4 text-sm font-medium text-gray-300">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-gray-600" />
+                                          {item.action || item.title}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Training */}
+                                {actionPlan.trainingRecommendations && actionPlan.trainingRecommendations.length > 0 && (
+                                  <div className="space-y-3 pt-4 border-t border-white/10">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Formación Recomendada</p>
+                                    <div className="space-y-3">
+                                      {actionPlan.trainingRecommendations.map((item: any, i) => (
+                                        <div key={i} className="p-3 md:p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                                          <p className="font-bold text-white text-sm">{item.course || item.curso}</p>
+                                          <p className="text-xs text-gray-400 mt-1 leading-relaxed">{item.reason || item.motivo}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                <Button
+                                  onClick={handleDownloadGuide}
+                                  className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/10 mt-4 font-bold"
+                                >
+                                  <Download className="w-4 h-4 mr-2" />
+                                  Descargar Guía ATS Completa
+                                </Button>
+                              </>
+                            )}
                           </div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-widest text-center">IA Generando pasos finales...</p>
+                          {!isUnlocked && <p className="text-xs text-gray-500 font-bold uppercase tracking-widest text-center">Desbloquea para ver el plan completo</p>}
                         </CardContent>
                       </Card>
                     )}
                   </div>
                 </div>
 
+                {/* Inline Payment Options - New Section */}
+                {!isUnlocked && (
+                  <div className="bg-gray-50 rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 border border-gray-100 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 blur-[100px] rounded-full -mr-40 -mt-40" />
+
+                    <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8 md:space-y-10">
+                      <div className="space-y-4">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-primary/10 rounded-full text-primary text-[10px] md:text-xs font-black uppercase tracking-widest">
+                          <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
+                          Oferta de Lanzamiento
+                        </div>
+                        <h2 className="text-2xl md:text-4xl font-black tracking-tight text-gray-900 leading-tight">Desbloquea tu Potencial Completo</h2>
+                        <p className="text-base md:text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
+                          Obtén el plan de acción detallado, accede a los diseños premium y descarga la Guía ATS definitiva.
+                        </p>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-3xl mx-auto">
+                        {/* Pack Básico */}
+                        <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-soft hover:shadow-strong transition-all flex flex-col items-center">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-[#00D1A0] mb-2">PACK BÁSICO</p>
+                          <p className="text-2xl md:text-3xl font-black text-gray-900">4,99€</p>
+                          <div className="my-5 md:my-6 space-y-2 md:space-y-3 w-full">
+                            <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+                              <Check className="w-4 h-4 text-[#00D1A0]" />
+                              2 Descargas de CV
+                            </div>
+                            <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
+                              <Check className="w-4 h-4 text-[#00D1A0]" />
+                              Análisis ATS Completo
+                            </div>
+                          </div>
+                          <Button
+                            variant="hero"
+                            className="w-full h-12 md:h-14 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold"
+                            onClick={handleUnlockBasic}
+                            disabled={isProcessingPayment}
+                          >
+                            Seleccionar Básico
+                          </Button>
+                        </div>
+
+                        {/* Pack Premium */}
+                        <div className="bg-gray-900 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 border border-gray-800 shadow-strong relative overflow-hidden group flex flex-col items-center">
+                          <div className="absolute top-0 right-6 md:right-8 bg-[#00D1A0] text-white text-[9px] md:text-[10px] font-black px-3 py-1 md:px-4 md:py-1.5 rounded-b-xl z-20 shadow-xl tracking-widest uppercase">
+                            POPULAR
+                          </div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">PACK PROFESIONAL</p>
+                          <p className="text-2xl md:text-3xl font-black text-white">17,99€</p>
+                          <div className="my-5 md:my-6 space-y-2 md:space-y-3 w-full">
+                            <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
+                              <Check className="w-4 h-4 text-primary" />
+                              Descargas Ilimitadas
+                            </div>
+                            <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
+                              <Check className="w-4 h-4 text-primary" />
+                              Guía ATS de Regalo
+                            </div>
+                          </div>
+                          <Button
+                            variant="hero"
+                            className="w-full h-12 md:h-14 bg-primary hover:bg-primary/90 text-white rounded-xl md:rounded-2xl font-black shadow-accent"
+                            onClick={handleUnlockPremium}
+                            disabled={isProcessingPayment}
+                          >
+                            Seleccionar Premium
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Final Action CTA */}
-                <div className="flex flex-col md:flex-row gap-6 items-center justify-center py-10">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-center py-6 md:py-10">
                   <Button
                     size="xl"
-                    className="w-full md:w-[400px] h-24 gap-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-3xl text-2xl font-black shadow-accent hover:scale-[1.02] transition-all"
+                    className="w-full md:w-[400px] h-16 md:h-24 gap-3 md:gap-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-2xl md:rounded-3xl text-lg md:text-2xl font-black shadow-accent hover:scale-[1.02] transition-all"
                     onClick={handleContinueToQuestions}
                   >
-                    <Sparkles className="w-8 h-8" />
+                    <Sparkles className="w-6 h-6 md:w-8 md:h-8" />
                     Generar Nuevo CV
-                    <ArrowRight className="w-8 h-8" />
+                    <ArrowRight className="w-6 h-6 md:w-8 md:h-8" />
                   </Button>
                   <Button
                     variant="outline"
                     size="xl"
-                    className="w-full md:w-auto px-10 h-24 gap-3 bg-white border-none shadow-strong rounded-3xl text-lg font-black hover:bg-gray-50 transition-all"
+                    className="w-full md:w-auto px-10 h-16 md:h-24 gap-3 bg-white border-none shadow-strong rounded-2xl md:rounded-3xl text-base md:text-lg font-black hover:bg-gray-50 transition-all"
                     onClick={() => window.print()}
                   >
-                    <Printer className="w-6 h-6 text-muted-foreground font-medium" />
+                    <Printer className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground font-medium" />
                     Reporte PDF
                   </Button>
                 </div>
@@ -1541,7 +1662,7 @@ const Analyzer = () => {
 
       <footer className="border-t mt-auto py-8 bg-white no-print">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2026 Training to Work. Todos los derechos reservados.</p>
+          <p>© 2026 Training2Work. Todos los derechos reservados.</p>
           <p className="mt-1">
             <a href="https://training2work.com" className="text-primary hover:underline">
               training2work.com

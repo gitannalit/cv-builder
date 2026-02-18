@@ -12,6 +12,7 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -19,17 +20,20 @@ export default function Login() {
         setLoading(true);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            setError(null);
+            const { error: supabaseError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
-            if (error) throw error;
+            if (supabaseError) throw supabaseError;
 
             toast.success("¡Bienvenido de nuevo!");
             navigate("/dashboard");
         } catch (error: any) {
-            toast.error(error.message || "Error al iniciar sesión");
+            const message = error.message || "Error al iniciar sesión";
+            setError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -73,9 +77,12 @@ export default function Login() {
                                 id="email"
                                 type="email"
                                 placeholder="ejemplo@email.com"
-                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                className={`h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium ${error ? "border-red-500 ring-1 ring-red-500 bg-red-50/30" : ""}`}
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (error) setError(null);
+                                }}
                                 required
                             />
                         </div>
@@ -84,12 +91,8 @@ export default function Login() {
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password" className="text-sm font-bold text-foreground">Contraseña</Label>
                                 <Link
-                                    to="#"
+                                    to="/forgot-password"
                                     className="text-xs font-bold text-primary hover:underline"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        toast.info("Funcionalidad de recuperación próximamente");
-                                    }}
                                 >
                                     ¿La has olvidado?
                                 </Link>
@@ -98,12 +101,28 @@ export default function Login() {
                                 id="password"
                                 type="password"
                                 placeholder="••••••••"
-                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
+                                className={`h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium ${error ? "border-red-500 ring-1 ring-red-500 bg-red-50/30" : ""}`}
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setPassword(e.target.value);
+                                    if (error) setError(null);
+                                }}
                                 required
                             />
                         </div>
+
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="p-3.5 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3"
+                            >
+                                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <span className="text-[10px] font-bold text-white leading-none">!</span>
+                                </div>
+                                <p className="text-xs font-bold text-red-600 leading-relaxed">{error}</p>
+                            </motion.div>
+                        )}
 
                         <Button
                             type="submit"

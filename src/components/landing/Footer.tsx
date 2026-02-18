@@ -26,7 +26,7 @@ export function Footer() {
 
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 text-sm font-bold uppercase tracking-widest text-gray-400">
             <a href="https://training2work.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-              Training to Work
+              Training2Work
             </a>
             <a href="https://cursos.training2work.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
               Cursos
@@ -45,7 +45,7 @@ export function Footer() {
 
         <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <div className="text-xs text-gray-600 font-bold uppercase tracking-[0.2em]">
-            © {new Date().getFullYear()} Training to Work. Todos los derechos reservados.
+            © {new Date().getFullYear()} Training2Work. Todos los derechos reservados.
           </div>
         </div>
       </div>

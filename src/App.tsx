@@ -9,6 +9,8 @@ import Analyzer from "./pages/Analyzer";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import UpdatePassword from "./pages/Auth/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import Terms from "./pages/Legal/Terms";
 import Privacy from "./pages/Legal/Privacy";
@@ -34,6 +36,8 @@ const App = () => (
             <Route path="/analyzer" element={<Analyzer />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/terminos" element={<Terms />} />
             <Route path="/privacidad" element={<Privacy />} />
             <Route path="/cookies" element={<Cookies />} />
