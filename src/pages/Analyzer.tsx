@@ -1548,105 +1548,115 @@ const Analyzer = () => {
                 </div>
 
                 {/* Inline Payment Options - New Section */}
-                {!isUnlocked && (
-                  <div className="bg-gray-50 rounded-[2rem] md:rounded-[3rem] p-6 md:p-16 border border-gray-100 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 blur-[100px] rounded-full -mr-40 -mt-40" />
+{!isUnlocked && (
+  <div className="bg-gray-50 rounded-2xl sm:rounded-[2rem] md:rounded-[3rem] p-4 sm:p-8 md:p-16 border border-gray-100 relative overflow-hidden">
+    <div className="absolute top-0 right-0 w-60 h-60 md:w-80 md:h-80 bg-primary/5 blur-[80px] md:blur-[100px] rounded-full -mr-28 md:-mr-40 -mt-28 md:-mt-40" />
 
-                    <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8 md:space-y-10">
-                      <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-primary/10 rounded-full text-primary text-[10px] md:text-xs font-black uppercase tracking-widest">
-                          <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
-                          Oferta de Lanzamiento
-                        </div>
-                        <h2 className="text-2xl md:text-4xl font-black tracking-tight text-gray-900 leading-tight">Desbloquea tu Potencial Completo</h2>
-                        <p className="text-base md:text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
-                          Obtén el plan de acción detallado, accede a los diseños premium y descarga la Guía ATS definitiva.
-                        </p>
-                      </div>
+    <div className="relative z-10 max-w-4xl mx-auto text-center space-y-5 sm:space-y-8 md:space-y-10">
+      <div className="space-y-2 sm:space-y-3 md:space-y-4">
+        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-primary/10 rounded-full text-primary text-[8px] sm:text-[10px] md:text-xs font-black uppercase tracking-widest">
+          <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4" />
+          Oferta de Lanzamiento
+        </div>
+        <h2 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-gray-900 leading-tight px-2 sm:px-4 md:px-0">
+          Desbloquea tu Potencial Completo
+        </h2>
+        <p className="text-xs sm:text-sm md:text-lg text-muted-foreground font-medium max-w-2xl mx-auto px-4 sm:px-6 md:px-0">
+          Obtén el plan de acción detallado, accede a los diseños premium y descarga la Guía ATS definitiva.
+        </p>
+      </div>
 
-                      <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-3xl mx-auto">
-                        {/* Pack Básico */}
-                        <div className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-soft hover:shadow-strong transition-all flex flex-col items-center">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-[#00D1A0] mb-2">PACK BÁSICO</p>
-                          <p className="text-2xl md:text-3xl font-black text-gray-900">4,99€</p>
-                          <div className="my-5 md:my-6 space-y-2 md:space-y-3 w-full">
-                            <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
-                              <Check className="w-4 h-4 text-[#00D1A0]" />
-                              2 Descargas de CV
-                            </div>
-                            <div className="flex items-center gap-3 text-sm font-medium text-gray-600">
-                              <Check className="w-4 h-4 text-[#00D1A0]" />
-                              Análisis ATS Completo
-                            </div>
-                          </div>
-                          <Button
-                            variant="hero"
-                            className="w-full h-12 md:h-14 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold"
-                            onClick={handleUnlockBasic}
-                            disabled={isProcessingPayment}
-                          >
-                            Seleccionar Básico
-                          </Button>
-                        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-3xl mx-auto">
+        {/* Pack Básico */}
+        <div className="bg-white rounded-2xl sm:rounded-[1.5rem] md:rounded-[2rem] p-4 sm:p-6 md:p-8 border border-gray-100 shadow-soft hover:shadow-strong transition-all flex flex-col items-center">
+          <p className="text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest text-[#00D1A0] mb-1.5 sm:mb-2">
+            PACK BÁSICO
+          </p>
+          <p className="text-2xl sm:text-2xl md:text-3xl font-black text-gray-900">4,99€</p>
+          <div className="my-3 sm:my-4 md:my-6 space-y-2 md:space-y-3 w-full">
+            <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm font-medium text-gray-600">
+              <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00D1A0] flex-shrink-0" />
+              <span>2 Descargas de CV</span>
+            </div>
+            <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm font-medium text-gray-600">
+              <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#00D1A0] flex-shrink-0" />
+              <span>Análisis ATS Completo</span>
+            </div>
+          </div>
+          <Button
+            variant="hero"
+            className="w-full h-10 sm:h-11 md:h-14 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-100 rounded-xl md:rounded-2xl font-bold text-xs sm:text-sm"
+            onClick={handleUnlockBasic}
+            disabled={isProcessingPayment}
+          >
+            Seleccionar Básico
+          </Button>
+        </div>
 
-                        {/* Pack Premium */}
-                        <div className="bg-gray-900 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 border border-gray-800 shadow-strong relative overflow-hidden group flex flex-col items-center">
-                          <div className="absolute top-0 right-6 md:right-8 bg-[#00D1A0] text-white text-[9px] md:text-[10px] font-black px-3 py-1 md:px-4 md:py-1.5 rounded-b-xl z-20 shadow-xl tracking-widest uppercase">
-                            POPULAR
-                          </div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-2">PACK PROFESIONAL</p>
-                          <p className="text-2xl md:text-3xl font-black text-white">17,99€</p>
-                          <div className="my-5 md:my-6 space-y-2 md:space-y-3 w-full">
-                            <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
-                              <Check className="w-4 h-4 text-primary" />
-                              Descargas Ilimitadas
-                            </div>
-                            <div className="flex items-center gap-3 text-sm font-medium text-gray-300">
-                              <Check className="w-4 h-4 text-primary" />
-                              Guía ATS de Regalo
-                            </div>
-                          </div>
-                          <Button
-                            variant="hero"
-                            className="w-full h-12 md:h-14 bg-primary hover:bg-primary/90 text-white rounded-xl md:rounded-2xl font-black shadow-accent"
-                            onClick={handleUnlockPremium}
-                            disabled={isProcessingPayment}
-                          >
-                            Seleccionar Premium
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+        {/* Pack Premium */}
+        <div className="bg-gray-900 rounded-2xl sm:rounded-[1.5rem] md:rounded-[2rem] p-4 sm:p-6 md:p-8 border border-gray-800 shadow-strong relative overflow-hidden group flex flex-col items-center">
+          <div className="absolute top-0 right-4 sm:right-5 md:right-8 bg-[#00D1A0] text-white text-[7px] sm:text-[8px] md:text-[10px] font-black px-2.5 py-0.5 sm:px-3 sm:py-1 md:px-4 md:py-1.5 rounded-b-xl z-20 shadow-xl tracking-widest uppercase">
+            POPULAR
+          </div>
+          <p className="text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary mb-1.5 sm:mb-2">
+            PACK PROFESIONAL
+          </p>
+          <p className="text-2xl sm:text-2xl md:text-3xl font-black text-white">17,99€</p>
+          <div className="my-3 sm:my-4 md:my-6 space-y-2 md:space-y-3 w-full">
+            <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm font-medium text-gray-300">
+              <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary flex-shrink-0" />
+              <span>Descargas Ilimitadas</span>
+            </div>
+            <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm font-medium text-gray-300">
+              <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary flex-shrink-0" />
+              <span>Guía ATS de Regalo</span>
+            </div>
+          </div>
+          <Button
+            variant="hero"
+            className="w-full h-10 sm:h-11 md:h-14 bg-primary hover:bg-primary/90 text-white rounded-xl md:rounded-2xl font-black shadow-accent text-xs sm:text-sm"
+            onClick={handleUnlockPremium}
+            disabled={isProcessingPayment}
+          >
+            Seleccionar Premium
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
-                {/* Final Action CTA */}
-                <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-center justify-center py-6 md:py-10">
-                  <Button
-                    size="xl"
-                    className="w-full md:w-[400px] h-16 md:h-24 gap-3 md:gap-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-2xl md:rounded-3xl text-lg md:text-2xl font-black shadow-accent hover:scale-[1.02] transition-all"
-                    onClick={handleContinueToQuestions}
-                  >
-                    <Sparkles className="w-6 h-6 md:w-8 md:h-8" />
-                    Generar Nuevo CV
-                    <ArrowRight className="w-6 h-6 md:w-8 md:h-8" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xl"
-                    className="w-full md:w-auto px-10 h-16 md:h-24 gap-3 bg-white border-none shadow-strong rounded-2xl md:rounded-3xl text-base md:text-lg font-black hover:bg-gray-50 transition-all"
-                    onClick={() => window.print()}
-                  >
-                    <Printer className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground font-medium" />
-                    Reporte PDF
-                  </Button>
-                </div>
+{/* Final Action CTA */}
+<div className="flex flex-col gap-3 sm:gap-4 md:gap-6 items-center justify-center py-5 sm:py-6 md:py-10">
+  <Button
+    size="xl"
+    className="w-full sm:w-[320px] md:w-[400px] h-14 sm:h-16 md:h-24 gap-2 sm:gap-3 md:gap-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-2xl md:rounded-3xl text-base sm:text-lg md:text-2xl font-black shadow-accent hover:scale-[1.02] transition-all"
+    onClick={handleContinueToQuestions}
+  >
+    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
+    Generar Nuevo CV
+    <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8" />
+  </Button>
+  <Button
+    variant="outline"
+    size="xl"
+    className="w-full sm:w-auto sm:px-8 md:px-10 h-14 sm:h-16 md:h-24 gap-2 sm:gap-3 bg-white border-none shadow-strong rounded-2xl md:rounded-3xl text-sm sm:text-base md:text-lg font-black hover:bg-gray-50 transition-all"
+    onClick={() => window.print()}
+  >
+    <Printer className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-muted-foreground" />
+    Reporte PDF
+  </Button>
+</div>
 
-                <div className="flex justify-center pb-12">
-                  <Button variant="ghost" onClick={handleNewAnalysis} className="text-muted-foreground font-bold hover:text-primary tracking-tight">
-                    ← Analizar otro documento
-                  </Button>
-                </div>
+<div className="flex justify-center pb-8 sm:pb-12">
+  <Button
+    variant="ghost"
+    onClick={handleNewAnalysis}
+    className="text-muted-foreground text-sm sm:text-base font-bold hover:text-primary tracking-tight"
+  >
+    ← Analizar otro documento
+  </Button>
+</div>
               </motion.div>
             )}
           </AnimatePresence>

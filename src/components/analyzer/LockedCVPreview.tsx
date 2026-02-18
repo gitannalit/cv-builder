@@ -80,70 +80,72 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic
                     </div>
                 </div>
 
-                {/* Unlock Sidebar (Right) - We'll make it sticky on larger screens */}
-                <div className="lg:col-span-12 xl:col-span-4 space-y-6 md:space-y-8 sticky top-32">
+                {/* Unlock Sidebar (Right) - Hidden on mobile, sticky on desktop */}
+                <div className="hidden xl:block xl:col-span-4 space-y-6 md:space-y-8 sticky top-32 w-full max-w-2xl mx-auto xl:max-w-none no-print">
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-white rounded-[2rem] md:rounded-[2.5rem] shadow-strong border border-gray-100 p-6 md:p-10 relative overflow-hidden"
+                        className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] shadow-strong border border-gray-100 p-4 md:p-10 relative overflow-hidden"
                     >
+                        {/* Decorative background blur */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
 
-                        <div className="relative z-10 space-y-6 md:space-y-8">
-                            <div className="space-y-3 md:space-y-4 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full mx-auto md:mx-0">
+                        <div className="relative z-10 space-y-5 md:space-y-8">
+                            <div className="hidden md:block space-y-3 md:space-y-4 text-center md:text-left">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full">
                                     <Sparkles className="w-3 h-3 text-primary" />
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-primary">Oferta de Lanzamiento</span>
+                                    <span className="text-[9px] md:text-[10px] font-black uppercase tracking-wider text-primary">Oferta de Lanzamiento</span>
                                 </div>
-                                <h2 className="text-2xl md:text-3xl font-black leading-tight text-gray-900">Consigue tu CV <span className="text-[#00D1A0]">Impactante</span></h2>
+                                <h2 className="text-xl md:text-3xl font-black leading-tight text-gray-900">Consigue tu CV <span className="text-[#00D1A0]">Impactante</span></h2>
                                 <p className="text-sm md:text-base text-muted-foreground font-medium">Desbloquea el acceso completo y recíbelo instantáneamente en tu email.</p>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="space-y-3 md:space-y-4">
                                 {/* Pack Básico */}
                                 <div className="relative group">
                                     <Button
                                         onClick={onUnlockBasic}
                                         disabled={isProcessing}
-                                        variant="hero"
-                                        className="w-full min-h-[5rem] md:h-24 py-4 bg-white hover:bg-gray-50 text-gray-900 hover:text-gray-900 border-2 border-gray-100 hover:border-[#00D1A0]/30 rounded-2xl md:rounded-3xl shadow-soft hover:shadow-strong transition-all flex items-center justify-between px-6 md:px-8"
+                                        variant="outline"
+                                        className="w-full min-h-[4.5rem] md:h-24 py-3 bg-white !bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-100 hover:border-[#00D1A0]/30 rounded-xl md:rounded-3xl shadow-soft hover:shadow-strong transition-all flex items-center gap-3 px-4 md:px-8"
                                     >
-                                        <div className="text-left">
-                                            <p className="text-[10px] md:text-sm font-black text-[#00D1A0]">PACK BÁSICO</p>
-                                            <p className="text-base md:text-lg font-bold">2 Descargas</p>
+                                        <div className="text-left flex-1 min-w-0">
+                                            <p className="text-[9px] md:text-sm font-black text-[#00D1A0] truncate uppercase">PACK BÁSICO</p>
+                                            <p className="text-sm md:text-lg font-bold truncate">2 Descargas</p>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-xl md:text-2xl font-black">4,99€</p>
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-lg md:text-2xl font-black whitespace-nowrap">4,99€</p>
                                         </div>
                                     </Button>
                                 </div>
 
                                 {/* Pack Premium */}
                                 <div className="relative group">
-                                    <div className="absolute -top-3 right-6 md:right-8 bg-black text-white text-[9px] md:text-[10px] font-black px-3 py-1 md:px-4 md:py-1.5 rounded-full z-20 shadow-xl tracking-widest uppercase">
+                                    <div className="absolute -top-3 right-4 md:right-8 bg-black text-white text-[8px] md:text-[10px] font-black px-3 py-1 md:px-4 md:py-1.5 rounded-full z-20 shadow-xl tracking-widest uppercase">
                                         RECOMENDADO
                                     </div>
                                     <Button
                                         onClick={onUnlockPremium}
                                         disabled={isProcessing}
-                                        className="w-full min-h-[6rem] md:h-28 py-4 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-2xl md:rounded-3xl shadow-accent hover:scale-[1.02] transition-all flex items-center justify-between px-6 md:px-8"
+                                        variant="hero"
+                                        className="w-full min-h-[5.5rem] md:h-28 py-3 bg-[#00D1A0] hover:bg-[#00B88D] text-white rounded-xl md:rounded-3xl shadow-accent hover:scale-[1.02] transition-all flex items-center gap-3 px-4 md:px-8"
                                     >
-                                        <div className="text-left">
-                                            <p className="text-[10px] md:text-sm font-black text-white/80">PACK PROFESIONAL</p>
-                                            <p className="text-lg md:text-xl font-black leading-tight">Ilimitado + Regalos</p>
+                                        <div className="text-left flex-1 min-w-0">
+                                            <p className="text-[9px] md:text-sm font-black text-white/80 truncate uppercase">PACK PROFESIONAL</p>
+                                            <p className="text-base md:text-xl font-black leading-tight truncate">Ilimitado + Regalos</p>
                                         </div>
-                                        <div className="text-right flex flex-col items-end">
-                                            <p className="text-2xl md:text-3xl font-black">17,99€</p>
-                                            <p className="text-[10px] font-bold line-through opacity-60">24,99€</p>
+                                        <div className="text-right flex-shrink-0 flex flex-col items-end">
+                                            <p className="text-xl md:text-3xl font-black whitespace-nowrap">17,99€</p>
+                                            <p className="text-[9px] md:text-[10px] font-bold line-through opacity-60 whitespace-nowrap">24,99€</p>
                                         </div>
                                     </Button>
                                 </div>
                             </div>
 
                             {/* Trust Signals */}
-                            <div className="space-y-6 pt-4 border-t border-gray-100">
-                                <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-4 pt-4 border-t border-gray-100">
+                                <div className="grid grid-cols-2 gap-3 md:gap-4">
                                     <div className="flex items-center gap-2 md:gap-3">
                                         <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
                                             <ShieldCheck className="w-4 h-4 text-gray-400" />
@@ -158,9 +160,9 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 p-4 bg-[#00D1A0]/5 rounded-2xl border border-[#00D1A0]/10">
+                                <div className="flex items-center gap-3 p-3.5 md:p-4 bg-[#00D1A0]/5 rounded-xl md:rounded-2xl border border-[#00D1A0]/10">
                                     <Zap className="w-5 h-5 text-[#00D1A0] flex-shrink-0" />
-                                    <p className="text-xs font-bold text-gray-700 leading-snug">
+                                    <p className="text-[10px] md:text-xs font-bold text-gray-700 leading-snug">
                                         Únete a las más de <span className="text-[#00D1A0]">15.000 personas</span> que ya han impulsado su carrera.
                                     </p>
                                 </div>
@@ -168,32 +170,51 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic
                         </div>
                     </motion.div>
 
-                    <div className="flex justify-center pb-12 md:pb-0">
+                    <div className="flex justify-center pt-4 pb-12 md:pb-0">
                         <button
                             onClick={onEdit}
-                            className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"
+                            className="text-[10px] md:text-sm font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"
                         >
-                            <ArrowRight className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                            <ArrowRight className="w-3 h-3 md:w-4 md:h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
                             Probablemente prefieras el otro diseño
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* Mobile / Sticky Bottom Bar - Redesigned */}
-            <div className="xl:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-lg z-50">
-                <div className="bg-gray-900/90 backdrop-blur-2xl rounded-3xl p-3 shadow-strong flex items-center gap-4 border border-white/10">
-                    <div className="flex-1 space-y-0.5 pl-4">
-                        <p className="text-[9px] font-black text-primary uppercase tracking-widest">Desde</p>
-                        <p className="text-xl font-black text-white">4,99€</p>
+            {/* Mobile / Sticky Bottom Bar - Dual Plan Desktop */}
+            <div className="xl:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-lg z-50">
+                <div className="bg-gray-900/95 backdrop-blur-2xl rounded-[2rem] p-2 shadow-strong border border-white/10 flex flex-col gap-2">
+                    {/* Pack Profesional (Featured) */}
+                    <div className="flex items-center gap-3 bg-[#00D1A0]/10 rounded-[1.5rem] p-2 pl-4 border border-[#00D1A0]/20">
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[8px] font-black text-[#00D1A0] uppercase tracking-widest">PRO</p>
+                            <p className="text-sm font-black text-white truncate text-nowrap">Ilimitado + Regalos</p>
+                        </div>
+                        <Button
+                            onClick={onUnlockPremium}
+                            disabled={isProcessing}
+                            className="bg-[#00D1A0] hover:bg-[#00B88D] text-white h-11 px-6 rounded-xl font-black text-sm shadow-accent whitespace-nowrap"
+                        >
+                            17,99€
+                        </Button>
                     </div>
-                    <Button
-                        onClick={onUnlockPremium}
-                        disabled={isProcessing}
-                        className="flex-[2] bg-[#00D1A0] hover:bg-[#00B88D] text-white h-14 rounded-2xl font-black text-base shadow-accent"
-                    >
-                        {isProcessing ? "..." : "Desbloquear Todo"}
-                    </Button>
+
+                    {/* Pack Básico */}
+                    <div className="flex items-center gap-3 p-1 pl-4">
+                        <div className="flex-1 min-w-0">
+                            <p className="text-[8px] font-black text-primary/60 uppercase tracking-widest">Básico</p>
+                            <p className="text-sm font-bold text-white/90 truncate text-nowrap">2 Descargas</p>
+                        </div>
+                        <Button
+                            onClick={onUnlockBasic}
+                            disabled={isProcessing}
+                            variant="outline"
+                            className="bg-transparent border-white/10 text-white hover:bg-white/5 h-10 px-6 rounded-xl font-bold text-sm whitespace-nowrap"
+                        >
+                            4,99€
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
