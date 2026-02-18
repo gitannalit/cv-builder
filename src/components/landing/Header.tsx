@@ -166,9 +166,9 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 h-screen w-[280px] bg-white shadow-2xl z-[55] lg:hidden p-6 pb-6 flex flex-col"
+              className="fixed right-0 top-0 h-[100dvh] w-[280px] bg-white shadow-2xl z-[55] lg:hidden flex flex-col"
             >
-              <div className="flex flex-col h-full pt-12">
+              <div className="flex flex-col h-full p-6 pt-12">
                 <div className="space-y-4 flex-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground px-4">Menú</p>
                   <nav className="flex flex-col gap-1">
@@ -186,9 +186,9 @@ export function Header() {
                   </nav>
                 </div>
 
-                <div className="mt-auto space-y-4 pb-2">
+                <div className="mt-auto space-y-4 pb-16 pb-[env(safe-area-inset-bottom)]">
                   <div className="h-px bg-gray-100" />
-                  <div className="flex items-center gap-2 pt-2">
+                  <div className="flex items-center gap-2 pt-1">
                     {user ? (
                       <>
                         <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="flex-1">
