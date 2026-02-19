@@ -4,6 +4,7 @@ import { CVVersion } from "@/types/cv";
 import { Layers, Briefcase, Sparkles, GraduationCap, Wrench, ZoomIn } from "lucide-react";
 import { CVTemplateModern } from "./templates/CVTemplateModern";
 import { CVTemplateExecutive } from "./templates/CVTemplateExecutive";
+import { getPrioritySkills } from "@/lib/cvUtils";
 
 const ResponsivePreview = ({ children }: { children: React.ReactNode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,6 +67,7 @@ interface CVVersionsCardProps {
     email: string;
     phone?: string;
     targetJob?: string;
+    selectedKeywords?: string[];
   };
 }
 
@@ -99,7 +101,7 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
         startDate: edu.startDate || edu.start_date || "",
         endDate: edu.endDate || edu.end_date || edu.fecha_fin || ""
       })),
-      skills: content.skills || (content as any).habilidades || [],
+      skills: getPrioritySkills(userData?.selectedKeywords || [], content.skills || (content as any).habilidades || [], 5),
       languages: (content as any).languages || (content as any).idiomas || []
     };
 

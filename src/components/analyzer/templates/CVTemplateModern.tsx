@@ -136,7 +136,7 @@ export const CVTemplateModern = forwardRef<HTMLDivElement, CVTemplateModernProps
                                     Habilidades
                                 </h2>
                                 <div className="flex flex-wrap gap-2">
-                                    {data.skills.map((skill, i) => (
+                                    {data.skills.slice(0, 5).map((skill, i) => (
                                         <span
                                             key={i}
                                             className="px-3 py-1 text-xs rounded-full"

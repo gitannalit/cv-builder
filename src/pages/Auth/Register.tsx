@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Loader2, ArrowLeft, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -35,12 +34,13 @@ export default function Register() {
 
             if (supabaseError) throw supabaseError;
 
-            toast.success("Cuenta creada exitosamente. ¡Bienvenido!");
             navigate("/dashboard");
         } catch (error: any) {
-            const message = error.message || "Error al registrarse";
+            let message = error.message || "Error al registrarse";
+            if (message.includes("User already registered")) {
+                message = "Cuenta ya registrada";
+            }
             setError(message);
-            toast.error(message);
         } finally {
             setLoading(false);
         }

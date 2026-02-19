@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Loader2, ArrowLeft, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -28,12 +27,10 @@ export default function Login() {
 
             if (supabaseError) throw supabaseError;
 
-            toast.success("¡Bienvenido de nuevo!");
             navigate("/dashboard");
         } catch (error: any) {
             const message = error.message || "Error al iniciar sesión";
             setError(message);
-            toast.error(message);
         } finally {
             setLoading(false);
         }

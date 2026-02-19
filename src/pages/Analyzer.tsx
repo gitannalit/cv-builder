@@ -556,7 +556,7 @@ const Analyzer = () => {
 
         const version = cvVersions[selectedVersion];
         const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-        const userData = { name, email, targetJob };
+        const userData = { name, email, targetJob, selectedKeywords };
 
         // Use real PDF download instead of print dialog
         await downloadTemplatePDF(version, templateType, false, userData);
@@ -585,7 +585,7 @@ const Analyzer = () => {
       toast.loading('Generando PDF...');
       const version = cvVersions[selectedVersion];
       const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
-      const userData = { name, email, targetJob };
+      const userData = { name, email, targetJob, selectedKeywords };
 
       // Generate PDF using the same template as download
       const { generateTemplatePDFBlob } = await import('@/lib/templatePdfGenerator');
@@ -1265,7 +1265,7 @@ const Analyzer = () => {
                     <CVVersionsCard
                       versions={cvVersions}
                       selectedOnly={selectedVersion}
-                      userData={{ name, email, targetJob }}
+                      userData={{ name, email, phone: extractedData?.personalInfo?.phone, targetJob, selectedKeywords }}
                     />
                   </div>
 

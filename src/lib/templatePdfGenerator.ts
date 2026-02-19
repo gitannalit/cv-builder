@@ -1,12 +1,13 @@
 import { CVVersion } from "@/types/cv";
 import { TemplateType } from "@/components/analyzer/templates";
+import { getPrioritySkills } from "./cvUtils";
 
 // Generate HTML for each template type
 export function generateTemplateHTML(
   version: CVVersion,
   template: TemplateType,
   hasWatermark: boolean,
-  userData?: { name: string; email: string; phone?: string; targetJob?: string }
+  userData?: { name: string; email: string; phone?: string; targetJob?: string; selectedKeywords?: string[] }
 ): string {
   const watermarkHTML = hasWatermark
     ? `<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0, 204, 169, 0.08); font-weight: bold; pointer-events: none; z-index: 1000; white-space: nowrap; font-family: 'Inter', sans-serif;">T2W CV Builder</div>`
@@ -336,7 +337,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
       <div class="sidebar-section">
         <h2 class="sidebar-title">Habilidades</h2>
         <div style="display: flex; flex-wrap: wrap;">
-          ${version.content.skills.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+          ${getPrioritySkills(userData?.selectedKeywords || [], version.content.skills || [], 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
         </div>
       </div>
       
@@ -611,7 +612,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
           <section class="section">
             <h2 class="section-title">Competencias</h2>
             <div class="skills-container">
-              ${version.content.skills.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+              ${getPrioritySkills(userData?.selectedKeywords || [], version.content.skills || [], 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
             </div>
           </section>
           
@@ -723,7 +724,7 @@ function generateClassicHTML(version: CVVersion, hasWatermark: boolean, watermar
     <section class="section">
       <h2 class="section-title">Competencias</h2>
       <div class="skills-list">
-        ${version.content.skills.slice(0, 5).map(skill => `<span class="skill-item">${skill}</span>`).join('')}
+        ${getPrioritySkills(userData?.selectedKeywords || [], version.content.skills || [], 5).map(skill => `<span class="skill-item">${skill}</span>`).join('')}
       </div>
     </section>
   </div>
