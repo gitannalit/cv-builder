@@ -79,17 +79,11 @@ export const ATS_GUIDE = {
     "Mantén tu CV en 1-2 páginas máximo",
     "Revisa la ortografía (los ATS detectan errores)",
     "Actualiza tu LinkedIn para que coincida con tu CV"
-  ],
-
-  resources: [
-    { name: "Jobscan", url: "https://www.jobscan.co", description: "Analiza tu CV contra ofertas de empleo" },
-    { name: "Resume Worded", url: "https://resumeworded.com", description: "Feedback instantáneo de tu CV" },
-    { name: "LinkedIn Learning", url: "https://www.linkedin.com/learning", description: "Cursos de desarrollo profesional" }
   ]
 };
 
 export const generateATSGuideHTML = (userName: string): string => {
-  const { title, subtitle, sections, quickTips, resources } = ATS_GUIDE;
+  const { title, subtitle, sections, quickTips } = ATS_GUIDE;
 
   const sectionsHTML = sections.map(section => {
     let html = `<h2>${section.title}</h2>`;
@@ -109,10 +103,6 @@ export const generateATSGuideHTML = (userName: string): string => {
   }).join('');
 
   const tipsHTML = quickTips.map(tip => `<li>${tip}</li>`).join('');
-
-  const resourcesHTML = resources.map(r =>
-    `<div class="resource-item"><a href="${r.url}" target="_blank">${r.name}</a> - ${r.description}</div>`
-  ).join('');
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -258,11 +248,6 @@ export const generateATSGuideHTML = (userName: string): string => {
     <ul>
       ${tipsHTML}
     </ul>
-  </div>
-  
-  <div class="resources">
-    <h3>🔗 Recursos Útiles</h3>
-    ${resourcesHTML}
   </div>
   
   <div class="footer">

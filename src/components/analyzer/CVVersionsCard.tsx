@@ -69,9 +69,11 @@ interface CVVersionsCardProps {
     targetJob?: string;
     selectedKeywords?: string[];
   };
+  editable?: boolean;
+  onDataChange?: (cvData: any) => void;
 }
 
-export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsCardProps) {
+export function CVVersionsCard({ versions, selectedOnly, userData, editable = false, onDataChange }: CVVersionsCardProps) {
   const renderVersion = (version: CVVersion, isCreative: boolean = false) => {
     const content = (version?.content as any) || {
       summary: "",
@@ -105,6 +107,12 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
       languages: (content as any).languages || (content as any).idiomas || []
     };
 
+    const handleDataChange = (newCvData: any) => {
+      if (onDataChange) {
+        onDataChange(newCvData);
+      }
+    };
+
     const TemplateComponent = isCreative ? CVTemplateModern : CVTemplateExecutive;
 
     return (
@@ -116,7 +124,11 @@ export function CVVersionsCard({ versions, selectedOnly, userData }: CVVersionsC
           </h4>
         </div>
         <ResponsivePreview>
-          <TemplateComponent data={cvData} />
+          <TemplateComponent
+            data={cvData}
+            editable={editable}
+            onDataChange={handleDataChange}
+          />
         </ResponsivePreview>
       </div>
     );

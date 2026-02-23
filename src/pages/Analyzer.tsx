@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen, Plus, RotateCcw } from "lucide-react";
+import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen, Plus, RotateCcw, Pencil, MousePointerClick } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 import { LockedCVPreview } from "@/components/analyzer/LockedCVPreview";
@@ -57,6 +57,8 @@ const Analyzer = () => {
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [isVerifiedPDF, setIsVerifiedPDF] = useState(false);
   const [acceptedLegal, setAcceptedLegal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCvVersions, setEditedCvVersions] = useState<{ formal: CVVersion; creative: CVVersion } | null>(null);
 
   // Form state
   const [name, setName] = useState("");
@@ -535,8 +537,51 @@ const Analyzer = () => {
     }
   };
 
+  // Sync editedCvVersions when cvVersions first becomes available or changes
+  useEffect(() => {
+    if (cvVersions) {
+      setEditedCvVersions(JSON.parse(JSON.stringify(cvVersions)));
+    }
+  }, [cvVersions]);
+
+  const handleCvDataChange = (newCvData: any) => {
+    if (!editedCvVersions || !selectedVersion) return;
+    const updated = { ...editedCvVersions };
+    const version = { ...updated[selectedVersion] };
+    version.content = {
+      ...version.content,
+      summary: newCvData.professionalSummary,
+      experience: newCvData.workExperience.map((exp: any) => ({
+        company: exp.company,
+        position: exp.position,
+        startDate: exp.startDate,
+        endDate: exp.endDate,
+        description: exp.description,
+        achievements: exp.achievements || []
+      })),
+      education: newCvData.education.map((edu: any) => ({
+        institution: edu.institution,
+        degree: edu.degree,
+        field: edu.field,
+        startDate: edu.startDate,
+        endDate: edu.endDate
+      })),
+      skills: newCvData.skills,
+      languages: newCvData.languages
+    };
+    version.personalDetails = {
+      ...version.personalDetails,
+      name: newCvData.name,
+      email: newCvData.email,
+      phone: newCvData.phone
+    };
+    updated[selectedVersion] = version;
+    setEditedCvVersions(updated);
+  };
+
   const handleDownload = async () => {
-    if (cvVersions && selectedVersion) {
+    const versionsToUse = editedCvVersions || cvVersions;
+    if (versionsToUse && selectedVersion) {
       try {
         toast.loading("Generando PDF...");
 
@@ -554,7 +599,7 @@ const Analyzer = () => {
           return;
         }
 
-        const version = cvVersions[selectedVersion];
+        const version = versionsToUse[selectedVersion];
         const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
         const userData = { name, email, targetJob, selectedKeywords };
 
@@ -575,7 +620,8 @@ const Analyzer = () => {
   };
 
   const handleSendEmail = async () => {
-    if (!cvVersions || !selectedVersion) return;
+    const versionsToUse = editedCvVersions || cvVersions;
+    if (!versionsToUse || !selectedVersion) return;
     if (!email || !email.includes('@')) {
       toast.error('Introduce un email válido arriba para enviar el CV');
       return;
@@ -583,7 +629,7 @@ const Analyzer = () => {
 
     try {
       toast.loading('Generando PDF...');
-      const version = cvVersions[selectedVersion];
+      const version = versionsToUse[selectedVersion];
       const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
       const userData = { name, email, targetJob, selectedKeywords };
 
@@ -960,7 +1006,16 @@ const Analyzer = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="max-w-4xl mx-auto space-y-10"
               >
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-4 relative">
+                  <div className="absolute left-0 top-0">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsCustomizing(false)}
+                      className="text-muted-foreground font-bold hover:text-primary transition-all flex items-center gap-2"
+                    >
+                      ← Volver
+                    </Button>
+                  </div>
                   <h1 className="text-4xl font-black text-foreground tracking-tight">Personaliza tu Nueva Versión</h1>
                   <p className="text-lg text-muted-foreground font-medium">
                     Ajusta los últimos detalles para que el generador cree el CV perfecto para ti.
@@ -1114,7 +1169,19 @@ const Analyzer = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-12 max-w-6xl mx-auto"
               >
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-4 relative">
+                  <div className="absolute left-0 top-0">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setCVVersions(null);
+                        setIsCustomizing(true);
+                      }}
+                      className="text-muted-foreground font-bold hover:text-primary transition-all flex items-center gap-2"
+                    >
+                      ← Volver
+                    </Button>
+                  </div>
                   <h1 className="text-5xl font-black text-foreground tracking-tight">Elige tu Identidad Visual</h1>
                   <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
                     Hemos creado dos estrategias visuales diferentes. Selecciona la que mejor resuene con tu industria.
@@ -1201,7 +1268,10 @@ const Analyzer = () => {
                 </div>
 
                 <div className="flex justify-center pt-8">
-                  <Button variant="ghost" onClick={() => setIsCustomizing(true)} className="text-muted-foreground font-bold hover:text-primary">
+                  <Button variant="ghost" onClick={() => {
+                    setCVVersions(null);
+                    setIsCustomizing(true);
+                  }} className="text-muted-foreground font-bold hover:text-primary">
                     ← Refinar personalización
                   </Button>
                 </div>
@@ -1237,18 +1307,50 @@ const Analyzer = () => {
                   <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/50 backdrop-blur-xl p-8 rounded-[2.5rem] border border-gray-100 shadow-strong no-print">
                     <div className="space-y-1 text-center md:text-left">
                       <h2 className="text-3xl font-black text-foreground">Tu CV Maestro</h2>
-                      <p className="text-muted-foreground font-medium">Optimizado, pulido y listo para el mercado.</p>
+                      <p className="text-muted-foreground font-medium">
+                        {isEditing ? "Haz clic en cualquier texto para editarlo" : "Optimizado, pulido y listo para el mercado."}
+                      </p>
                     </div>
                     <div className="flex flex-wrap items-center justify-center gap-4">
                       <Button
+                        variant="ghost"
+                        onClick={() => setSelectedVersion(null)}
+                        className="h-16 px-6 rounded-2xl font-bold text-muted-foreground hover:text-primary transition-all flex items-center gap-2 no-print"
+                      >
+                        ← Volver
+                      </Button>
+                      <Button
+                        variant={isEditing ? "default" : "outline"}
+                        size="xl"
+                        onClick={() => setIsEditing(!isEditing)}
+                        className={`h-16 px-8 rounded-2xl font-bold flex items-center gap-2 transition-all ${isEditing
+                          ? "bg-[#00D1A0] hover:bg-[#00B88D] text-white shadow-accent"
+                          : "border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+                          }`}
+                      >
+                        {isEditing ? <MousePointerClick className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
+                        {isEditing ? "Editando..." : "Editar CV"}
+                      </Button>
+                      <Button
                         variant="outline"
                         size="xl"
-                        onClick={() => window.print()}
+                        onClick={() => setSelectedVersion(selectedVersion === 'formal' ? 'creative' : 'formal')}
                         className="h-16 px-8 rounded-2xl font-bold border-gray-200 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
                       >
-                        <Printer className="w-5 h-5" />
-                        Imprimir
+                        <Sparkles className="w-5 h-5" />
+                        {selectedVersion === 'formal' ? 'Ver Moderna' : 'Ver Ejecutiva'}
                       </Button>
+                      {currentPlan === 'premium' && (
+                        <Button
+                          variant="outline"
+                          size="xl"
+                          onClick={handleDownloadGuide}
+                          className="h-16 px-8 rounded-2xl font-bold border-gray-200 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
+                        >
+                          <BookOpen className="w-5 h-5" />
+                          Guía ATS
+                        </Button>
+                      )}
                       <Button
                         variant="hero"
                         size="xl"
@@ -1261,11 +1363,22 @@ const Analyzer = () => {
                     </div>
                   </div>
 
+                  {isEditing && (
+                    <div className="flex items-center gap-3 px-6 py-4 bg-[#00D1A0]/10 border border-[#00D1A0]/20 rounded-2xl no-print">
+                      <MousePointerClick className="w-5 h-5 text-[#00D1A0] flex-shrink-0" />
+                      <p className="text-sm font-medium text-gray-700">
+                        <span className="font-bold text-[#00D1A0]">Modo edición activo.</span> Haz clic en cualquier texto del CV para modificarlo. Pulsa <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">Esc</kbd> para cancelar o haz clic fuera para guardar.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="bg-white rounded-[3rem] shadow-strong border border-gray-100 p-4 md:p-12 min-h-[1000px]">
                     <CVVersionsCard
-                      versions={cvVersions}
+                      versions={editedCvVersions || cvVersions}
                       selectedOnly={selectedVersion}
                       userData={{ name, email, phone: extractedData?.personalInfo?.phone, targetJob, selectedKeywords }}
+                      editable={isEditing}
+                      onDataChange={handleCvDataChange}
                     />
                   </div>
 
@@ -1304,7 +1417,16 @@ const Analyzer = () => {
                 exit={{ opacity: 0, scale: 0.98 }}
                 className="max-w-5xl mx-auto space-y-12"
               >
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-4 relative">
+                  <div className="absolute left-0 top-0">
+                    <Button
+                      variant="ghost"
+                      onClick={handleNewAnalysis}
+                      className="text-muted-foreground font-bold hover:text-primary transition-all flex items-center gap-2"
+                    >
+                      ← Volver
+                    </Button>
+                  </div>
                   <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">Análisis de Impacto Final</h1>
                   <p className="text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
                     Hemos procesado tu trayectoria con nuestros algoritmos ATS. Aquí tienes el diagnóstico completo de tu competitividad.

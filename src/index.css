@@ -185,6 +185,27 @@
   }
 }
 
+/* Editable Field Styles (Canva-like inline editing) */
+.editable-field {
+  position: relative;
+  border: 1.5px dashed transparent;
+  padding: 1px 3px;
+  margin: -1px -3px;
+  transition: all 0.15s ease;
+  min-width: 20px;
+  display: inline-block;
+}
+.editable-field:hover {
+  border-color: rgba(0, 209, 160, 0.4);
+  background: rgba(0, 209, 160, 0.04);
+}
+.editable-field--focused,
+.editable-field--focused:hover {
+  border-color: rgba(0, 209, 160, 0.8);
+  background: rgba(0, 209, 160, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 209, 160, 0.12);
+}
+
 @media print {
   .no-print {
     display: none !important;
