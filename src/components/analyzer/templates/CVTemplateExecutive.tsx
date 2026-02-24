@@ -1,5 +1,6 @@
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 import { EditableField } from "../EditableField";
+import { DraggablePhoto, PhotoPosition } from "../DraggablePhoto";
 
 interface CVData {
     name: string;
@@ -31,10 +32,32 @@ interface CVTemplateExecutiveProps {
     showWatermark?: boolean;
     editable?: boolean;
     onDataChange?: (data: CVData) => void;
+    photoUrl?: string | null;
+    photoPosition?: PhotoPosition;
+    photoSize?: number;
+    photoShape?: 'circle' | 'rect';
+    onPhotoChange?: (url: string | null) => void;
+    onPhotoPositionChange?: (pos: PhotoPosition) => void;
+    onPhotoSizeChange?: (size: number) => void;
+    onPhotoShapeChange?: (shape: 'circle' | 'rect') => void;
 }
 
 export const CVTemplateExecutive = forwardRef<HTMLDivElement, CVTemplateExecutiveProps>(
-    ({ data, showWatermark = false, editable = false, onDataChange }, ref) => {
+    ({
+        data,
+        showWatermark = false,
+        editable = false,
+        onDataChange,
+        photoUrl,
+        photoPosition = { x: 72, y: 2 },
+        photoSize = 90,
+        photoShape = 'circle',
+        onPhotoChange,
+        onPhotoPositionChange,
+        onPhotoSizeChange,
+        onPhotoShapeChange
+    }, ref) => {
+        const containerRef = useRef<HTMLDivElement>(null);
 
         const update = (partial: Partial<CVData>) => {
             if (onDataChange) {
@@ -76,7 +99,12 @@ export const CVTemplateExecutive = forwardRef<HTMLDivElement, CVTemplateExecutiv
 
         return (
             <div
-                ref={ref}
+                ref={(node) => {
+                    // Attach both the forwardRef and the internal containerRef
+                    (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+                    if (typeof ref === 'function') ref(node);
+                    else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+                }}
                 data-cv-template="executive"
                 className="bg-white shadow-2xl mx-auto flex flex-col"
                 style={{
@@ -86,6 +114,21 @@ export const CVTemplateExecutive = forwardRef<HTMLDivElement, CVTemplateExecutiv
                     position: "relative"
                 }}
             >
+                {/* Draggable Photo */}
+                {(photoUrl || editable) && (
+                    <DraggablePhoto
+                        photoUrl={photoUrl ?? null}
+                        position={photoPosition}
+                        size={photoSize}
+                        shape={photoShape}
+                        onPhotoChange={onPhotoChange ?? (() => { })}
+                        onPositionChange={onPhotoPositionChange ?? (() => { })}
+                        onSizeChange={onPhotoSizeChange ?? (() => { })}
+                        onShapeChange={onPhotoShapeChange ?? (() => { })}
+                        editable={editable}
+                        containerRef={containerRef}
+                    />
+                )}
                 {/* Watermark */}
                 {showWatermark && (
                     <div

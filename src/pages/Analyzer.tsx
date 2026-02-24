@@ -59,6 +59,10 @@ const Analyzer = () => {
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedCvVersions, setEditedCvVersions] = useState<{ formal: CVVersion; creative: CVVersion } | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoPosition, setPhotoPosition] = useState<{ x: number; y: number }>({ x: 72, y: 2 });
+  const [photoSize, setPhotoSize] = useState<number>(100);
+  const [photoShape, setPhotoShape] = useState<'circle' | 'rect'>('circle');
 
   // Form state
   const [name, setName] = useState("");
@@ -117,6 +121,10 @@ const Analyzer = () => {
         if (state.currentPlan !== undefined) setCurrentPlan(state.currentPlan);
         if (state.downloadCount !== undefined) setDownloadCount(state.downloadCount);
         if (state.isVerifiedPDF !== undefined) setIsVerifiedPDF(state.isVerifiedPDF);
+        if (state.photoUrl) setPhotoUrl(state.photoUrl);
+        if (state.photoPosition) setPhotoPosition(state.photoPosition);
+        if (state.photoSize) setPhotoSize(state.photoSize);
+        if (state.photoShape) setPhotoShape(state.photoShape);
 
         // If we have an email, verify status immediately
         if (state.email && state.email.includes('@')) {
@@ -148,10 +156,14 @@ const Analyzer = () => {
       hasActivePlan,
       currentPlan,
       downloadCount,
-      isVerifiedPDF
+      isVerifiedPDF,
+      photoUrl,
+      photoPosition,
+      photoSize,
+      photoShape
     };
     localStorage.setItem('cv_analyzer_state', JSON.stringify(state));
-  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary, hasActivePlan, currentPlan, downloadCount, isVerifiedPDF]);
+  }, [analysisResult, actionPlan, cvVersions, extractedData, name, email, targetJob, experienceYears, cvText, selectedVersion, isUnlocked, isCustomizing, selectedKeywords, generateSummary, hasActivePlan, currentPlan, downloadCount, isVerifiedPDF, photoUrl, photoPosition, photoSize, photoShape]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -604,7 +616,7 @@ const Analyzer = () => {
         const userData = { name, email, targetJob, selectedKeywords };
 
         // Use real PDF download instead of print dialog
-        await downloadTemplatePDF(version, templateType, false, userData);
+        await downloadTemplatePDF(version, templateType, false, userData, photoUrl, photoPosition, photoSize, photoShape);
 
         toast.dismiss();
         toast.success("PDF descargado correctamente");
@@ -635,7 +647,7 @@ const Analyzer = () => {
 
       // Generate PDF using the same template as download
       const { generateTemplatePDFBlob } = await import('@/lib/templatePdfGenerator');
-      const pdfBlob = await generateTemplatePDFBlob(version, templateType, false, userData);
+      const pdfBlob = await generateTemplatePDFBlob(version, templateType, false, userData, photoUrl, photoPosition, photoSize, photoShape);
 
       toast.loading('Enviando email...');
       const { sendCVEmail } = await import('@/lib/resendClient');
@@ -1367,7 +1379,7 @@ const Analyzer = () => {
                     <div className="flex items-center gap-3 px-6 py-4 bg-[#00D1A0]/10 border border-[#00D1A0]/20 rounded-2xl no-print">
                       <MousePointerClick className="w-5 h-5 text-[#00D1A0] flex-shrink-0" />
                       <p className="text-sm font-medium text-gray-700">
-                        <span className="font-bold text-[#00D1A0]">Modo edición activo.</span> Haz clic en cualquier texto del CV para modificarlo. Pulsa <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">Esc</kbd> para cancelar o haz clic fuera para guardar.
+                        <span className="font-bold text-[#00D1A0]">Modo edición activo.</span> Haz clic en cualquier texto del CV para modificarlo. Arrastra la <span className="font-bold text-[#00D1A0]">foto de perfil</span> para recolocarla, o pulsa el icón de cámara para subirla. Pulsa <kbd className="px-1.5 py-0.5 bg-gray-100 rounded text-xs font-mono">Esc</kbd> para cancelar o haz clic fuera para guardar.
                       </p>
                     </div>
                   )}
@@ -1379,6 +1391,14 @@ const Analyzer = () => {
                       userData={{ name, email, phone: extractedData?.personalInfo?.phone, targetJob, selectedKeywords }}
                       editable={isEditing}
                       onDataChange={handleCvDataChange}
+                      photoUrl={photoUrl}
+                      photoPosition={photoPosition}
+                      photoSize={photoSize}
+                      photoShape={photoShape}
+                      onPhotoChange={setPhotoUrl}
+                      onPhotoPositionChange={setPhotoPosition}
+                      onPhotoSizeChange={setPhotoSize}
+                      onPhotoShapeChange={setPhotoShape}
                     />
                   </div>
 

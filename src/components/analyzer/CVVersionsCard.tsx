@@ -71,9 +71,31 @@ interface CVVersionsCardProps {
   };
   editable?: boolean;
   onDataChange?: (cvData: any) => void;
+  photoUrl?: string | null;
+  photoPosition?: { x: number; y: number };
+  photoSize?: number;
+  photoShape?: 'circle' | 'rect';
+  onPhotoChange?: (url: string | null) => void;
+  onPhotoPositionChange?: (pos: { x: number; y: number }) => void;
+  onPhotoSizeChange?: (size: number) => void;
+  onPhotoShapeChange?: (shape: 'circle' | 'rect') => void;
 }
 
-export function CVVersionsCard({ versions, selectedOnly, userData, editable = false, onDataChange }: CVVersionsCardProps) {
+export function CVVersionsCard({
+  versions,
+  selectedOnly,
+  userData,
+  editable = false,
+  onDataChange,
+  photoUrl,
+  photoPosition,
+  photoSize,
+  photoShape,
+  onPhotoChange,
+  onPhotoPositionChange,
+  onPhotoSizeChange,
+  onPhotoShapeChange
+}: CVVersionsCardProps) {
   const renderVersion = (version: CVVersion, isCreative: boolean = false) => {
     const content = (version?.content as any) || {
       summary: "",
@@ -128,6 +150,14 @@ export function CVVersionsCard({ versions, selectedOnly, userData, editable = fa
             data={cvData}
             editable={editable}
             onDataChange={handleDataChange}
+            photoUrl={photoUrl}
+            photoPosition={photoPosition}
+            photoSize={photoSize}
+            photoShape={photoShape}
+            onPhotoChange={onPhotoChange}
+            onPhotoPositionChange={onPhotoPositionChange}
+            onPhotoSizeChange={onPhotoSizeChange}
+            onPhotoShapeChange={onPhotoShapeChange}
           />
         </ResponsivePreview>
       </div>

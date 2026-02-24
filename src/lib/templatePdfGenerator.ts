@@ -7,7 +7,11 @@ export function generateTemplateHTML(
   version: CVVersion,
   template: TemplateType,
   hasWatermark: boolean,
-  userData?: { name: string; email: string; phone?: string; targetJob?: string; selectedKeywords?: string[] }
+  userData?: { name: string; email: string; phone?: string; targetJob?: string; selectedKeywords?: string[] },
+  photoUrl?: string | null,
+  photoPosition?: { x: number; y: number },
+  photoSize?: number,
+  photoShape?: 'circle' | 'rect'
 ): string {
   const watermarkHTML = hasWatermark
     ? `<div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0, 204, 169, 0.08); font-weight: bold; pointer-events: none; z-index: 1000; white-space: nowrap; font-family: 'Inter', sans-serif;">T2W CV Builder</div>`
@@ -56,21 +60,21 @@ export function generateTemplateHTML(
 
   switch (template) {
     case 'modern':
-      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
     case 'creative':
-      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
     case 'executive':
-      return generateExecutiveHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+      return generateExecutiveHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
     case 'classic':
       return generateClassicHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     case 'minimal':
       return generateMinimalHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     default:
-      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
+      return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
   }
 }
 
-function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
+function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any, photoUrl?: string | null, photoPosition?: { x: number; y: number }, photoSize?: number, photoShape?: 'circle' | 'rect'): string {
   const primaryColor = "#00BFA6"; // T2W Turquoise
   const darkColor = "#0d1117";
 
@@ -310,8 +314,8 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
   </style>
 </head>
 <body>
-  ${watermarkHTML}
-  <div class="container">
+  <div class="container" style="position:relative;">
+    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 2)}%;top:${(photoPosition?.y ?? 2)}%;width:${photoSize ?? 100}px;height:${photoSize ?? 100}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:30;"><img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>` : ''}
     <aside class="sidebar">
       <div class="profile-circle">${name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}</div>
       <h1>${name}</h1>
@@ -441,7 +445,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
 
 // ... [resto de las funciones generateExecutiveHTML, generateClassicHTML, generateMinimalHTML permanecen iguales]
 
-function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any): string {
+function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any, photoUrl?: string | null, photoPosition?: { x: number; y: number }, photoSize?: number, photoShape?: 'circle' | 'rect'): string {
   const primaryColor = "#1a1a2e"; // Dark Navy
 
   const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
@@ -537,8 +541,10 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
 </head>
 <body>
   ${watermarkHTML}
-  <div class="container">
+  <div class="container" style="position:relative;">
+    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 72)}%;top:${(photoPosition?.y ?? 2)}%;width:${photoSize ?? 90}px;height:${photoSize ?? 90}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:30;"><img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>` : ''}
     <header class="header">
+
       <h1>${name}</h1>
       <p>${targetJob}</p>
       <div class="header-info">
@@ -821,9 +827,13 @@ export async function downloadTemplatePDF(
   version: CVVersion,
   template: TemplateType,
   hasWatermark: boolean,
-  userData?: { name: string; email: string; phone?: string; targetJob?: string }
+  userData?: { name: string; email: string; phone?: string; targetJob?: string },
+  photoUrl?: string | null,
+  photoPosition?: { x: number; y: number },
+  photoSize?: number,
+  photoShape?: 'circle' | 'rect'
 ): Promise<void> {
-  const html = generateTemplateHTML(version, template, hasWatermark, userData);
+  const html = generateTemplateHTML(version, template, hasWatermark, userData, photoUrl, photoPosition, photoSize, photoShape);
 
   // Generate filename
   const baseName = version.personalDetails?.name || userData?.name || version.title || 'CV';
@@ -870,22 +880,23 @@ export async function downloadTemplatePDF(
     iframeDoc.close();
 
     // Wait for fonts and content to load
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Get the container element from iframe
     const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
 
     // Convert to canvas
     const canvas = await html2canvas(contentElement as HTMLElement, {
-      scale: 3,
+      scale: 2,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       backgroundColor: '#ffffff',
       windowWidth: 794,
       windowHeight: 1123,
       scrollX: 0,
       scrollY: 0,
       logging: false,
+      imageTimeout: 15000,
     });
 
     // Create PDF
@@ -927,9 +938,13 @@ export async function generateTemplatePDFBlob(
   version: CVVersion,
   template: TemplateType,
   hasWatermark: boolean,
-  userData?: { name: string; email: string; phone?: string; targetJob?: string }
+  userData?: { name: string; email: string; phone?: string; targetJob?: string },
+  photoUrl?: string | null,
+  photoPosition?: { x: number; y: number },
+  photoSize?: number,
+  photoShape?: 'circle' | 'rect'
 ): Promise<Blob> {
-  const html = generateTemplateHTML(version, template, hasWatermark, userData);
+  const html = generateTemplateHTML(version, template, hasWatermark, userData, photoUrl, photoPosition, photoSize, photoShape);
 
   try {
     const [html2canvasModule, jsPDFModule] = await Promise.all([
@@ -955,20 +970,21 @@ export async function generateTemplatePDFBlob(
     iframeDoc.write(html);
     iframeDoc.close();
 
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const contentElement = iframeDoc.querySelector('.container') || iframeDoc.body;
 
     const canvas = await html2canvas(contentElement as HTMLElement, {
-      scale: 3,
+      scale: 2,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       backgroundColor: '#ffffff',
       windowWidth: 794,
       windowHeight: 1123,
       scrollX: 0,
       scrollY: 0,
       logging: false,
+      imageTimeout: 15000,
     });
 
     const pdf = new jsPDF({
