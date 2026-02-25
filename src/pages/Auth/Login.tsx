@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft, FileText } from "lucide-react";
+import { Loader2, ArrowLeft, FileText, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -94,18 +95,31 @@ export default function Login() {
                                     ¿La has olvidado?
                                 </Link>
                             </div>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="••••••••"
-                                className={`h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium ${error ? "border-red-500 ring-1 ring-red-500 bg-red-50/30" : ""}`}
-                                value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    if (error) setError(null);
-                                }}
-                                required
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    className={`h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium pr-12 ${error ? "border-red-500 ring-1 ring-red-500 bg-red-50/30" : ""}`}
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        if (error) setError(null);
+                                    }}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
+                            </div>
                         </div>
 
                         {error && (

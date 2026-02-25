@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, FileText } from "lucide-react";
+import { Loader2, ArrowLeft, FileText, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function UpdatePassword() {
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -76,16 +77,29 @@ export default function UpdatePassword() {
                     <form onSubmit={handleUpdatePassword} className="space-y-6">
                         <div className="space-y-2.5">
                             <Label htmlFor="password" className="text-sm font-bold text-foreground">Contraseña</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="Mínimo 6 caracteres"
-                                className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                minLength={6}
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Mínimo 6 caracteres"
+                                    className="h-12 rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white transition-all font-medium pr-12"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    minLength={6}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showPassword ? (
+                                        <EyeOff className="h-5 w-5" />
+                                    ) : (
+                                        <Eye className="h-5 w-5" />
+                                    )}
+                                </button>
+                            </div>
                         </div>
 
                         <Button

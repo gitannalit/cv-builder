@@ -38,7 +38,7 @@ export function TemplateSelector({ version, onDownload }: TemplateSelectorProps)
     }[template];
 
     return (
-      <div 
+      <div
         className="origin-top-left overflow-hidden rounded-lg shadow-sm border border-border"
         style={{ transform: `scale(${scale})`, width: '210mm', height: '297mm' }}
       >
@@ -49,8 +49,8 @@ export function TemplateSelector({ version, onDownload }: TemplateSelectorProps)
 
   return (
     <>
-      <Button 
-        variant="hero" 
+      <Button
+        variant="hero"
         size="lg"
         onClick={() => setIsOpen(true)}
         className="w-full"
@@ -72,8 +72,8 @@ export function TemplateSelector({ version, onDownload }: TemplateSelectorProps)
             {/* Template Selection */}
             <div>
               <h3 className="font-semibold mb-4">Selecciona un diseño</h3>
-              <RadioGroup 
-                value={selectedTemplate} 
+              <RadioGroup
+                value={selectedTemplate}
                 onValueChange={(value) => setSelectedTemplate(value as TemplateType)}
                 className="grid grid-cols-2 gap-3"
               >
@@ -119,8 +119,8 @@ export function TemplateSelector({ version, onDownload }: TemplateSelectorProps)
                     <span className="font-medium">Gratis</span>
                     <span className="text-sm text-muted-foreground">Con marca de agua</span>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={() => handleDownload(false)}
                   >
@@ -139,8 +139,8 @@ export function TemplateSelector({ version, onDownload }: TemplateSelectorProps)
                     <span className="font-medium text-primary">4.99€</span>
                     <span className="text-sm text-muted-foreground">Sin marca de agua</span>
                   </div>
-                  <Button 
-                    variant="hero" 
+                  <Button
+                    variant="hero"
                     className="w-full"
                     onClick={() => handleDownload(true)}
                   >
@@ -156,10 +156,10 @@ export function TemplateSelector({ version, onDownload }: TemplateSelectorProps)
               <h3 className="font-semibold mb-4">Vista previa</h3>
               <div className="bg-gray-100 rounded-xl p-4 overflow-hidden">
                 <div className="relative w-full" style={{ height: '500px' }}>
-                  <div 
+                  <div
                     className="origin-top-left"
-                    style={{ 
-                      transform: 'scale(0.45)', 
+                    style={{
+                      transform: 'scale(0.45)',
                       transformOrigin: 'top left',
                     }}
                   >
