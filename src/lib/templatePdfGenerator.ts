@@ -65,6 +65,8 @@ export function generateTemplateHTML(
       return generateModernHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
     case 'executive':
       return generateExecutiveHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
+    case 'cvplus':
+      return generateCVPlusHTML(version, hasWatermark, watermarkHTML, baseStyles, userData, photoUrl, photoPosition, photoSize, photoShape);
     case 'classic':
       return generateClassicHTML(version, hasWatermark, watermarkHTML, baseStyles, userData);
     case 'minimal':
@@ -639,6 +641,215 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
     </div>
     
 
+  </div>
+</body>
+</html>`;
+}
+
+function generateCVPlusHTML(version: CVVersion, hasWatermark: boolean, watermarkHTML: string, baseStyles: string, userData?: any, photoUrl?: string | null, photoPosition?: { x: number; y: number }, photoSize?: number, photoShape?: 'circle' | 'rect'): string {
+  const primaryColor = "#b45309"; // amber-700
+  const accentColor = "#f59e0b"; // amber-500
+
+  const name = version.personalDetails?.name || userData?.name || "Tu Nombre";
+  const email = version.personalDetails?.email || "";
+  const phone = version.personalDetails?.phone || "";
+  const targetJob = userData?.targetJob || version.title || "Profesional";
+
+  const languages = version.content.languages || [];
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${version.title} - CV+</title>
+  <style>
+    ${baseStyles}
+    .container { padding: 48px; display: flex; flex-direction: column; background: white !important; font-family: 'Playfair Display', serif; position: relative; }
+    
+    .bg-accent { position: absolute; top: 0; right: 0; width: 45%; height: 350px; background: linear-gradient(to bottom left, rgba(254,243,199,0.8), transparent); pointer-events: none; -webkit-print-color-adjust: exact !important; }
+
+    .header { 
+      padding-bottom: 32px;
+      border-bottom: 2px solid ${accentColor} !important;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+      z-index: 10;
+    }
+    .header-content { flex: 1; }
+    .header h1 { font-size: 42px; font-weight: 700; margin-bottom: 8px; color: #111827 !important; letter-spacing: -0.5px; }
+    .header p { font-size: 22px; color: ${primaryColor} !important; font-weight: 500; font-style: italic; }
+    
+    .header-info { text-align: right; font-family: 'Inter', sans-serif; font-size: 13px; color: #4b5563 !important; display: flex; flex-direction: column; gap: 8px; }
+    .info-item { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+    .info-item svg { width: 14px; height: 14px; color: ${accentColor} !important; }
+    
+    .content { display: grid; grid-template-columns: 2fr 1fr; gap: 48px; flex-grow: 1; position: relative; z-index: 10; font-family: 'Inter', sans-serif; }
+    
+    .section { margin-bottom: 36px; }
+    .section-title { 
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; 
+      font-weight: 700; 
+      color: #111827 !important; 
+      border-bottom: 1px solid #e5e7eb !important; 
+      padding-bottom: 12px; 
+      margin-bottom: 20px; 
+      display: inline-block;
+    }
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 2px;
+      background-color: ${accentColor} !important;
+      margin-top: 12px;
+      -webkit-print-color-adjust: exact !important;
+    }
+    
+    .summary { color: #374151 !important; line-height: 1.7; font-size: 14px; text-align: justify; }
+    
+    .exp-item { margin-bottom: 28px; }
+    .exp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .exp-role { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #111827 !important; }
+    .exp-company { font-size: 15px; font-weight: 600; color: ${primaryColor} !important; margin-bottom: 8px; }
+    .exp-dates { font-size: 13px; color: #6b7280 !important; font-style: italic; }
+    .exp-desc { color: #4b5563 !important; font-size: 14px; line-height: 1.6; margin-bottom: 12px; text-align: justify; }
+    .achievement-list { padding-left: 16px; margin-top: 8px; }
+    .achievement-item { font-size: 13.5px; color: #374151 !important; margin-bottom: 6px; position: relative; padding-left: 12px; }
+    .achievement-item::before { content: '♦'; position: absolute; left: -8px; top: 0; color: ${accentColor} !important; font-size: 12px; }
+    
+    .edu-item { margin-bottom: 20px; }
+    .edu-degree { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: #111827 !important; margin-bottom: 4px; }
+    .edu-inst { font-size: 14px; font-weight: 600; color: #4b5563 !important; }
+    .edu-dates { font-size: 13px; color: #6b7280 !important; font-style: italic; }
+
+    .skills-container { display: flex; flex-direction: column; gap: 12px; }
+    .skill-tag { 
+      padding: 6px 0;
+      color: #374151 !important; 
+      font-size: 13.5px; 
+      font-weight: 500; 
+      border-bottom: 1px dashed #e5e7eb !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+    
+    .lang-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 8px 0; border-bottom: 1px dashed #e5e7eb !important; }
+    .lang-name { font-weight: 600; color: #374151 !important; }
+    .lang-level { color: ${primaryColor} !important; font-style: italic; font-size: 13px; }
+    
+    .footer { 
+      text-align: center; 
+      font-size: 11px; 
+      color: #9ca3af !important; 
+      margin-top: auto;
+      padding-top: 24px;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  ${watermarkHTML}
+  <div class="container" style="position:relative;">
+    <div class="bg-accent"></div>
+    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 72)}%;top:${(photoPosition?.y ?? 4)}%;width:${photoSize ?? 100}px;height:${photoSize ?? 100}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:4px solid white;box-shadow:0 10px 25px rgba(0,0,0,0.1);z-index:30;"><img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>` : ''}
+    
+    <header class="header">
+      <div class="header-content">
+        <h1>${name}</h1>
+        <p>${targetJob}</p>
+      </div>
+      <div class="header-info" style="${photoUrl ? 'margin-right: 120px;' : ''}">
+        <div class="info-item">
+          <span>${email}</span>
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+        </div>
+        ${phone ? `
+          <div class="info-item">
+            <span>${phone}</span>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+          </div>
+        ` : ""}
+      </div>
+    </header>
+    
+    <div class="content">
+      <div class="main-col">
+        <section class="section">
+          <h2 class="section-title">Perfil Profesional</h2>
+          <p class="summary">${version.content.summary}</p>
+        </section>
+        
+        <section class="section">
+          <h2 class="section-title">Experiencia Profesional</h2>
+          <div class="experience-list">
+            ${(version.content.experience || []).map(exp => {
+    const company = (exp as any).company || (exp as any).empresa || (exp as any).organization || "";
+    const position = (exp as any).position || (exp as any).puesto || (exp as any).cargo || (exp as any).role || "";
+    const startDate = (exp as any).startDate || (exp as any).start_date || (exp as any).fecha_inicio || "";
+    const endDate = (exp as any).endDate || (exp as any).end_date || (exp as any).fecha_fin || "";
+    const description = (exp as any).description || (exp as any).descripcion || (exp as any).desc || "";
+    const achievements = (exp as any).achievements || (exp as any).logros || [];
+
+    return `
+              <div class="exp-item">
+                <div class="exp-header">
+                  <h3 class="exp-role">${position}</h3>
+                  <span class="exp-dates">${startDate} — ${endDate}</span>
+                </div>
+                <div class="exp-company">${company}</div>
+                <p class="exp-desc">${description}</p>
+                ${achievements.length > 0 ? `
+                <div class="achievement-list">
+                  ${achievements.map((ach: string) => `<div class="achievement-item">${ach}</div>`).join('')}
+                </div>` : ""}
+              </div>`;
+  }).join('')}
+          </div>
+        </section>
+      </div>
+      
+      <div class="side-col">
+        <section class="section">
+          <h2 class="section-title">Formación</h2>
+          ${(version.content.education || []).map(edu => {
+    const institution = (edu as any).institution || (edu as any).institucion || (edu as any).school || (edu as any).university || "";
+    const degree = (edu as any).degree || (edu as any).titulo || (edu as any).degree_name || "";
+    const field = (edu as any).field || (edu as any).campo || (edu as any).area || "";
+    const endDate = (edu as any).endDate || (edu as any).end_date || (edu as any).fecha_fin || "";
+
+    return `
+              <div class="edu-item">
+                <h3 class="edu-degree">${degree}</h3>
+                <p class="edu-inst">${institution}</p>
+                <p class="edu-dates">${endDate}</p>
+              </div>`;
+  }).join('')}
+        </section>
+        
+        <section class="section">
+          <h2 class="section-title">Competencias Clave</h2>
+          <div class="skills-container">
+            ${getPrioritySkills(userData?.selectedKeywords || [], version.content.skills || [], 6).map(skill => `<div class="skill-tag">${skill}</div>`).join('')}
+          </div>
+        </section>
+        
+        ${languages.length > 0 ? `
+        <section class="section">
+          <h2 class="section-title">Idiomas</h2>
+          <div class="languages-container">
+            ${languages.map((lang: any) => `
+              <div class="lang-item">
+                <span class="lang-name">${lang.language}</span>
+                <span class="lang-level">${lang.level}</span>
+              </div>
+            `).join('')}
+          </div>
+        </section>` : ""}
+      </div>
+    </div>
   </div>
 </body>
 </html>`;

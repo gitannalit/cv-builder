@@ -31,7 +31,7 @@ export function UpgradeDialog({ isOpen, onClose, onUpgrade, currentPlan }: Upgra
         },
         {
             id: 'premium' as const,
-            name: "CV Premium",
+            name: "CV Pro",
             price: "17.99€",
             description: "Acceso total e ilimitado",
             features: [
@@ -63,8 +63,8 @@ export function UpgradeDialog({ isOpen, onClose, onUpgrade, currentPlan }: Upgra
                             key={plan.id}
                             whileHover={{ scale: 1.02 }}
                             className={`relative p-6 rounded-xl border-2 flex flex-col ${plan.highlight
-                                    ? "border-amber-400 bg-amber-50/30"
-                                    : "border-gray-100 bg-white"
+                                ? "border-amber-400 bg-amber-50/30"
+                                : "border-gray-100 bg-white"
                                 }`}
                         >
                             {plan.tag && (
@@ -96,8 +96,8 @@ export function UpgradeDialog({ isOpen, onClose, onUpgrade, currentPlan }: Upgra
                             <Button
                                 onClick={() => onUpgrade(plan.id)}
                                 className={`w-full font-bold ${plan.highlight
-                                        ? "bg-amber-500 hover:bg-amber-600 text-white"
-                                        : "bg-primary hover:bg-primary/90 text-white"
+                                    ? "bg-amber-500 hover:bg-amber-600 text-white"
+                                    : "bg-primary hover:bg-primary/90 text-white"
                                     }`}
                             >
                                 Elegir {plan.name}

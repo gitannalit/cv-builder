@@ -1,9 +1,11 @@
 export { ModernTemplate } from './ModernTemplate';
 export { ClassicTemplate } from './ClassicTemplate';
 export { MinimalTemplate } from './MinimalTemplate';
-export { CreativeTemplate } from './CreativeTemplate';
+export * from './CVTemplateModern';
+export * from './CVTemplateExecutive';
+export * from './CVTemplateCVPlus';
 
-export type TemplateType = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive';
+export type TemplateType = 'modern' | 'executive' | 'creative' | 'classic' | 'minimal' | 'cvplus';
 
 export const templateInfo: Record<TemplateType, { name: string; description: string }> = {
   modern: {
@@ -25,5 +27,9 @@ export const templateInfo: Record<TemplateType, { name: string; description: str
   executive: {
     name: 'Ejecutivo',
     description: 'Diseño sobrio y profesional para perfiles senior'
+  },
+  cvplus: {
+    name: 'Premium CV+',
+    description: 'Diseño ultra-elegante y distinguido, exclusivo para cuentas Pro'
   }
 };

@@ -4,6 +4,7 @@ import { CVVersion } from "@/types/cv";
 import { Layers, Briefcase, Sparkles, GraduationCap, Wrench, ZoomIn } from "lucide-react";
 import { CVTemplateModern } from "./templates/CVTemplateModern";
 import { CVTemplateExecutive } from "./templates/CVTemplateExecutive";
+import { CVTemplateCVPlus } from "./templates/CVTemplateCVPlus";
 import { getPrioritySkills } from "@/lib/cvUtils";
 
 const ResponsivePreview = ({ children }: { children: React.ReactNode }) => {
@@ -61,7 +62,7 @@ interface CVVersionsCardProps {
     formal: CVVersion;
     creative: CVVersion;
   };
-  selectedOnly?: 'formal' | 'creative' | null;
+  selectedOnly?: 'formal' | 'creative' | 'cvplus' | null;
   userData?: {
     name: string;
     email: string;
@@ -96,7 +97,7 @@ export function CVVersionsCard({
   onPhotoSizeChange,
   onPhotoShapeChange
 }: CVVersionsCardProps) {
-  const renderVersion = (version: CVVersion, isCreative: boolean = false) => {
+  const renderVersion = (version: CVVersion, template: 'formal' | 'creative' | 'cvplus' = 'formal') => {
     const content = (version?.content as any) || {
       summary: "",
       experience: [],
@@ -135,14 +136,26 @@ export function CVVersionsCard({
       }
     };
 
-    const TemplateComponent = isCreative ? CVTemplateModern : CVTemplateExecutive;
+    const TemplateComponent = template === 'cvplus'
+      ? CVTemplateCVPlus
+      : template === 'creative'
+        ? CVTemplateModern
+        : CVTemplateExecutive;
+
+    const title = version?.title || (
+      template === 'cvplus' ? "Premium CV+" :
+        template === 'creative' ? "Versión Creativa" : "Versión Ejecutiva"
+    );
+
+    const Icon = template === 'cvplus' ? ZoomIn : template === 'creative' ? Sparkles : Briefcase;
+    const iconColor = template === 'cvplus' ? "text-amber-500" : template === 'creative' ? "text-purple-500" : "text-blue-500";
 
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2">
           <h4 className="font-semibold text-lg flex items-center gap-2">
-            {isCreative ? <Sparkles className="w-4 h-4 text-purple-500" /> : <Briefcase className="w-4 h-4 text-blue-500" />}
-            {version?.title || (isCreative ? "Versión Creativa" : "Versión Ejecutiva")}
+            <Icon className={`w-4 h-4 ${iconColor}`} />
+            {title}
           </h4>
         </div>
         <ResponsivePreview>
@@ -168,8 +181,10 @@ export function CVVersionsCard({
     return (
       <div className="max-w-4xl mx-auto">
         {selectedOnly === 'formal'
-          ? renderVersion(versions.formal, false)
-          : renderVersion(versions.creative, true)}
+          ? renderVersion(versions.formal, 'formal')
+          : selectedOnly === 'cvplus'
+            ? renderVersion(versions.formal, 'cvplus')
+            : renderVersion(versions.creative, 'creative')}
       </div>
     );
   }
@@ -184,8 +199,8 @@ export function CVVersionsCard({
       </h3>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {renderVersion(versions.formal, false)}
-        {renderVersion(versions.creative, true)}
+        {renderVersion(versions.formal, 'formal')}
+        {renderVersion(versions.creative, 'creative')}
       </div>
     </div>
   );

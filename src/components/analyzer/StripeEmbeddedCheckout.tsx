@@ -39,7 +39,7 @@ export function StripeEmbeddedCheckout({ clientSecret, onClose }: StripeEmbedded
     }, [clientSecret]);
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 !mt-0">
             <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col relative">
                 <button
                     onClick={onClose}
@@ -49,7 +49,7 @@ export function StripeEmbeddedCheckout({ clientSecret, onClose }: StripeEmbedded
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                <div className="p-8 overflow-y-auto">
+                <div className="overflow-y-auto w-full h-full pb-4 p-8 ">
                     <div ref={checkoutRef}></div>
                 </div>
             </div>

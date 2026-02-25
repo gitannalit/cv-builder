@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen, Plus, RotateCcw, Pencil, MousePointerClick } from "lucide-react";
+import { Upload, Sparkles, BarChart3, FileText, Loader2, Target, Layers, Download, CheckCircle2, ArrowRight, AlertTriangle, Info, TrendingUp, Printer, Check, Zap, Briefcase, GraduationCap, Mail, BookOpen, Plus, RotateCcw, Pencil, MousePointerClick, Lock, Crown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AnalysisResult, ActionPlan, CVVersion, CVData } from "@/types/cv";
 import { LockedCVPreview } from "@/components/analyzer/LockedCVPreview";
@@ -41,7 +41,7 @@ const Analyzer = () => {
   const [isExtractingPDF, setIsExtractingPDF] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [keyAchievements, setKeyAchievements] = useState("");
-  const [selectedVersion, setSelectedVersion] = useState<'formal' | 'creative' | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<'formal' | 'creative' | 'cvplus' | null>(null);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [extractedData, setExtractedData] = useState<Partial<CVData> | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -611,8 +611,9 @@ const Analyzer = () => {
           return;
         }
 
-        const version = versionsToUse[selectedVersion];
-        const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
+        const versionKey = selectedVersion === 'cvplus' ? 'formal' : selectedVersion;
+        const version = versionsToUse[versionKey as 'formal' | 'creative'];
+        const templateType = selectedVersion === 'formal' ? 'executive' : selectedVersion === 'cvplus' ? 'cvplus' : 'creative';
         const userData = { name, email, targetJob, selectedKeywords };
 
         // Use real PDF download instead of print dialog
@@ -640,9 +641,26 @@ const Analyzer = () => {
     }
 
     try {
+      toast.loading('Verificando acceso...');
+
+      // Record download in DB
+      const { data, error } = await supabase.functions.invoke('check-payment-status', {
+        body: { email, action: 'record_download' }
+      });
+
+      if (error) throw error;
+
+      if (!data.hasAccess) {
+        toast.dismiss();
+        setIsUnlocked(false);
+        toast.error("Has alcanzado el límite de descargas de tu plan.");
+        return;
+      }
+
       toast.loading('Generando PDF...');
-      const version = versionsToUse[selectedVersion];
-      const templateType = selectedVersion === 'formal' ? 'executive' : 'creative';
+      const versionKey = selectedVersion === 'cvplus' ? 'formal' : selectedVersion;
+      const version = versionsToUse[versionKey as 'formal' | 'creative'];
+      const templateType = selectedVersion === 'formal' ? 'executive' : selectedVersion === 'cvplus' ? 'cvplus' : 'creative';
       const userData = { name, email, targetJob, selectedKeywords };
 
       // Generate PDF using the same template as download
@@ -654,6 +672,7 @@ const Analyzer = () => {
       await sendCVEmail(email, pdfBlob);
       toast.dismiss();
       toast.success('CV enviado por email');
+      setDownloadCount(data.count);
     } catch (err) {
       console.error('Error sending email:', err);
       toast.dismiss();
@@ -1200,7 +1219,7 @@ const Analyzer = () => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                   {/* Versión Ejecutiva */}
                   <div className="group space-y-6">
                     <div
@@ -1277,6 +1296,62 @@ const Analyzer = () => {
                       Seleccionar Moderna
                     </Button>
                   </div>
+
+                  {/* Versión Premium CV+ */}
+                  <div className="group space-y-6">
+                    <div
+                      className={`relative bg-white rounded-[3rem] p-10 border-4 transition-all cursor-pointer shadow-strong hover:shadow-glow/20 ${selectedVersion === 'cvplus' ? 'border-[#00D1A0] scale-[1.02]' : 'border-transparent'
+                        }`}
+                      onClick={() => setSelectedVersion('cvplus')}
+                    >
+                      {currentPlan !== 'premium' && (
+                        <div className="absolute -top-3 -right-3 bg-amber-500 text-white p-2 rounded-full shadow-lg z-10 flex items-center gap-1.5 px-3 py-1 font-bold text-xs ring-4 ring-white">
+                          <Lock className="w-3.5 h-3.5" />
+                          PRO
+                        </div>
+                      )}
+
+                      <div className="text-center mb-8">
+                        <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-100 transition-colors">
+                          <Crown className="w-7 h-7 text-amber-500" />
+                        </div>
+                        <h3 className="text-2xl font-black bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent">Premium CV+</h3>
+                        <p className="text-muted-foreground font-medium mt-1">Diseño ultra-elegante exclusivo para cuentas Pro</p>
+                      </div>
+
+                      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-gray-100 shadow-inner bg-gray-50/50 group-hover:bg-white transition-colors">
+                        <div className="absolute inset-0 scale-[0.38] origin-top-left w-[265%] h-[265%] pointer-events-none blur-[1px] opacity-80 group-hover:opacity-100 transition-opacity">
+                          {(cvVersions || mockVersions) && (
+                            <CVVersionsCard
+                              versions={cvVersions || mockVersions!}
+                              selectedOnly="cvplus"
+                              userData={{ name, email, targetJob }}
+                            />
+                          )}
+                        </div>
+                        {currentPlan !== 'premium' && (
+                          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                            <Lock className="w-8 h-8 text-amber-500/50" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      className={`w-full h-20 rounded-2xl text-xl font-black transition-all shadow-soft overflow-hidden relative ${selectedVersion === 'cvplus'
+                        ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-accent'
+                        : 'bg-white border-2 border-amber-100 text-amber-700 hover:bg-amber-50'
+                        }`}
+                      onClick={() => setSelectedVersion('cvplus')}
+                    >
+                      {currentPlan !== 'premium' && (
+                        <div className="absolute inset-0 bg-amber-500/10" />
+                      )}
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {currentPlan !== 'premium' && <Lock className="w-4 h-4" />}
+                        Seleccionar CV+
+                      </span>
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex justify-center pt-8">
@@ -1299,8 +1374,8 @@ const Analyzer = () => {
                 </div>
               ) : !isUnlocked ? (
                 <LockedCVPreview
-                  version={cvVersions[selectedVersion]}
-                  type={selectedVersion}
+                  version={cvVersions[selectedVersion === 'cvplus' ? 'formal' : selectedVersion]}
+                  type={selectedVersion as any}
                   onEdit={() => setSelectedVersion(null)}
                   onUnlock={() => { }}
                   onUnlockBasic={handleUnlockBasic}

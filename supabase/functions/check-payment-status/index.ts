@@ -38,69 +38,93 @@ serve(async (req) => {
             });
         }
 
-        // 2. Check for active Premium plan (valid for 30 days)
+        // 2. We find the latest valid payment (within the last 30 days)
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const latestPremium = payments.find(p => p.plan_type === "premium");
-        if (latestPremium) {
-            const paymentDate = new Date(latestPremium.created_at);
-            if (paymentDate >= thirtyDaysAgo) {
-                if (action === "record_download") {
-                    await supabase.from("downloads").insert({ email });
-                }
-                return new Response(JSON.stringify({
-                    hasAccess: true,
-                    planType: "premium",
-                    expiresAt: new Date(paymentDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                }), {
-                    headers: { ...corsHeaders, "Content-Type": "application/json" },
-                });
-            }
+        // Find the most recent payment
+        const latestPayment = payments[0];
+        const paymentDate = new Date(latestPayment.created_at);
+
+        // Check if the most recent payment is within the 30 days validity period
+        if (paymentDate < thirtyDaysAgo) {
+            return new Response(JSON.stringify({ hasAccess: false, reason: "plan_expired" }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
         }
 
-        // 3. Check for available Basic plan (2 downloads per payment, infinite time)
-        const latestBasic = payments.find(p => p.plan_type === "basic");
-        if (latestBasic) {
+        const planType = latestPayment.plan_type === 'premium' ? 'premium' : 'basic';
+        const expiresAt = new Date(paymentDate.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        const allowedDownloads = planType === 'premium' ? 9999 : 2;
+
+        if (planType === 'premium') {
+            if (action === "record_download") {
+                await supabase.from("downloads").insert({ email, user_id: latestPayment.user_id });
+            }
+            return new Response(JSON.stringify({
+                hasAccess: true,
+                planType: "premium",
+                role: "premium",
+                paymentDate: latestPayment.created_at,
+                allowedDownloads: allowedDownloads,
+                expiresAt: expiresAt
+            }), {
+                headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+        } else {
             // Count downloads since this specific payment was made
             const { count, error: downloadError } = await supabase
                 .from("downloads")
                 .select("*", { count: "exact", head: true })
                 .eq("email", email)
-                .gte("download_at", latestBasic.created_at);
+                .gte("download_at", latestPayment.created_at);
 
             if (downloadError) throw downloadError;
 
             const downloadCount = count || 0;
 
             if (action === "record_download") {
-                if (downloadCount >= 2) {
-                    return new Response(JSON.stringify({ hasAccess: false, reason: "limit_reached", count: downloadCount }), {
+                if (downloadCount >= allowedDownloads) {
+                    return new Response(JSON.stringify({
+                        hasAccess: false,
+                        reason: "limit_reached",
+                        count: downloadCount,
+                        role: "basic",
+                        paymentDate: latestPayment.created_at,
+                        allowedDownloads: allowedDownloads
+                    }), {
                         headers: { ...corsHeaders, "Content-Type": "application/json" },
                     });
                 }
-                await supabase.from("downloads").insert({ email });
-                return new Response(JSON.stringify({ hasAccess: true, planType: "basic", count: downloadCount + 1 }), {
+                await supabase.from("downloads").insert({ email, user_id: latestPayment.user_id });
+                return new Response(JSON.stringify({
+                    hasAccess: true,
+                    planType: "basic",
+                    role: "basic",
+                    paymentDate: latestPayment.created_at,
+                    allowedDownloads: allowedDownloads,
+                    count: downloadCount + 1,
+                    expiresAt: expiresAt
+                }), {
                     headers: { ...corsHeaders, "Content-Type": "application/json" },
                 });
             }
 
             return new Response(JSON.stringify({
-                hasAccess: downloadCount < 2,
-                reason: downloadCount >= 2 ? "limit_reached" : null,
+                hasAccess: downloadCount < allowedDownloads,
+                reason: downloadCount >= allowedDownloads ? "limit_reached" : null,
                 planType: "basic",
-                count: downloadCount
+                role: "basic",
+                paymentDate: latestPayment.created_at,
+                allowedDownloads: allowedDownloads,
+                count: downloadCount,
+                expiresAt: expiresAt
             }), {
                 headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
         }
 
-        // If we reach here, it means they might have an expired premium or consumed basics
-        return new Response(JSON.stringify({ hasAccess: false, reason: "plan_expired_or_consumed" }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-
-    } catch (error) {
+    } catch (error: any) {
         return new Response(JSON.stringify({ error: error.message }), {
             status: 400,
             headers: { ...corsHeaders, "Content-Type": "application/json" },

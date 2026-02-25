@@ -31,6 +31,42 @@ export default function Dashboard() {
         }
     }, [user]);
 
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        if (sessionId) {
+            handleVerifyPayment(sessionId);
+        }
+    }, []);
+
+    const handleVerifyPayment = async (sessionId: string) => {
+        setIsProcessingPayment(true);
+        toast.loading("Verificando pago...");
+        try {
+            const { data, error } = await supabase.functions.invoke('verify-payment', {
+                body: { sessionId }
+            });
+            if (error) throw error;
+            if (data.success) {
+                toast.dismiss();
+                toast.success("¡Pago verificado con éxito!");
+                fetchUserData();
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                toast.dismiss();
+                toast.error("El pago no se ha completado.");
+            }
+        } catch (error) {
+            console.error("Error verifying payment:", error);
+            toast.dismiss();
+            toast.error("Error al verificar el pago");
+        } finally {
+            setIsProcessingPayment(false);
+        }
+    };
+
     const fetchUserData = async () => {
         try {
             setLoading(true);
@@ -45,48 +81,41 @@ export default function Dashboard() {
             if (profileError && profileError.code !== "PGRST116") throw profileError;
             setProfile(profileData);
 
-            // 2. Fetch Subscription/Payments (Get latest active plan)
-            // Note: In a real app we might have a dedicated subscription table or status
-            // Here we assume 'payments' tracks plan purchases.
-            const { data: paymentsData, error: paymentsError } = await supabase
-                .from("payments")
-                .select("*")
-                .eq("user_id", user!.id)
-                .eq("status", "completed") // Assuming 'completed' is the success status
-                .order("created_at", { ascending: false })
-                .limit(1);
+            // 2. Fetch via Edge Function for consistency
+            const { data: statusData, error: statusError } = await supabase.functions.invoke('check-payment-status', {
+                body: { email: user!.email }
+            });
 
-            if (paymentsError) throw paymentsError;
+            if (statusError) throw statusError;
 
-            const currentPayment = paymentsData?.[0];
-            let planType = currentPayment?.plan_type || "free";
-
-            // 3. Fetch Downloads count and history
+            // 3. Fetch Downloads for this user history list
             const { data: downloadsData, error: downloadsError } = await supabase
                 .from("downloads")
                 .select("*")
-                .eq("user_id", user!.id)
+                .eq("email", user!.email) // Use email to be consistent with Edge Function
                 .order("download_at", { ascending: false });
 
             if (downloadsError) throw downloadsError;
 
-            setDownloads(downloadsData || []);
-            const downloadCount = downloadsData?.length || 0;
+            const allDownloads = downloadsData || [];
 
-            // Calculate remaining
             let remaining = 0;
-            if (planType === "basic") remaining = Math.max(0, 2 - downloadCount);
-            else if (planType === "premium") remaining = 9999; // Unlimited
-            else remaining = 0;
+            let planToDisplay = "free";
 
-            // Downgrade to free if basic is exhausted
-            if (planType === "basic" && remaining === 0) {
-                planType = "free";
+            if (statusData.hasAccess || statusData.reason === "limit_reached") {
+                if (statusData.planType === "premium" || statusData.role === "premium") {
+                    planToDisplay = "pro";
+                    remaining = 9999;
+                } else if (statusData.role === "basic") {
+                    planToDisplay = statusData.hasAccess ? "basic" : "free"; // Downgrade to free if out of downloads, keep basic UI otherwise
+                    remaining = Math.max(0, (statusData.allowedDownloads || 2) - (statusData.count || 0));
+                }
             }
 
+            setDownloads(allDownloads);
             setStats({
-                planType,
-                downloadCount,
+                planType: planToDisplay,
+                downloadCount: allDownloads.length,
                 remainingDownloads: remaining,
             });
 
@@ -108,7 +137,7 @@ export default function Dashboard() {
         const cleanUrl = window.location.origin + window.location.pathname;
         try {
             const amount = planType === 'basic' ? 499 : 1799;
-            const planName = planType === 'basic' ? 'CV Básico (2 descargas)' : 'CV Premium (Ilimitado)';
+            const planName = planType === 'basic' ? 'CV Básico (2 descargas)' : 'CV Pro (Ilimitado)';
 
             const { data, error } = await supabase.functions.invoke('create-checkout-session', {
                 body: {
@@ -224,13 +253,13 @@ export default function Dashboard() {
                             )}
                             {stats.planType === 'basic' && (
                                 <Button
-                                    onClick={() => setIsUpgradeDialogOpen(true)}
+                                    onClick={() => handleUpgrade('premium')}
                                     variant="secondary"
                                     className="flex-1 bg-gradient-to-r from-yellow-500 to-amber-600 text-white border-none hover:from-yellow-600 hover:to-amber-700"
                                     disabled={isProcessingPayment}
                                 >
                                     {isProcessingPayment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                    Pasar a Premium 💎
+                                    Pasar a Pro
                                 </Button>
                             )}
                         </CardContent>
