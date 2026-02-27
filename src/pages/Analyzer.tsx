@@ -559,7 +559,11 @@ const Analyzer = () => {
   const handleCvDataChange = (newCvData: any) => {
     if (!editedCvVersions || !selectedVersion) return;
     const updated = { ...editedCvVersions };
-    const version = { ...updated[selectedVersion] };
+
+    // CVPlus content is based on the formal version
+    const versionKey = selectedVersion === 'cvplus' ? 'formal' : selectedVersion;
+    const version = { ...updated[versionKey] };
+
     version.content = {
       ...version.content,
       summary: newCvData.professionalSummary,
@@ -587,7 +591,7 @@ const Analyzer = () => {
       email: newCvData.email,
       phone: newCvData.phone
     };
-    updated[selectedVersion] = version;
+    updated[versionKey] = version;
     setEditedCvVersions(updated);
   };
 
