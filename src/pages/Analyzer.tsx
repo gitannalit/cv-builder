@@ -1422,15 +1422,7 @@ const Analyzer = () => {
                         {isEditing ? <MousePointerClick className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
                         {isEditing ? "Editando..." : "Editar CV"}
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="xl"
-                        onClick={() => setSelectedVersion(selectedVersion === 'formal' ? 'creative' : 'formal')}
-                        className="h-16 px-8 rounded-2xl font-bold border-gray-200 hover:bg-gray-50 hover:text-gray-900 flex items-center gap-2"
-                      >
-                        <Sparkles className="w-5 h-5" />
-                        {selectedVersion === 'formal' ? 'Ver Moderna' : 'Ver Ejecutiva'}
-                      </Button>
+
                       {currentPlan === 'premium' && (
                         <Button
                           variant="outline"
@@ -1546,10 +1538,12 @@ const Analyzer = () => {
                             Puntuación Global ATS
                           </div>
                           <div className="space-y-2">
-                            <p className="text-6xl md:text-8xl font-black tracking-tighter text-white">
-                              {analysisResult.atsScore}
-                              <span className="text-2xl md:text-3xl text-white/40 ml-2">/100</span>
-                            </p>
+                            <div className="flex items-baseline justify-center md:justify-start gap-2 leading-none">
+                              <span className="text-6xl md:text-8xl font-black tracking-tight text-white">
+                                {analysisResult.atsScore}
+                              </span>
+                              <span className="text-2xl md:text-3xl font-bold text-white/40">/ 100</span>
+                            </div>
                             <p className="text-lg md:text-xl font-bold text-gray-300">
                               {analysisResult.atsScore >= 80 ? "Tu perfil está en el Top 5% de candidatos" :
                                 analysisResult.atsScore >= 60 ? "Potencial alto con ajustes específicos" :
@@ -1861,7 +1855,7 @@ const Analyzer = () => {
                   <Button
                     variant="outline"
                     size="xl"
-                    className="w-full sm:w-auto sm:px-8 md:px-10 h-14 sm:h-16 md:h-24 gap-2 sm:gap-3 bg-white border-none shadow-strong rounded-2xl md:rounded-3xl text-sm sm:text-base md:text-lg font-black hover:bg-gray-50 transition-all"
+                    className="w-full sm:w-auto sm:px-8 md:px-10 h-14 sm:h-16 md:h-24 gap-2 sm:gap-3 bg-white border-none shadow-strong rounded-2xl md:rounded-3xl text-sm sm:text-base md:text-lg font-black hover:bg-gray-50 transition-all hover:text-[#00D1A0]"
                     onClick={() => window.print()}
                   >
                     <Printer className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-muted-foreground" />

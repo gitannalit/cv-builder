@@ -227,14 +227,14 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
                     flexShrink: 0,
                 }}
             >
-                <img
-                    src={photoUrl!}
-                    alt="Foto de perfil"
-                    draggable={false}
+                <div
                     style={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover",
+                        backgroundImage: `url(${photoUrl})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
                         pointerEvents: "none",
                     }}
                 />

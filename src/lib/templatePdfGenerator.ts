@@ -317,7 +317,7 @@ function generateModernHTML(version: CVVersion, hasWatermark: boolean, watermark
 </head>
 <body>
   <div class="container" style="position:relative;">
-    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 2)}%;top:${(photoPosition?.y ?? 2)}%;width:${photoSize ?? 100}px;height:${photoSize ?? 100}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:30;"><img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>` : ''}
+    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 2)}%;top:${(photoPosition?.y ?? 2)}%;width:${photoSize ?? 100}px;height:${photoSize ?? 100}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:30;background-image:url('${photoUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;margin-top:-10px;"></div>` : ''}
     <aside class="sidebar">
       <div class="profile-circle">${name.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}</div>
       <h1>${name}</h1>
@@ -544,7 +544,7 @@ function generateExecutiveHTML(version: CVVersion, hasWatermark: boolean, waterm
 <body>
   ${watermarkHTML}
   <div class="container" style="position:relative;">
-    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 72)}%;top:${(photoPosition?.y ?? 2)}%;width:${photoSize ?? 90}px;height:${photoSize ?? 90}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:30;"><img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>` : ''}
+    ${photoUrl ? `<div style="position:absolute;left:${(photoPosition?.x ?? 72)}%;top:${(photoPosition?.y ?? 2)}%;width:${photoSize ?? 90}px;height:${photoSize ?? 90}px;border-radius:${(photoShape === 'circle' ? '50%' : '8px')};overflow:hidden;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:30;background-image:url('${photoUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;margin-top:-10px;"></div>` : ''}
     <header class="header">
 
       <h1>${name}</h1>
@@ -806,7 +806,7 @@ function generateCVPlusHTML(version: CVVersion, hasWatermark: boolean, watermark
   <!-- BEGIN CVPLUS_HTML -->
   <div class="container">
     <div class="bg-accent"></div>
-    ${photoUrl ? `<div style="position:absolute;left:${photoPosition?.x ?? 74}%;top:${photoPosition?.y ?? 3}%;width:${photoSize ?? 100}px;height:${photoSize ?? 100}px;border-radius:${(photoShape === 'circle' ? '50%' : '2px')};overflow:hidden;border:none;box-shadow:0 10px 25px rgba(0,0,0,0.1);z-index:30;"><img src="${photoUrl}" style="width:100%;height:100%;object-fit:cover;" /></div>` : ''}
+    ${photoUrl ? `<div style="position:absolute;left:${photoPosition?.x ?? 74}%;top:${photoPosition?.y ?? 3}%;width:${photoSize ?? 100}px;height:${photoSize ?? 100}px;border-radius:${(photoShape === 'circle' ? '50%' : '2px')};overflow:hidden;border:none;box-shadow:0 10px 25px rgba(0,0,0,0.1);z-index:30;background-image:url('${photoUrl}');background-size:cover;background-position:center;background-repeat:no-repeat;margin-top:-10px;"></div>` : ''}
     
     <header class="header">
       <div class="header-content">
