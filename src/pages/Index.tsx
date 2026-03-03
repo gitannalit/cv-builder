@@ -154,7 +154,7 @@ export default function Index() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
             <div className="max-w-xs space-y-2">
               <h2 className="text-3xl font-black text-foreground">Resultados <br className="hidden md:block" /> Reales.</h2>
-              <p className="text-sm text-muted-foreground font-medium">Ayudamos a profesionales a destacar en el mercado laboral competitivo.</p>
+              <p className="text-sm text-muted-foreground font-medium">Ayudamos a profesionales a destacar en el mercado laboral competitivo. </p>
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-end gap-12 lg:gap-24">
