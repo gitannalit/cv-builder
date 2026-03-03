@@ -107,8 +107,8 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic
                                     <Button
                                         onClick={onUnlockBasic}
                                         disabled={isProcessing}
-                                        variant="outline"
-                                        className="w-full min-h-[4.5rem] md:h-24 py-3 bg-white !bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-100 hover:border-[#00D1A0]/30 rounded-xl md:rounded-3xl shadow-soft hover:shadow-strong transition-all flex items-center gap-3 px-4 md:px-8"
+                                        variant="ghost"
+                                        className="w-full min-h-[4.5rem] md:h-24 py-3 bg-white !bg-white hover:bg-gray-50 text-gray-900 hover:text-gray-900 border-2 border-gray-100 hover:border-[#00D1A0]/30 rounded-xl md:rounded-3xl shadow-soft hover:shadow-strong transition-all flex items-center gap-3 px-4 md:px-8"
                                     >
                                         <div className="text-left flex-1 min-w-0">
                                             <p className="text-[9px] md:text-sm font-black text-[#00D1A0] truncate uppercase">PACK BÁSICO</p>
@@ -182,6 +182,17 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic
                 </div>
             </div>
 
+            {/* Change design button for mobile - outside the xl:block sidebar */}
+            <div className="xl:hidden flex justify-center pt-8 pb-32 px-4 no-print text-center">
+                <button
+                    onClick={onEdit}
+                    className="text-xs md:text-sm font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"
+                >
+                    <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 rotate-180 group-hover:-translate-x-1 transition-transform" />
+                    Probablemente prefieras el otro diseño
+                </button>
+            </div>
+
             {/* Mobile / Sticky Bottom Bar - Dual Plan Desktop */}
             <div className="xl:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-lg z-50">
                 <div className="bg-gray-900/95 backdrop-blur-2xl rounded-[2rem] p-2 shadow-strong border border-white/10 flex flex-col gap-2">
@@ -209,8 +220,8 @@ export function LockedCVPreview({ version, type, onEdit, onUnlock, onUnlockBasic
                         <Button
                             onClick={onUnlockBasic}
                             disabled={isProcessing}
-                            variant="outline"
-                            className="bg-transparent border-white/10 text-white hover:bg-white/5 h-10 px-6 rounded-xl font-bold text-sm whitespace-nowrap"
+                            variant="ghost"
+                            className="bg-transparent border border-white/10 text-white hover:bg-white/5 hover:text-white h-10 px-6 rounded-xl font-bold text-sm whitespace-nowrap"
                         >
                             4,99€
                         </Button>
