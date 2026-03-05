@@ -44,8 +44,42 @@ export const DraggablePhoto: React.FC<DraggablePhotoProps> = ({
 
         const reader = new FileReader();
         reader.onload = (ev) => {
-            const result = ev.target?.result as string;
-            onPhotoChange(result);
+            const originalResult = ev.target?.result as string;
+
+            // Compress image
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Max dimension
+                const MAX_DIM = 800;
+                if (width > height) {
+                    if (width > MAX_DIM) {
+                        height *= MAX_DIM / width;
+                        width = MAX_DIM;
+                    }
+                } else {
+                    if (height > MAX_DIM) {
+                        width *= MAX_DIM / height;
+                        height = MAX_DIM;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    // Use jpeg with 0.8 quality for good compression/quality balance
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+                    onPhotoChange(compressedBase64);
+                } else {
+                    onPhotoChange(originalResult);
+                }
+            };
+            img.src = originalResult;
         };
         reader.readAsDataURL(file);
         // Reset so same file can be re-uploaded

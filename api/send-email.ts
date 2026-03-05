@@ -1,5 +1,14 @@
 import { Resend } from 'resend';
 
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '10mb',
+        },
+    },
+    maxDuration: 60,
+};
+
 export default async function handler(req: any, res: any) {
     console.log('API Request received:', req.method);
 

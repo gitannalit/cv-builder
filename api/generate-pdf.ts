@@ -6,6 +6,11 @@ chromium.setHeadlessMode = true;
 chromium.setGraphicsMode = false;
 
 export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '10mb',
+        },
+    },
     maxDuration: 60, // 60 seconds for Pro plan
 };
 
